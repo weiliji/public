@@ -19,15 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\ASIOServerPool.cpp" />
-    <ClCompile Include="Src\NetAddr.cpp" />
-    <ClCompile Include="Src\Network.cpp" />
-    <ClCompile Include="Src\Strand.cpp" />
-    <ClCompile Include="Src\TcpClient.cpp" />
-    <ClCompile Include="Src\TcpServer.cpp" />
-    <ClCompile Include="Src\Udp.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\Include\Network\Defs.h" />
     <ClInclude Include="..\Include\Network\NetAddr.h" />
     <ClInclude Include="..\Include\Network\Network.h" />
@@ -36,21 +27,24 @@
     <ClInclude Include="..\Include\Network\TcpClient.h" />
     <ClInclude Include="..\Include\Network\TcpServer.h" />
     <ClInclude Include="..\Include\Network\Udp.h" />
-    <ClInclude Include="Include\Network\Defs.h" />
-    <ClInclude Include="Src\ASIOServerPool.h" />
-    <ClInclude Include="Src\ASIOSocketAcceptor.h" />
-    <ClInclude Include="Src\ASIOSocketDefine.h" />
-    <ClInclude Include="Src\ASIOSocketConneter.h" />
-    <ClInclude Include="Src\ASIOSocketObject.h" />
-    <ClInclude Include="Src\ASIOSocketUDP.h" />
-    <ClInclude Include="Src\UserThreadInfo.h" />
+    <ClInclude Include="Src\aio\_epool.h" />
+    <ClInclude Include="Src\aio\_eventpool.h" />
+    <ClInclude Include="Src\aio\_eventthreadpool.h" />
+    <ClInclude Include="Src\aio\_iocp.h" />
+    <ClInclude Include="Src\aio\_pool.h" />
+    <ClInclude Include="Src\aio\_userthread.h" />
+    <ClInclude Include="Src\aio\_winevent.h" />
+    <ClInclude Include="Src\IOWorker.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Version.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Include\Network\Version.tpl" />
-    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Src\NetAddr.cpp" />
+    <ClCompile Include="Src\TcpServer.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{00D374D2-FF31-4627-BCCE-F597B4769959}</ProjectGuid>

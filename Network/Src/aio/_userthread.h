@@ -1,15 +1,13 @@
 #ifndef __ASIOSOCKET_OBJCET_USERTHREADINFO_DEFINE_H__
 #define __ASIOSOCKET_OBJCET_USERTHREADINFO_DEFINE_H__
-#include "ASIOServerPool.h"
-#include "Network/Socket.h"
-namespace Public {
-namespace Network {
+#include "Base/Base.h"
+using namespace Public::Base;
 
-class UserThreadInfo
+class UserThread
 {
 public:
-	UserThreadInfo():mustQuit(false),usedCallbackThreadId(0),usedCallbackThreadNum(0){}
-	~UserThreadInfo(){}
+	UserThread():mustQuit(false),usedCallbackThreadId(0),usedCallbackThreadNum(0){}
+	~UserThread(){}
 	void quit() 
 	{
 		Guard locker(mutex);
@@ -58,9 +56,6 @@ protected:
 	uint64_t										usedCallbackThreadId;	//正在使用回调的线程ID和
 	uint32_t										usedCallbackThreadNum;	//正在使用回调的线程数
 };
-
-}
-}
 
 
 #endif //__ASIOSOCKET_OBJCET_H__

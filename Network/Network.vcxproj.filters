@@ -1,17 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Src\ASIOServerPool.cpp" />
-    <ClCompile Include="Src\NetAddr.cpp" />
-    <ClCompile Include="Src\Network.cpp" />
-    <ClCompile Include="Src\TcpClient.cpp" />
-    <ClCompile Include="Src\TcpServer.cpp" />
-    <ClCompile Include="Src\Udp.cpp" />
-    <ClCompile Include="Src\Strand.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Include\Network\Defs.h" />
-    <ClInclude Include="Src\ASIOServerPool.h" />
     <ClInclude Include="..\Include\Network\Defs.h">
       <Filter>Include</Filter>
     </ClInclude>
@@ -33,21 +22,33 @@
     <ClInclude Include="..\Include\Network\Udp.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="Src\ASIOSocketConneter.h" />
-    <ClInclude Include="Src\ASIOSocketDefine.h" />
-    <ClInclude Include="Src\ASIOSocketObject.h" />
-    <ClInclude Include="Src\ASIOSocketAcceptor.h" />
-    <ClInclude Include="Src\ASIOSocketUDP.h" />
     <ClInclude Include="..\Include\Network\Strand.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="Src\UserThreadInfo.h" />
+    <ClInclude Include="Src\aio\_epool.h">
+      <Filter>aio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\aio\_eventpool.h">
+      <Filter>aio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\aio\_eventthreadpool.h">
+      <Filter>aio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\aio\_iocp.h">
+      <Filter>aio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\aio\_pool.h">
+      <Filter>aio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\aio\_winevent.h">
+      <Filter>aio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\IOWorker.h" />
+    <ClInclude Include="Src\aio\_userthread.h">
+      <Filter>aio</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Version.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
     <None Include="..\Include\Network\Version.tpl">
       <Filter>Include</Filter>
     </None>
@@ -56,5 +57,20 @@
     <Filter Include="Include">
       <UniqueIdentifier>{4d9c7b57-8aad-4cde-8a53-976461c77cb9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{7f3d9aca-feec-438c-85c4-9666574c25f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="aio">
+      <UniqueIdentifier>{f34f0081-feeb-4734-a98f-d5526b384149}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Version.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Src\NetAddr.cpp" />
+    <ClCompile Include="Src\TcpServer.cpp" />
   </ItemGroup>
 </Project>

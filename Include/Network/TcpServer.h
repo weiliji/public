@@ -22,6 +22,12 @@ public:
 
 	virtual ~TCPServer();
 
+	///绑定串口信息
+	///param[in]		addr		需要绑定的端口
+	///param[in]		reusedAddr	端口是否允许需要重复绑定
+	///return		true 成功、false 失败 
+	virtual bool bind(const NetAddr& addr, bool reusedAddr = true);
+
 	///断开socket连接，停止socket内部工作，关闭socket句柄等
 	///UDP/TCP都可使用该接口释放资源，关闭socket
 	virtual bool disconnect();

@@ -55,7 +55,7 @@ public:
 	void* getBoostASIOIOServerPtr() const;
 
 	uint32_t	threadNum();
-private:
+public:
 	class IOWorkerInternal;
 	IOWorkerInternal* internal;
 };
