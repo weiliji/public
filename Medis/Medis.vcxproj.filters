@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="db">
+      <UniqueIdentifier>{e33f507f-e088-40e4-b01e-32cd0dbd0091}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="value">
+      <UniqueIdentifier>{bbba9210-5d19-4561-ab39-bb6f09b4830c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dump">
+      <UniqueIdentifier>{19281717-0801-4ff0-bb67-24cb417e875f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="communication">
+      <UniqueIdentifier>{2351a076-1994-4626-ba06-614aea778bb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{21b9507d-537a-4cb0-bb0b-a677e18f7214}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="message">
+      <UniqueIdentifier>{d52b9dc2-0500-4cf3-8457-454b56929ec1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Include\Medis\Defs.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Medis\Medis.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\memory.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\redisprotocol.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\redisstring.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\redisvalue.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\communication\communication.h">
+      <Filter>communication</Filter>
+    </ClInclude>
+    <ClInclude Include="src\communication\connection.h">
+      <Filter>communication</Filter>
+    </ClInclude>
+    <ClInclude Include="src\db\db.h">
+      <Filter>db</Filter>
+    </ClInclude>
+    <ClInclude Include="src\db\dbhash_4.h">
+      <Filter>db</Filter>
+    </ClInclude>
+    <ClInclude Include="src\db\dbkey_0.h">
+      <Filter>db</Filter>
+    </ClInclude>
+    <ClInclude Include="src\db\dblist_2.h">
+      <Filter>db</Filter>
+    </ClInclude>
+    <ClInclude Include="src\db\dbstring_1.h">
+      <Filter>db</Filter>
+    </ClInclude>
+    <ClInclude Include="src\db\dbzset_3.h">
+      <Filter>db</Filter>
+    </ClInclude>
+    <ClInclude Include="src\db\keyobject.h">
+      <Filter>db</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dump\storefactory.h">
+      <Filter>dump</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dump\storer.h">
+      <Filter>dump</Filter>
+    </ClInclude>
+    <ClInclude Include="src\value\valuedata.h">
+      <Filter>value</Filter>
+    </ClInclude>
+    <ClInclude Include="src\value\valuehash.h">
+      <Filter>value</Filter>
+    </ClInclude>
+    <ClInclude Include="src\value\valuelist.h">
+      <Filter>value</Filter>
+    </ClInclude>
+    <ClInclude Include="src\value\valueobject.h">
+      <Filter>value</Filter>
+    </ClInclude>
+    <ClInclude Include="src\value\valuestring.h">
+      <Filter>value</Filter>
+    </ClInclude>
+    <ClInclude Include="src\value\valuezset.h">
+      <Filter>value</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\config.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\message\exchange.h">
+      <Filter>message</Filter>
+    </ClInclude>
+    <ClInclude Include="src\message\pub-sub.h">
+      <Filter>message</Filter>
+    </ClInclude>
+    <ClInclude Include="src\message\push-pull.h">
+      <Filter>message</Filter>
+    </ClInclude>
+    <ClInclude Include="src\message\megssage.h">
+      <Filter>message</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Service.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
