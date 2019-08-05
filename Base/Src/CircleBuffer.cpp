@@ -102,8 +102,10 @@ bool CircleBuffer::setConsumeLength(uint32_t length)
 	if (length > internal->dataLen) return false;
 
 	internal->dataLen -= length;
-	internal->consumePos = (internal->consumePos + length) % internal->bufferLen;
+	internal->consumePos += length;
 
+	if (internal->consumePos >= internal->bufferLen)
+		internal->consumePos = internal->consumePos - internal->bufferLen;
 
 	return true;
 }
@@ -126,7 +128,10 @@ bool CircleBuffer::setProductionLength(uint32_t length)
 	if (length > internal->bufferLen - internal->dataLen) return false;
 
 	internal->dataLen += length;
-	internal->productionPos = (internal->productionPos + length) % internal->bufferLen;
+	internal->productionPos += length;
+
+	if (internal->productionPos >= internal->bufferLen)
+		internal->productionPos = internal->productionPos - internal->bufferLen;
 
 	return true;
 }
@@ -177,7 +182,11 @@ char CircleBuffer::readChar(uint32_t pos) const
 {
 	if (pos >= internal->dataLen) return 0;
 
-	uint32_t readpos = (internal->consumePos + pos) % internal->bufferLen;
+	uint32_t readpos = internal->consumePos + pos;
+
+	if (readpos >= internal->bufferLen)
+		readpos = readpos - internal->bufferLen;
+
 
 	return internal->bufferAddr[readpos];
 }
@@ -186,7 +195,12 @@ bool CircleBuffer::readBuffer(uint32_t pos, void* dstptr, uint32_t length) const
 	if (pos < 0 || length + pos > internal->dataLen || dstptr == NULL || length <= 0) return false;
 
 	char* buffer = (char*)dstptr;
-	uint32_t readpos = (internal->consumePos + pos) % internal->bufferLen;
+
+	uint32_t readpos = internal->consumePos + pos;
+
+	if (readpos >= internal->bufferLen)
+		readpos = readpos - internal->bufferLen;
+
 	while (length > 0)
 	{
 		uint32_t usedlen = 0;
@@ -201,7 +215,9 @@ bool CircleBuffer::readBuffer(uint32_t pos, void* dstptr, uint32_t length) const
 
 		memcpy(buffer, internal->bufferAddr + readpos, usedlen);
 
-		readpos = (readpos + usedlen) % internal->bufferLen;
+		readpos += usedlen;
+		if (readpos >= internal->bufferLen) 
+			readpos -= internal->bufferLen;
 		
 		length -= usedlen;
 		buffer += usedlen;
@@ -216,7 +232,11 @@ bool CircleBuffer::readBuffer(uint32_t pos, std::vector<BufferInfo>& buffer, uin
 
 	if (internal->dataLen == 0 || pos < 0 || length + pos > internal->dataLen) return false;
 
-	uint32_t readpos = (internal->consumePos + pos) % internal->bufferLen;
+	uint32_t readpos = internal->consumePos + pos;
+
+	if (readpos >= internal->bufferLen)
+		readpos = readpos - internal->bufferLen;
+
 
 	while (length > 0)
 	{
@@ -236,7 +256,9 @@ bool CircleBuffer::readBuffer(uint32_t pos, std::vector<BufferInfo>& buffer, uin
 
 		buffer.push_back(info);
 
-		readpos = (readpos + info.bufferLen) % internal->bufferLen;
+		readpos += info.bufferLen;
+		if (readpos >= internal->bufferLen)
+			readpos = readpos - internal->bufferLen;
 
 		length -= info.bufferLen;
 	}

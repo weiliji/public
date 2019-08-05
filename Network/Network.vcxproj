@@ -27,13 +27,16 @@
     <ClInclude Include="..\Include\Network\TcpClient.h" />
     <ClInclude Include="..\Include\Network\TcpServer.h" />
     <ClInclude Include="..\Include\Network\Udp.h" />
-    <ClInclude Include="Src\aio\_epool.h" />
-    <ClInclude Include="Src\aio\_eventpool.h" />
-    <ClInclude Include="Src\aio\_eventthreadpool.h" />
-    <ClInclude Include="Src\aio\_iocp.h" />
-    <ClInclude Include="Src\aio\_pool.h" />
-    <ClInclude Include="Src\aio\_userthread.h" />
-    <ClInclude Include="Src\aio\_winevent.h" />
+    <ClInclude Include="Src\aio\asocket.h" />
+    <ClInclude Include="Src\aio\common\_eventpool.h" />
+    <ClInclude Include="Src\aio\common\_eventthreadpool.h" />
+    <ClInclude Include="Src\aio\common\_pool.h" />
+    <ClInclude Include="Src\aio\common\_userthread.h" />
+    <ClInclude Include="Src\aio\ioserver.h" />
+    <ClInclude Include="Src\aio\linux\_epool.h" />
+    <ClInclude Include="Src\aio\win32\_winevent.h" />
+    <ClInclude Include="Src\aio\win32\_winiocp.h" />
+    <ClInclude Include="Src\aio\win32\_winsocket.h" />
     <ClInclude Include="Src\IOWorker.h" />
   </ItemGroup>
   <ItemGroup>
@@ -43,8 +46,13 @@
     <None Include="..\Include\Network\Version.tpl" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\aio\asocket.cpp" />
+    <ClCompile Include="Src\IOWorker.cpp" />
     <ClCompile Include="Src\NetAddr.cpp" />
+    <ClCompile Include="Src\Strand.cpp" />
+    <ClCompile Include="Src\TcpClient.cpp" />
     <ClCompile Include="Src\TcpServer.cpp" />
+    <ClCompile Include="Src\Udp.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{00D374D2-FF31-4627-BCCE-F597B4769959}</ProjectGuid>

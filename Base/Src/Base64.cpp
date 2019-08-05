@@ -38,7 +38,7 @@ char *base64_encode(const char* data, size_t data_len)
 	}     
 	memset(ret, 0, ret_len);    
 	f = ret;     
-	while (tmp < data_len)     
+	while ((size_t)tmp < data_len)     
 	{        
 		temp = 0;         
 		prepare = 0;         
@@ -46,7 +46,7 @@ char *base64_encode(const char* data, size_t data_len)
 		while (temp < 3)         
 		{
 			//printf("tmp = %d\n", tmp);             
-			if (tmp >= data_len)             
+			if ((size_t)tmp >= data_len)
 			{                 
 				break;             
 			}            
@@ -58,7 +58,7 @@ char *base64_encode(const char* data, size_t data_len)
 		//printf("before for : temp = %d, prepare = %d\n", temp, prepare);         
 		for (i = 0; i < 4 ;i++ )         
 		{             
-			if (temp < i)             
+			if (temp < (size_t)i)
 			{                 
 				changed[i] = 0x40;             
 			}             
@@ -131,13 +131,13 @@ char *base64_decode(const char *data, size_t data_len, size_t&len)
 	}     
 	memset(ret, 0, ret_len);     
 	f = ret;     
-	while (tmp < (data_len - equal_count))     
+	while ((size_t)tmp < (data_len - (size_t)equal_count))
 	{        
 		temp = 0;         
 		prepare = 0;         
 		while (temp < 4)         
 		{             
-			if (tmp >= (data_len - equal_count))             
+			if ((size_t)tmp >= (data_len - (size_t)equal_count))
 			{                 
 				break;             
 			}             

@@ -1,6 +1,6 @@
 #pragma  once
-#include "_pool.h"
-#include "_eventthreadpool.h"
+#include "../common/_Pool.h"
+#include "../common/_EventThreadPool.h"
 
 #ifndef WIN32
 
@@ -28,6 +28,8 @@ public:
 	{
 		epoll = ::epoll_create(10000);
 		if (epoll <= 0) return;
+
+		createThread();
 	}
 	~EPool()
 	{

@@ -50,11 +50,6 @@ public:
 	~IOWorker();
 
 	static shared_ptr<IOWorker> defaultWorker();
-
-	//返回值为 boost::asio::io_service*
-	void* getBoostASIOIOServerPtr() const;
-
-	uint32_t	threadNum();
 public:
 	class IOWorkerInternal;
 	IOWorkerInternal* internal;
@@ -302,7 +297,10 @@ public:
 
 
 	//设置socket属性
-	virtual bool setSocketOpt(int level, int optname, const void *optval, int optlen) = 0;
+	virtual bool setSocketOpt(int level, int optname, const void *optval, int optlen) { return false; }
+
+	//获取属性
+	virtual bool getSocketOpt(int level, int optname, void *optval, int *optlen)const { return false; }
 
 	//socket准备就绪
 	virtual void socketReady() {}

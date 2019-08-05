@@ -19,7 +19,7 @@ class NETWORK_API TCPClient:public Socket
 	friend class ASIOSocketAcceptor;
 
 	struct TCPClientInternalPointer;
-	TCPClient(const shared_ptr<IOWorker>& worker, void* socketptr);
+	TCPClient();
 public:
 	static shared_ptr<Socket> create(const shared_ptr<IOWorker>& worker, void* socketptr = NULL);
 	virtual ~TCPClient();
@@ -154,11 +154,12 @@ public:
 	//获取属性
 	virtual bool getSocketOpt(int level, int optname, void *optval, int *optlen) const;
 
+	//socket准备就绪
 	virtual void socketReady();
 
 	virtual void socketError(const std::string &errmsg);
 private:
-	TCPClientInternalPointer* tcpclientinternal;
+	TCPClientInternalPointer* internal;
 };
 
 

@@ -3,11 +3,12 @@
 #include "Base/Base.h"
 using namespace Public::Base;
 
-class UserThread
+//该接口可以用于判断并阻塞socket内部的回调在关闭时
+class _UserThread
 {
 public:
-	UserThread():mustQuit(false),usedCallbackThreadId(0),usedCallbackThreadNum(0){}
-	~UserThread(){}
+	_UserThread():mustQuit(false),usedCallbackThreadId(0),usedCallbackThreadNum(0){}
+	~_UserThread(){}
 	void quit() 
 	{
 		Guard locker(mutex);

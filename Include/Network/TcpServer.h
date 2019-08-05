@@ -16,7 +16,7 @@ namespace Network{
 class NETWORK_API TCPServer:public Socket
 {
 	struct TCPServerInternalPointer;
-	TCPServer(const shared_ptr<IOWorker>& _worker, const NetAddr& addr);
+	TCPServer();
 public:
 	static shared_ptr<Socket> create(const shared_ptr<IOWorker>& worker,const NetAddr& addr = NetAddr());
 
@@ -95,7 +95,7 @@ public:
 	//ªÒ»° Ù–‘
 	virtual bool getSocketOpt(int level, int optname, void *optval, int *optlen) const;
 private:
-	TCPServerInternalPointer* tcpserverinternal;
+	TCPServerInternalPointer* internal;
 };
 
 

@@ -2,36 +2,48 @@
 #include "_eventpool.h"
 
 //这里是处理事件的线程池
-class EventThreadPool
+class _EventThreadPool
 {
+public:
+	typedef Function0<void>		EventFunc;
+private:
 	struct EventInfo
 	{
 		void* eventid;
 		int bytes;
 		bool status;
+		EventFunc	func;
 	};
 public:
-	EventThreadPool(const shared_ptr<EventPool>& _eventpool, uint32_t threadnum)
+	_EventThreadPool(){}
+
+	~_EventThreadPool(){}
+
+	bool start(_EventPool* _eventpool, uint32_t threadnum)
 	{
 		eventpool = _eventpool;
 		threadsize = threadnum;
 
 		for (uint32_t i = 0; i < threadnum; i++)
 		{
-			shared_ptr<Thread> thread = ThreadEx::creatThreadEx("EventThreadPool", ThreadEx::Proc(&EventThreadPool::threadProc, this), NULL,Thread::priorTop,Thread::policyRealtime);
+			shared_ptr<Thread> thread = ThreadEx::creatThreadEx("EventThreadPool", ThreadEx::Proc(&_EventThreadPool::threadProc, this), NULL, Thread::priorTop, Thread::policyRealtime);
 			thread->createThread();
 
 			threadlist.push_back(thread);
 		}
+
+		return true;
 	}
 
-	~EventThreadPool()
+	bool stop()
 	{
 		for (std::list<shared_ptr<Thread> >::iterator iter = threadlist.begin(); iter != threadlist.end(); iter++)
 		{
 			(*iter)->cancelThread();
 		}
 		threadlist.clear();
+
+		return true;
 	}
 
 	//存放事件，等待线程池处理
@@ -55,14 +67,39 @@ public:
 			doEvent(eventinfo);
 		}
 	}
+	void postEvent(const EventFunc& eventfunc)
+	{
+		EventInfo* eventinfo = new EventInfo;
+		eventinfo->func = eventfunc;
+
+		if (threadsize >= 0)
+		{
+			Guard locker(mutex);
+
+			waitDoEventList.push_back(eventinfo);
+
+			eventsem.post();
+		}
+		else
+		{
+			doEvent(eventinfo);
+		}
+	}
 private:
 	void doEvent(EventInfo* eventinfo)
 	{
-		shared_ptr<Event> event = eventpool->popEvent(eventinfo->eventid);
-		
-		if (event)
+		if (eventinfo->func)
 		{
-			event->doEvent(eventinfo->bytes, eventinfo->status);
+			eventinfo->func();
+		}
+		else
+		{
+			shared_ptr<Event> event = eventpool->popEvent(eventinfo->eventid);
+
+			if (event)
+			{
+				event->doEvent(eventinfo->bytes, eventinfo->status);
+			}
 		}
 
 		SAFE_DELETE(eventinfo);
@@ -86,7 +123,7 @@ private:
 		}
 	}
 private:
-	shared_ptr<EventPool>			eventpool;
+	_EventPool *					eventpool;
 
 	Mutex							mutex;
 	Semaphore						eventsem;

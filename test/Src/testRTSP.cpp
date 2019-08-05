@@ -1,7 +1,7 @@
 #include "RTSP/RTSP.h"
 using namespace Public::RTSP;
 
-#if 0
+#if 1
 
 class RTSPSessiontmp :public RTSPClientHandler
 {
@@ -64,10 +64,10 @@ struct RTSPClientInfo
 };
 
 string rtspaddr[] = {
-	//"rtsp://admin:ms123456@192.168.7.104:554/main",
+//	"rtsp://admin:ms123456@192.168.7.104:554/main",
 	//"rtsp://admin:ms123456@192.168.3.135:554/main",
-//	"rtsp://192.168.9.230:554/cam/realmonitor?channel=1&subtype=0&unicast=true&proto=Onvif",
-	"rtsp://admin:support2019@192.168.9.205:554/Streaming/Channels/102",
+	"rtsp://192.168.9.230:554/cam/realmonitor?channel=1&subtype=0&unicast=true&proto=Onvif",
+//	"rtsp://admin:support2019@192.168.9.205:554/Streaming/Channels/102",
 	//"rtsp://admin:ms123456@192.168.10.230:554/main",
 	//"rtsp://admin:ms123456@192.168.11.230:554/main",
 	//"rtsp://admin:ms123456@192.168.4.150:554/main",
@@ -105,7 +105,7 @@ int main()
 		RTSPClientInfo info;
 		info.handler = make_shared<RTSPSessiontmp>();
 		info.client = manager->create(info.handler, RTSPUrl(rtspaddr[openrtspaddrindex % rtspaddrsize]));
-	//	info.client->initRTPOverUdpType();
+		info.client->initRTPOverUdpType();
 		info.client->start(10000);
 
 		clientlist.push_back(info);

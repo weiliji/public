@@ -1,70 +1,37 @@
 #pragma  once
-#ifdef WIN32
-
-#include <winsock2.h>
-typedef int socklen_t;
-
-#endif
-
 #include "Base/Base.h"
-#include "Network/Socket.h"
+#include "Network/Network.h"
 #include "_userthread.h"
 
 using namespace Public::Base;
 using namespace Public::Network;
 
-
-
-
-//这里是时间池，存放事件
-
 struct NewSocketInfo
 {
-	int		newsock;
-	NetAddr otheraddr;
+	int		newsocket;
+	NetAddr	otheraddr;
 };
+
 
 class Event
 {
 public:
-#ifdef WIN32
-	OVERLAPPED		overlped;
-	WSABUF			wbuf;
-	SOCKADDR		addr;
-	int 			addrlen;
-	DWORD			dwBytes;
-	DWORD			dwFlags;
-	int				newsock;
-#endif
-public:
-	Event()
+	Event(const shared_ptr<Socket>& _sock, const shared_ptr<_UserThread>& _userthread)
 	{
-#ifdef WIN32
-		memset(&overlped, 0, sizeof(overlped));
-		memset(&wbuf, 0, sizeof(wbuf));
-		memset(&addr, 0, sizeof(addr));
-		dwBytes = dwFlags = 0;
-		newsock = 0;
-
-		addr.sa_family = AF_INET;
-		addrlen = sizeof(SOCKADDR);
-#endif
-	}
-	virtual ~Event() {}
-
-	virtual bool init(const shared_ptr<Socket>& _sock, const shared_ptr<UserThread>& _userthread)
-	{
+		if (_sock == NULL || _userthread == NULL)
+		{
+			assert(0);
+		}
 		weak_sock = _sock;
 		userthread = _userthread;
-
-		return true;
 	}
+	virtual ~Event() {}
 
 	//处理事件，int 为事件当前的值，status为状态
 	void doEvent(int bytes, bool status)
 	{
 		shared_ptr<Socket> sock = weak_sock.lock();
-		if (sock == NULL || !userthread->callbackThreadUsedStart())
+		if (sock == NULL || !userthread || !userthread->callbackThreadUsedStart())
 		{
 			return;
 		}
@@ -75,27 +42,37 @@ public:
 	}
 
 	//判断事件是否有效
-	bool isValid() { return weak_sock.lock() != NULL; }
+	virtual bool isValid() { return weak_sock.lock() != NULL; }
 private:
 	virtual void doEvent(const shared_ptr<Socket>& sock, int bytes, bool status) = 0;
-private:
+protected:
 	weak_ptr<Socket> weak_sock;
-	shared_ptr<UserThread> userthread;
+	shared_ptr<_UserThread> userthread;
 };
 
 //事件池，存放当前正在使用的事件，定时判断事件是否过期
-class EventPool
+class _EventPool
 {
 public:
-	EventPool() 
+	_EventPool(){}
+	~_EventPool(){}
+
+	bool start()
 	{
 		checkTimer = make_shared<Timer>("EventPool");
-		checkTimer->start(Timer::Proc(&EventPool::doCheckTimerProc, this), 0, 10000);
+		checkTimer->start(Timer::Proc(&_EventPool::doCheckTimerProc, this), 0, 10000);
+
+		return true;
 	}
-	~EventPool() 
+
+	bool stop()
 	{
 		checkTimer = NULL;
+		eventmap.clear();
+
+		return true;
 	}
+
 	//放入事件
 	void pushEvent(void* eventid, const shared_ptr<Event>& event)
 	{

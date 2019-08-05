@@ -1,31 +1,39 @@
 #pragma  once
-#include "_Pool.h"
-#include "_EventThreadPool.h"
+#include "_winevent.h"
+#include "../common/_Pool.h"
+#include "../common/_EventThreadPool.h"
 
 #ifdef WIN32
-class IOCP :public Pool
+class _SystemPool :public _Pool
 {
 public:
-	IOCP(const shared_ptr<EventThreadPool>&_eventpool):Pool(_eventpool)
+	_SystemPool(){}
+	~_SystemPool(){}
+
+	virtual bool start(_EventThreadPool*_eventpool)
 	{
 		iocp = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
 		if (iocp == NULL)
 		{
-			return;
+			return false;
 		}
+
+		return _Pool::start(_eventpool);
 	}
-	~IOCP()
+	virtual bool stop()
 	{
 		cancelThread();
-		
-		if(iocp != NULL)
-			::PostQueuedCompletionStatus(iocp, 0, NULL, NULL);
-		
-		destroyThread(); 
 
-		if(iocp)
+		if (iocp != NULL)
+			::PostQueuedCompletionStatus(iocp, 0, NULL, NULL);
+
+		destroyThread();
+
+		if (iocp)
 			CloseHandle(iocp);
 		iocp = NULL;
+
+		return _Pool::stop();
 	}
 
 	virtual void create(int sockfd, int& poolid)
@@ -55,9 +63,7 @@ public:
 
 		if (poverlaped == NULL) return;
 
-		Event* eventptr = CONTAINING_RECORD(poverlaped, Event, overlped);
-
-		eventpool->postEvent(eventptr, ret, bytes);
+		eventpool->postEvent(poverlaped, ret, bytes);
 	}
 private:
 	HANDLE			iocp;

@@ -1,3 +1,5 @@
+#if 0
+
 #include "boost/regex.hpp"
 #include "boost/shared_ptr.hpp"
 #include "boost/make_shared.hpp"
@@ -13,7 +15,7 @@ using namespace Public::Base;
 using namespace Public::Network;
 
 
-#if 0
+
 websocketpp::server<websocketpp::config::asio> server;
 
 int onhttpfunc(websocketpp::connection_hdl hdl)

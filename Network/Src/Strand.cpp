@@ -1,10 +1,5 @@
-#include "boost/asio.hpp"
-#include "boost/enable_shared_from_this.hpp"
-#include "boost/make_shared.hpp"
-#include "boost/bind.hpp"
-
+#include "IOWorker.h"
 #include "Network/Strand.h"
-
 
 namespace Public {
 namespace Network {
@@ -12,24 +7,65 @@ namespace Network {
 struct StrandInternalCallbackObj
 {
 	Strand::StrandCallback handler;
-	shared_ptr<Strand::StrandData> data;
+	weak_ptr<Strand::StrandData> data;
+};
 
-	static void strandCallback(const shared_ptr<StrandInternalCallbackObj>& object)
+struct StrandInfo:public enable_shared_from_this<StrandInfo>
+{
+	Mutex							mutex;
+	std::list<StrandInternalCallbackObj> calllist;
+	bool							callruning;
+	shared_ptr<IOWorker>			worker;
+
+	void strandRunFunc()
 	{
-		shared_ptr<StrandInternalCallbackObj> tmp = object;
-		if (tmp == NULL) return;
+		StrandInternalCallbackObj info;
+		{
+			Guard locker(mutex);
+			if (calllist.size() > 0)
+			{
+				info = calllist.front();
+				calllist.pop_front();
+			}
+		}
 
-		tmp->handler(tmp->data);
+		shared_ptr<Strand::StrandData > stranddata = info.data.lock();
+		if (stranddata) info.handler(stranddata);
+
+		{
+			Guard locker(mutex);
+			callruning = false;
+		}
+
+		checkRunFunc();
+	}
+
+	void checkRunFunc()
+	{
+		{
+			Guard locker(mutex);
+			if (callruning) return;
+
+			if (calllist.size() <= 0) return;
+
+			callruning = false;
+		}
+
+		worker->internal->ioserver->postEvent(_EventThreadPool::EventFunc(&StrandInfo::checkRunFunc, shared_from_this()));
 	}
 };
+
+
 struct Strand::StrandInternal
 {
-	boost::asio::io_service::strand strand;
-	StrandInternal(const shared_ptr<IOWorker>& ioworker) :strand(*(boost::asio::io_service*)ioworker->getBoostASIOIOServerPtr()){}
+	shared_ptr<StrandInfo> strandinfo;
 };
+
 Strand::Strand(const shared_ptr<IOWorker>& ioworker)
 {
-	internal = new StrandInternal(ioworker);
+	internal = new StrandInternal();
+	internal->strandinfo = make_shared<StrandInfo>();
+	internal->strandinfo->worker = ioworker;
 }
 Strand::~Strand()
 {
@@ -38,11 +74,17 @@ Strand::~Strand()
 
 void Strand::post(const Strand::StrandCallback& handler, const shared_ptr<Strand::StrandData>& data)
 {
-	shared_ptr< StrandInternalCallbackObj> object = make_shared<StrandInternalCallbackObj>();
-	object->handler = handler;
-	object->data = data;
+	{
+		Guard locker(internal->strandinfo->mutex);
 
-	internal->strand.post(boost::bind(StrandInternalCallbackObj::strandCallback, object));
+		StrandInternalCallbackObj info;
+		info.handler = handler;
+		info.data = data;
+
+		internal->strandinfo->calllist.push_back(info);
+	}
+
+	internal->strandinfo->checkRunFunc();
 }
 
 }

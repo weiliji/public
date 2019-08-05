@@ -17,7 +17,7 @@ namespace Network{
 class NETWORK_API UDP:public Socket
 {
 	struct UDPInternalPointer;
-	UDP(const shared_ptr<IOWorker>& worker);
+	UDP();
 public:	
 	static shared_ptr<Socket> create(const shared_ptr<IOWorker>& worker);
 	virtual ~UDP();
@@ -125,7 +125,7 @@ public:
 	//ªÒ»° Ù–‘
 	virtual bool getSocketOpt(int level, int optname, void *optval, int *optlen) const;
 private:
-	UDPInternalPointer* udpinternal;
+	UDPInternalPointer* internal;
 };
 
 

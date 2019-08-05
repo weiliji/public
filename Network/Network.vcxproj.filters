@@ -25,27 +25,36 @@
     <ClInclude Include="..\Include\Network\Strand.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="Src\aio\_epool.h">
-      <Filter>aio</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\aio\_eventpool.h">
-      <Filter>aio</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\aio\_eventthreadpool.h">
-      <Filter>aio</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\aio\_iocp.h">
-      <Filter>aio</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\aio\_pool.h">
-      <Filter>aio</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\aio\_winevent.h">
-      <Filter>aio</Filter>
-    </ClInclude>
     <ClInclude Include="Src\IOWorker.h" />
-    <ClInclude Include="Src\aio\_userthread.h">
+    <ClInclude Include="Src\aio\common\_eventpool.h">
+      <Filter>aio\common</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\aio\common\_eventthreadpool.h">
+      <Filter>aio\common</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\aio\common\_pool.h">
+      <Filter>aio\common</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\aio\common\_userthread.h">
+      <Filter>aio\common</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\aio\win32\_winevent.h">
+      <Filter>aio\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\aio\win32\_winiocp.h">
+      <Filter>aio\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\aio\win32\_winsocket.h">
+      <Filter>aio\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\aio\ioserver.h">
       <Filter>aio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\aio\asocket.h">
+      <Filter>aio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\aio\linux\_epool.h">
+      <Filter>aio\linux</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -63,6 +72,15 @@
     <Filter Include="aio">
       <UniqueIdentifier>{f34f0081-feeb-4734-a98f-d5526b384149}</UniqueIdentifier>
     </Filter>
+    <Filter Include="aio\common">
+      <UniqueIdentifier>{80dfcf53-7ab9-48b6-ae69-a6bcc35854b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="aio\win32">
+      <UniqueIdentifier>{72a53451-aabc-48c8-b839-d2e65f023e34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="aio\linux">
+      <UniqueIdentifier>{4334623e-fdd2-48a5-bf22-3b1ce0453aca}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Version.rc">
@@ -72,5 +90,12 @@
   <ItemGroup>
     <ClCompile Include="Src\NetAddr.cpp" />
     <ClCompile Include="Src\TcpServer.cpp" />
+    <ClCompile Include="Src\TcpClient.cpp" />
+    <ClCompile Include="Src\aio\asocket.cpp">
+      <Filter>aio</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\IOWorker.cpp" />
+    <ClCompile Include="Src\Udp.cpp" />
+    <ClCompile Include="Src\Strand.cpp" />
   </ItemGroup>
 </Project>

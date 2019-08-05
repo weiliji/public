@@ -10,16 +10,23 @@ typedef enum {
 	PoolType_Read,
 	PoolType_Write,
 }PoolType;
-class Pool :public Thread
+class _Pool :public Thread
 {
 public:
-	Pool(const shared_ptr<EventThreadPool>&_eventpool) :Thread("IOPool",Thread::priorTop, Thread::policyRealtime), eventpool(_eventpool)
+	_Pool() :Thread("IOPool",Thread::priorTop, Thread::policyRealtime){}
+	virtual ~_Pool(){}
+	virtual bool start(_EventThreadPool*_eventpool)
 	{
-		cancelThread();
+		eventpool = _eventpool;
+
+		createThread();
+
+		return true;
 	}
-	virtual ~Pool()
+	virtual bool stop()
 	{
 		destroyThread();
+		return true;
 	}
 	virtual void create(int sockfd,int& poolid) = 0;
 	virtual void destory(int sockfd,int poolid) = 0;
@@ -36,5 +43,5 @@ private:
 private:
 	virtual void runPool() = 0;
 protected:
-	shared_ptr<EventThreadPool>	eventpool;
+	_EventThreadPool*	eventpool;
 };
