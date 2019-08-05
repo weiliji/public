@@ -53,6 +53,7 @@
 #pragma warning(disable:4251)
 #pragma warning(disable:4786)
 #pragma warning(disable:4091)
+#pragma warning(disable:4018)
 #endif
 
 #ifdef WIN32

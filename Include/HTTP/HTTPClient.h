@@ -14,7 +14,7 @@ class HTTP_API HTTPClientRequest
 public:
 	typedef Function2<void, const shared_ptr<HTTPClientRequest>&, const std::string&> DisconnectCallback;
 public:
-	HTTPClientRequest(const std::string& method,const std::string& url,HTTPCacheType type);
+	HTTPClientRequest(const std::string& method = "GET",const std::string& url = "/",HTTPCacheType type = HTTPCacheType_Mem);
 	virtual ~HTTPClientRequest();
 
 	std::string& url();

@@ -32,6 +32,7 @@
 #include "Base/ReadWriteMutex.h"
 #include "Base/RecursiveMutex.h"
 #include "Base/RecycleBin.h"
+#include "Base/RegEx.h"
 #include "Base/Semaphore.h"
 #include "Base/Sha1.h"
 #include "Base/ShareMem.h"

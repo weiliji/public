@@ -1,6 +1,5 @@
 #include "HTTP/HTTPServer.h"
 #include "HTTPCommunication.h"
-#include "boost/regex.hpp" 
 namespace Public {
 namespace HTTP {
 
@@ -171,13 +170,11 @@ private:
 		
 		for (std::map<std::string, HTTPServer::WebsocketCallback>::iterator iter = websocketlistencallbackmap.begin(); iter != websocketlistencallbackmap.end(); iter++)
 		{
-			boost::regex oRegex(iter->first);
-			if (!boost::regex_match(requestPathname, oRegex))
+			RegEx oRegex(iter->first);
+			if (iter->first == "*" || RegEx::regex_match(requestPathname, oRegex))
 			{
-				continue;
+				return iter->second;
 			}
-
-			return iter->second;
 		}
 
 		return HTTPServer::WebsocketCallback();
@@ -196,8 +193,8 @@ private:
 
 			for (std::map<std::string, std::map<std::string, ListenInfo> >::iterator citer = httplistencallbackmap.begin(); citer != httplistencallbackmap.end() && liteninfo.callback == NULL; citer++)
 			{
-				boost::regex oRegex(citer->first);
-				if(!boost::regex_match(requestPathname,oRegex))
+				RegEx oRegex(citer->first);
+				if(citer->first!= "*" && !RegEx::regex_match(requestPathname,oRegex))
 				{
 					continue;
 				}

@@ -133,7 +133,7 @@ public:
 	~WriteContent();
 
 	bool write(const char* buffer, int len);
-	bool writeString(const std::string& buffer);
+	bool write(const std::string& buffer);
 	bool writeFromFile(const std::string& filename, bool needdeletefile = false);
 
 	void writeChunk(const char* buffer, uint32_t len);

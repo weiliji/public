@@ -1,4 +1,3 @@
-#include "boost/asio.hpp"
 #include "HTTP/HTTPClient.h"
 #include "HTTPDefine.h"
 #include "HTTPCache.h"

@@ -19,6 +19,9 @@
     <Filter Include="源文件\Expression">
       <UniqueIdentifier>{d2b0bd64-fa10-4076-9e5f-9ad8ba0195a0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\regex">
+      <UniqueIdentifier>{996eb774-73c6-400e-97cb-0760acac2085}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Thread.h">
@@ -186,6 +189,12 @@
     <ClInclude Include="..\Include\Base\CircleBuffer.h">
       <Filter>头文件\Base</Filter>
     </ClInclude>
+    <ClInclude Include="..\Include\Base\RegEx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\regex\regex.h">
+      <Filter>源文件\regex</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base.cpp">
@@ -328,6 +337,12 @@
     </ClCompile>
     <ClCompile Include="Src\CircleBuffer.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RegEx1.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\regex\regex.cpp">
+      <Filter>源文件\regex</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

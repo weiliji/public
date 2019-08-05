@@ -1,4 +1,3 @@
-#include "boost/asio.hpp"
 #include "HTTP/HTTPPublic.h"
 #include "HTTPDefine.h"
 #include "HTTPCache.h"
@@ -164,6 +163,22 @@ struct WriteContent::WriteContentInternal
 
 		header->headers[Content_Type] = contenttype;
 	}
+
+	bool write(const char* buffer, int len)
+	{
+		while (len > 0)
+		{
+			int writelen = cache->write(buffer, len);
+			if (writelen <= 0) return false;
+
+			len -= writelen;
+			buffer += writelen;
+		}
+
+		if (notify) notify->WriteNotify();
+
+		return true;
+	}
 };
 
 WriteContent::WriteContent(const shared_ptr<HTTPHeader>& header,WriteContenNotify* notify, HTTPCacheType type)
@@ -185,22 +200,11 @@ WriteContent::~WriteContent()
 
 bool WriteContent::write(const char* buffer, int len)
 {
-	while (len > 0)
-	{
-		int writelen = internal->cache->write(buffer, len);
-		if (writelen <= 0) return false;
-
-		len -= writelen;
-		buffer += writelen;
-	}
-
-	if (internal->notify) internal->notify->WriteNotify();
-
-	return true;
+	return internal->write(buffer, len);
 }
-bool WriteContent::writeString(const std::string& buffer)
+bool WriteContent::write(const std::string& buffer)
 {
-	return write(buffer.c_str(), buffer.length());
+	return internal->write(buffer.c_str(), buffer.length());
 }
 bool WriteContent::writeFromFile(const std::string& filename, bool needdeletefile)
 {
@@ -238,7 +242,7 @@ void WriteContent::writeChunk(const char* buffer, uint32_t len)
 	{
 		internal->header->headers[Transfer_Encoding] = CHUNKED;
 
-		internal->chunk = make_shared<ChunkData>(ChunkData::WriteCallback(&WriteContent::write, this));
+		internal->chunk = make_shared<ChunkData>(ChunkData::WriteCallback(&WriteContentInternal::write, internal));
 	}
 
 	if(internal->chunk)

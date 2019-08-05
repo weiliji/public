@@ -20,7 +20,7 @@ public:
 	bool sendOvifRequest(CmdObject* cmd, int timeout, const URL& _requrl = URL())
 	{
 		shared_ptr<HTTPClient> client = make_shared<HTTPClient>(worker, useragent);
-		shared_ptr<HTTPRequest> req = make_shared<HTTPRequest>();
+		shared_ptr<HTTPClientRequest> req = make_shared<HTTPClientRequest>();
 
 		URL requrl = _requrl;
 		if (requrl.getHostname() == "") requrl = url;
@@ -44,7 +44,7 @@ public:
 		req->timeout() = timeout;
 		req->url() = requrl.getHost() + requrl.getPath() + requrl.getSearch();
 
-		shared_ptr<HTTPResponse> response = client->request(req);
+		shared_ptr<HTTPClientResponse> response = client->request(req);
 
 		if (response == NULL || response->statusCode() != 200)
 		{

@@ -17,11 +17,13 @@ public:
 		Type_Double,
 		Type_Bool,
 		Type_Int64,
+		Type_Array,
 	}Type;
 public:
 	Value();
 	Value(const std::string& val, Type Type);
 	Value(const std::string& val);
+	Value(const std::vector<char>& val);
 	Value(char val);
 	Value(const char* val);
 	Value(const unsigned char* val);
@@ -32,6 +34,7 @@ public:
 	Value(uint64_t val);
 	Value(int64_t val);
 	Value(const Value& val);
+	Value(const std::vector<Value>& val);
 	~Value();
 
 	Value& operator = (const Value& val);
@@ -45,6 +48,7 @@ public:
 	operator bool() const;
 	operator double() const;
 	operator float() const;
+	operator std::vector<Value>() const;
 
 	std::string readString(const std::string& fmt = "") const;
 	int readInt(const std::string& fmt = "") const;
@@ -53,7 +57,8 @@ public:
 	bool readBool() const;
 	uint32_t readUint32(const std::string& fmt = "") const;
 	uint64_t readUint64(const std::string& fmt = "") const;
-	
+	const std::vector<Value>& readArray() const;
+
 	Type type() const;
 
 	bool empty() const;

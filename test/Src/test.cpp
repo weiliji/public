@@ -258,8 +258,7 @@ int main()
 #endif
 
 
-#if 1
-#include <regex.h>
+#if 0
 #include <iostream>
 #include <sys/types.h>
 #include <stdio.h>

@@ -51,6 +51,7 @@
     <ClInclude Include="..\Include\Base\ReadWriteMutex.h" />
     <ClInclude Include="..\Include\Base\RecursiveMutex.h" />
     <ClInclude Include="..\Include\Base\RecycleBin.h" />
+    <ClInclude Include="..\Include\Base\RegEx.h" />
     <ClInclude Include="..\Include\Base\Semaphore.h" />
     <ClInclude Include="..\Include\Base\Sha1.h" />
     <ClInclude Include="..\Include\Base\Shared_ptr.h" />
@@ -71,6 +72,7 @@
     <ClInclude Include="..\Include\Base\URLEncoding.h" />
     <ClInclude Include="..\Include\Base\Value.h" />
     <ClInclude Include="..\Include\Base\Version.h" />
+    <ClInclude Include="Src\regex\regex.h" />
     <ClInclude Include="Src\Thread.h" />
     <ClInclude Include="Src\ThreadPoolInternal.h" />
     <ClInclude Include="Src\TimerManager.h" />
@@ -106,6 +108,8 @@
     <ClCompile Include="Src\ReadWriteMutex.cpp" />
     <ClCompile Include="Src\RecursiveMutex.cpp" />
     <ClCompile Include="Src\RecycleBin.cpp" />
+    <ClCompile Include="Src\RegEx1.cpp" />
+    <ClCompile Include="Src\regex\regex.cpp" />
     <ClCompile Include="Src\Semaphore.cpp" />
     <ClCompile Include="Src\Sha1.cpp" />
     <ClCompile Include="Src\ShareMem.cpp" />

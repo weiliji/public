@@ -395,7 +395,7 @@ typedef struct
 
 #else /* not __STDC__ */
 
-#define _RE_ARGS(args) ()
+#define _RE_ARGS(args) args
 
 #endif /* not __STDC__ */
 
@@ -470,14 +470,14 @@ extern char *re_comp _RE_ARGS ((const char *));
 extern int re_exec _RE_ARGS ((const char *));
 
 /* POSIX compatibility.  */
-extern int regcomp _RE_ARGS ((regex_t *preg, const char *pattern, int cflags));
-extern int regexec
+/*extern*/ int regcomp _RE_ARGS ((regex_t *preg, const char *pattern, int cflags));
+/*extern*/ int regexec
   _RE_ARGS ((const regex_t *preg, const char *string, size_t nmatch,
              regmatch_t pmatch[], int eflags));
-extern size_t regerror
+/*extern*/ size_t regerror
   _RE_ARGS ((int errcode, const regex_t *preg, char *errbuf,
              size_t errbuf_size));
-extern void regfree _RE_ARGS ((regex_t *preg));
+/*extern*/ void regfree _RE_ARGS ((regex_t *preg));
 
 #endif /* not __REGEXP_LIBRARY_H__ */
 
