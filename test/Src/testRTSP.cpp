@@ -65,22 +65,22 @@ struct RTSPClientInfo
 
 string rtspaddr[] = {
 //	"rtsp://admin:ms123456@192.168.7.104:554/main",
-	//"rtsp://admin:ms123456@192.168.3.135:554/main",
+	"rtsp://admin:ms123456@192.168.3.135:554/main",
 	"rtsp://192.168.9.230:554/cam/realmonitor?channel=1&subtype=0&unicast=true&proto=Onvif",
 //	"rtsp://admin:support2019@192.168.9.205:554/Streaming/Channels/102",
-	//"rtsp://admin:ms123456@192.168.10.230:554/main",
-	//"rtsp://admin:ms123456@192.168.11.230:554/main",
-	//"rtsp://admin:ms123456@192.168.4.150:554/main",
-	//"rtsp://admin:ms123456@192.168.4.111:554/main",
-	//"rtsp://admin:ms123456@192.168.2.172:554/main",
-	//"rtsp://admin:ms123456@192.168.4.105:554/main",
-	//"rtsp://admin:ms123456@192.168.10.236:554/main",
+	"rtsp://admin:ms123456@192.168.10.230:554/main",
+	"rtsp://admin:ms123456@192.168.11.230:554/main",
+	"rtsp://admin:ms123456@192.168.4.150:554/main",
+	"rtsp://admin:ms123456@192.168.4.111:554/main",
+//	"rtsp://admin:ms123456@192.168.2.172:554/main",
+//	"rtsp://admin:ms123456@192.168.4.105:554/main",
+//	"rtsp://admin:ms123456@192.168.10.236:554/main",
 	//"rtsp://192.168.2.16:5554/111",
 };
 
 int main()
 {
-	shared_ptr<IOWorker>	worker = make_shared<IOWorker>(8);
+	shared_ptr<IOWorker>	worker = make_shared<IOWorker>(4);
 	shared_ptr<RTSPClientManager> manager = make_shared<RTSPClientManager>(worker,"test");
 
 	std::list< RTSPClientInfo> clientlist;

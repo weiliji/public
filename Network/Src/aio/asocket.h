@@ -30,7 +30,7 @@ public:
 	virtual bool disconnect()
 	{
 		userthread->quit();
-		ioserver->destory(sock, poolid);
+		ioserver->destory(sock);
 
 		return true;
 	}
@@ -251,7 +251,6 @@ protected:
 	weak_ptr<Socket>		socketptr;
 
 	int						sock;
-	int						poolid;
 
 	shared_ptr<_UserThread> userthread;
 

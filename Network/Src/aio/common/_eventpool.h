@@ -83,12 +83,17 @@ public:
 	//取出事件
 	shared_ptr<Event> popEvent(void* eventid)
 	{
-		Guard locker(mutex);
+		shared_ptr<Event> event;
+		{
+			Guard locker(mutex);
 
-		std::map<void*, shared_ptr<Event> >::iterator iter = eventmap.find(eventid);
-		if (iter == eventmap.end()) return shared_ptr<Event>();
+			std::map<void*, shared_ptr<Event> >::iterator iter = eventmap.find(eventid);
+			if (iter == eventmap.end()) return shared_ptr<Event>();
 
-		return iter->second;
+			event = iter->second;
+			eventmap.erase(iter);
+		}
+		return event;
 	}
 private:
 	void doCheckTimerProc(unsigned long)

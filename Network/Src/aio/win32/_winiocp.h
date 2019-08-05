@@ -10,7 +10,7 @@ public:
 	_SystemPool(){}
 	~_SystemPool(){}
 
-	virtual bool start(_EventThreadPool*_eventpool)
+	virtual bool start(_EventThreadPool*_eventpool,uint32_t threadnum)
 	{
 		iocp = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
 		if (iocp == NULL)
@@ -18,16 +18,12 @@ public:
 			return false;
 		}
 
-		return _Pool::start(_eventpool);
+		return _Pool::start(_eventpool, threadnum);
 	}
 	virtual bool stop()
 	{
-		cancelThread();
-
 		if (iocp != NULL)
 			::PostQueuedCompletionStatus(iocp, 0, NULL, NULL);
-
-		destroyThread();
 
 		if (iocp)
 			CloseHandle(iocp);
@@ -36,20 +32,15 @@ public:
 		return _Pool::stop();
 	}
 
-	virtual void create(int sockfd, int& poolid)
+	virtual void create(int sockfd)
 	{
 		if (iocp == NULL) return;
 
-		HANDLE iosock = ::CreateIoCompletionPort((HANDLE)sockfd, iocp, NULL, 0);
-
-		poolid = (int)iosock;
+		::CreateIoCompletionPort((HANDLE)sockfd, iocp, NULL, 0);
 	}
 
-	virtual void destory(int sockfd,int poolid)
+	virtual void destory(int sockfd)
 	{
-		HANDLE iosock = (HANDLE)poolid;
-
-		if (iosock != NULL) CloseHandle(iosock);
 	}
 
 	virtual void runPool()

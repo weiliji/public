@@ -14,11 +14,18 @@ public:
 	{
 		if (threadnum <= 0) threadnum = 1;
 
-		uint32_t poolthreadnum = threadnum - 1;
+		uint32_t poolThreadnum = 1;
+		uint32_t threadPoolnum = threadnum - poolThreadnum;
+
+#ifdef WIN32
+		poolThreadnum = threadnum / 4;
+		if (poolThreadnum == 0) poolThreadnum = 1;
+		threadPoolnum = threadnum - poolThreadnum;
+#endif
 
 		_EventPool::start();
-		_EventThreadPool::start(this, poolthreadnum);
-		_SystemPool::start(this);
+		_EventThreadPool::start(this, threadPoolnum);
+		_SystemPool::start(this, poolThreadnum);
 	}
 	~IOServer()
 	{

@@ -27,6 +27,7 @@ public:
 			return false;
 		}
 
+		if(type != NetType_Udp)
 		{
 			GUID acceptEX = WSAID_ACCEPTEX;
 			GUID getAcceptAddrEx = WSAID_GETACCEPTEXSOCKADDRS;
@@ -46,6 +47,11 @@ public:
 				assert(0);
 			}
 		}
+
+#ifdef WIN32
+		unsigned long on_windows = 1;
+		ioctlsocket(sock, FIONBIO, &on_windows);
+#endif
 
 		return true;
 	}

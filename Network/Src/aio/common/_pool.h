@@ -10,32 +10,38 @@ typedef enum {
 	PoolType_Read,
 	PoolType_Write,
 }PoolType;
-class _Pool :public Thread
+class _Pool
 {
 public:
-	_Pool() :Thread("IOPool",Thread::priorTop, Thread::policyRealtime){}
+	_Pool(){}
 	virtual ~_Pool(){}
-	virtual bool start(_EventThreadPool*_eventpool)
+	virtual bool start(_EventThreadPool*_eventpool,uint32_t threadnum)
 	{
 		eventpool = _eventpool;
+		for (uint32_t i = 0; i < threadnum; i++)
+		{
+			shared_ptr<Thread> thread = ThreadEx::creatThreadEx("_Pool", ThreadEx::Proc(&_Pool::threadProc,this), NULL, Thread::priorTop, Thread::policyRealtime);
+			thread->createThread();
 
-		createThread();
+			threadlist.push_back(thread);
+		}
 
 		return true;
 	}
 	virtual bool stop()
 	{
-		destroyThread();
+		threadlist.clear();
+
 		return true;
 	}
-	virtual void create(int sockfd,int& poolid) = 0;
-	virtual void destory(int sockfd,int poolid) = 0;
+	virtual void create(int sockfd) = 0;
+	virtual void destory(int sockfd) = 0;
 	virtual void clean(int sockfd, PoolType type){}
 	virtual void add(int sockfd,PoolType type,void* eventid){}
 private:
-	void threadProc()
+	void threadProc(Thread* t,void*)
 	{
-		while (looping())
+		while (t->looping())
 		{
 			runPool();
 		}
@@ -44,4 +50,6 @@ private:
 	virtual void runPool() = 0;
 protected:
 	_EventThreadPool*	eventpool;
+private:
+	std::list<shared_ptr<Thread> > threadlist;
 };

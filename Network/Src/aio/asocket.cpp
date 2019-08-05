@@ -7,7 +7,7 @@ shared_ptr<ASocket> ASocket::create(const shared_ptr<IOWorker>& _ioworker, const
 
 	if (sock->creatSocket(_type))
 	{
-		sock->ioserver->create(sock->sock, sock->poolid);
+		sock->ioserver->create(sock->sock);
 	}
 
 	if (sock->type == NetType_TcpClient)
@@ -22,6 +22,8 @@ shared_ptr<ASocket> ASocket::create(const shared_ptr<IOWorker>& _ioworker, const
 shared_ptr<ASocket> ASocket::create(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, const NewSocketInfo& newsock)
 {
 	shared_ptr<ASocket> sock(new _WinSocket(_ioworker, _ioserver, _sockptr, newsock));
+
+	sock->ioserver->create(sock->sock);
 
 	return sock;
 }

@@ -30,6 +30,7 @@ struct WinEvent
 		addr.sa_family = AF_INET;
 		addrlen = sizeof(SOCKADDR);
 	}
+	virtual ~WinEvent() {}
 };
 
 struct SendEvent :public Event,public WinEvent
@@ -89,7 +90,11 @@ struct RecvEvent :public Event,public WinEvent
 
 	RecvEvent(const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& userthread) :Event(sock, userthread)
 	{}
-	~RecvEvent() { if (needFreeBuffer) delete[](char*)wbuf.buf; }
+	~RecvEvent() 
+	{ 
+		if (needFreeBuffer) 
+			delete[](char*)wbuf.buf;
+	}
 	bool init(char* buffer, uint32_t len, const Socket::ReceivedCallback& _recvcallback, const Socket::RecvFromCallback& _recvfromcallback)
 	{
 		shared_ptr<Socket> sock = weak_sock.lock();
@@ -113,7 +118,7 @@ struct RecvEvent :public Event,public WinEvent
 		int ret = 0;
 		if (recvcallback)
 		{
-			ret = WSARecv(sock->getHandle(), &wbuf, 1, &dwBytes, &dwFlags,&overlped, NULL);
+			ret = WSARecv(sock->getHandle(), &wbuf, 1, &dwBytes, &dwFlags, &overlped, NULL);
 		}
 		else
 		{
@@ -139,9 +144,15 @@ struct RecvEvent :public Event,public WinEvent
 	}
 	void doEvent(const shared_ptr<Socket>& sock, int bytes, bool status)
 	{
-		if (!status && !socketIsAlive(sock)) sock->socketError("socket disconnected");
-		else if(bytes <= 0 && !socketIsAlive(sock)) sock->socketError("socket disconnected");
-		else if(status && bytes > 0)
+		if (!status && !socketIsAlive(sock))
+		{
+			sock->socketError("socket disconnected");
+		}
+		else if (bytes <= 0 && !socketIsAlive(sock))
+		{
+			sock->socketError("socket disconnected");
+		}
+		else if (status && bytes > 0)
 		{
 			if (recvcallback) recvcallback(sock, (const char*)wbuf.buf, bytes);
 			else recvfromcallback(sock, (const char*)wbuf.buf, bytes, NetAddr(*(SockAddr*)&addr));

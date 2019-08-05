@@ -54,7 +54,7 @@ public:
 		eventinfo->status = status;
 		eventinfo->bytes = bytes;
 
-		if (threadsize >= 0)
+		if (threadsize > 0)
 		{
 			Guard locker(mutex);
 
