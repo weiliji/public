@@ -15,7 +15,7 @@ class RedisParser
 public:
 	RedisParser() : bulkSize(0)
 	{
-		buf.alloc(64);
+		buf.reserve(64);
 	}
 	~RedisParser() {}
 
@@ -68,7 +68,7 @@ public:
 				 }
 				 else if (isChar(c) && !isControl(c))
 				 {
-					 buf.append(c);
+					 buf.push_back(c);
 				 }
 				 else
 				 {
@@ -83,7 +83,7 @@ public:
 				 }
 				 else if (isChar(c) && !isControl(c))
 				 {
-					 buf.append(c);
+					 buf.push_back(c);
 				 }
 				 else
 				 {
@@ -106,7 +106,7 @@ public:
 				 }
 				 else if (isdigit(c) || c == '-')
 				 {
-					 buf.append(c);
+					 buf.push_back(c);
 				 }
 				 else
 				 {
@@ -160,14 +160,14 @@ public:
 					 }
 					 else
 					 {
-						 buf.alloc(bulkSize);
+						 buf.reserve(bulkSize);
 
 						 long int available = size - position;
 						 long int canRead = min(bulkSize, available);
 
 						 if (canRead > 0)
 						 {
-							 buf = String(ptr + position, canRead);
+							 buf = std::string(ptr + position, canRead);
 							 position += canRead;
 							 bulkSize -= canRead;
 						 }
@@ -243,7 +243,7 @@ public:
 				 }
 				 else if (isdigit(c) || c == '-')
 				 {
-					 buf.append(c);
+					 buf.push_back(c);
 				 }
 				 else
 				 {
@@ -302,7 +302,7 @@ public:
 				 }
 				 else if (isdigit(c) || c == '-')
 				 {
-					 buf.append(c);
+					 buf.push_back(c);
 				 }
 				 else
 				 {
@@ -450,7 +450,7 @@ private:
     std::stack<State> states;
 
 	long int bulkSize;
-	String buf;
+	std::string buf;
 
 	RedisValue redisValue;
    
@@ -478,6 +478,27 @@ public:
 		else if (items.isString()) buildString(items, callback);
 		else if (items.isInt()) buildInt(items, callback);
 		else if (items.isStatus()) buildStatus(items, callback);
+	}
+	static std::string RedisBuilder::makeCommand(const std::deque<Value> &items)
+	{
+		std::string cmdstr;
+
+		cmdstr += '*';
+		cmdstr += std::to_string(items.size());
+		cmdstr += crlf;
+
+		for (const auto &item : items)
+		{
+			std::string tmpstr = item.readString();
+
+			cmdstr += '$';
+			cmdstr += std::to_string(tmpstr.size());
+			cmdstr += crlf;
+			cmdstr += tmpstr;
+			cmdstr += crlf;
+		}
+
+		return std::move(cmdstr);
 	}
 private:
 	static void buildArray(const RedisValue &items, BuildCallback& callback)
@@ -528,28 +549,6 @@ private:
 		}
 
 		callback(buffer);
-	}
-
-	static std::string RedisBuilder::makeCommand(const std::deque<Value> &items)
-	{
-		std::string cmdstr;
-
-		cmdstr += '*';
-		cmdstr += std::to_string(items.size());
-		cmdstr += crlf;
-
-		for (const auto &item : items)
-		{
-			std::string tmpstr = item.readString();
-
-			cmdstr += '$';
-			cmdstr += std::to_string(tmpstr.size());
-			cmdstr += crlf;
-			cmdstr += tmpstr;
-			cmdstr += crlf;
-		}
-
-		return std::move(cmdstr);
 	}
 };
 

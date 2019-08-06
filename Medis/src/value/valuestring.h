@@ -17,11 +17,11 @@ public:
 	ValueString(const shared_ptr<ValueHeader>& _header) :ValueObject(_header) {}
 	~ValueString(){}
 
-	RedisString get()
+	String get()
 	{
 		return value->getData();
 	}
-	bool set(const RedisString& data)
+	bool set(const String& data)
 	{
 		value->setData(data);
 

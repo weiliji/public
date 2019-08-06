@@ -19,15 +19,14 @@ public:
 			return success == t.success && errmsg == t.errmsg;
 		}
 	};
-	RedisValue(): value(NullTag()){}
+	RedisValue(){}
 	RedisValue(RedisValue &&other): value(std::move(other.value)){}
 	RedisValue(long long i): value(i){}
 	RedisValue(const StatusTag& err):value(err){}
 	RedisValue(bool success,const std::string& errmsg):value(StatusTag(success,errmsg)){}
 	RedisValue(bool success, const String& errmsg) :value(StatusTag(success, errmsg)) {}
-	RedisValue(const char *s,int len) : value(String(std::string(s,len))) {}
-	RedisValue(const std::string &s): value(String(s)){}
-	RedisValue(const String &s):value(s){}
+	RedisValue(const char *s,int len) : value(std::string(s,len)) {}
+	RedisValue(const std::string &s): value(s){}
 	RedisValue(const std::vector<RedisValue>& array): value(std::move(array)){}
 
 	RedisValue(const RedisValue &) = default;
@@ -36,11 +35,11 @@ public:
 
 	// Return the value as a std::string if
 	// type is a byte string; otherwise returns an empty std::string.
-	String toString() const
+	std::string toString() const
 	{
 		if (isInt()) return Value(toInt()).readString();
 
-		static const String emptstr;
+		static const std::string emptstr;
 		if (!isString()) return emptstr;
 
 		return getString();
@@ -84,7 +83,7 @@ public:
 	// Return true if this is a null.
 	bool isNull() const
 	{
-		return typeEq<NullTag>();
+		return value.empty();
 	}
 	// Return true if type is an int
 	bool isInt() const
@@ -121,13 +120,13 @@ public:
 	{
 		return value.get<StatusTag>();
 	}
-	String& getString()
+	std::string& getString()
 	{
-		return value.get<String>();
+		return value.get<std::string>();
 	}
-	const String& getString()const
+	const std::string& getString()const
 	{
-		return value.get<String>();
+		return value.get<std::string>();
 	}
 protected:
 	template<typename T>
@@ -140,13 +139,6 @@ protected:
 	}
 
 private:
-	struct NullTag {
-		inline bool operator == (const NullTag &) const {
-			return true;
-		}
-	};
-
-
 	Variant value;
 };
 

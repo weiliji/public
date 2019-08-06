@@ -53,7 +53,7 @@ private:
 		if (val.size() != 4)return RedisValue(false, "wrong number of arguments");
 		std::string key = String::tolower(val[1].toString());
 		std::string filed = String::tolower(val[2].toString());
-		const RedisString& data = val[3].toString();
+		const String& data = val[3].toString();
 
 		shared_ptr<ValueObject> valueobject;
 		std::map<std::string, shared_ptr<ValueObject> >::iterator iter = valuelist.find(key);
@@ -80,7 +80,7 @@ private:
 		if (val.size() != 4) return RedisValue(false, "wrong number of arguments");
 		std::string key = String::tolower(val[1].toString());
 		std::string filed = String::tolower(val[2].toString());
-		const RedisString& data = val[3].toString();
+		const String& data = val[3].toString();
 
 		shared_ptr<ValueObject> valueobject;
 		std::map<std::string, shared_ptr<ValueObject> >::iterator iter = valuelist.find(key);
@@ -147,7 +147,7 @@ private:
 		if (valueobject->type() != DataType_Hash) return RedisValue(0);
 		ValueHash* hashobject = (ValueHash*)valueobject.get();
 
-		RedisString data = hashobject->get(filed);
+		String data = hashobject->get(filed);
 
 		return RedisValue(data);
 	}
@@ -171,11 +171,11 @@ private:
 		if (valueobject->type() != DataType_Hash) return RedisValue(0);
 		ValueHash* hashobject = (ValueHash*)valueobject.get();
 
-		std::map<std::string, RedisString> data;
+		std::map<std::string, String> data;
 		hashobject->getall(data);
 
 		std::vector<RedisValue> dataarray;
-		for (std::map<std::string, RedisString>::iterator iter = data.begin(); iter != data.end(); iter++)
+		for (std::map<std::string, String>::iterator iter = data.begin(); iter != data.end(); iter++)
 		{
 			dataarray.push_back(RedisValue(iter->first));
 			dataarray.push_back(RedisValue(iter->second));
@@ -262,7 +262,7 @@ private:
 			else return RedisValue(false, "syntax error");
 		}
 
-		std::vector<RedisString> keysdata;
+		std::vector<String> keysdata;
 		uint32_t newscosor = 0;
 		
 		shared_ptr<ValueObject> valueobject;

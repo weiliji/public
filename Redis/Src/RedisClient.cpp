@@ -162,7 +162,7 @@ public:
 
 		retval = client->command(cmd, args, ec);
 
-		return ec && !retval.isError();
+		return ec && (!retval.isStatus() || retval.getStatus().success);
 	}
 	~Redis_ClientInternal()
 	{

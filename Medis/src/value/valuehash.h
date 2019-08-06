@@ -26,7 +26,7 @@ public:
 
 		return true;
 	}
-	bool set(const std::string& field, const RedisString& data)
+	bool set(const std::string& field, const String& data)
 	{
 		shared_ptr<ValueData> node = factory->createValueData(header, field);
 		node->setData(data);
@@ -36,25 +36,25 @@ public:
 		return true;
 
 	}
-	bool setnx(const std::string& field, const RedisString& data)
+	bool setnx(const std::string& field, const String& data)
 	{
 		if (exists(field)) return false;
 
 		return set(field,data);
 
 	}
-	RedisString get(const std::string& field)
+	String get(const std::string& field)
 	{
 		std::map<std::string, shared_ptr<ValueData> >::iterator niter = datalist.find(field);
-		if (niter == datalist.end()) return RedisString();
+		if (niter == datalist.end()) return String();
 
 		return niter->second->getData();
 	}
-	bool getall(std::map<std::string, RedisString>& data)
+	bool getall(std::map<std::string, String>& data)
 	{
 		for (std::map<std::string, shared_ptr<ValueData> >::iterator niter = datalist.begin(); niter != datalist.end(); niter++)
 		{
-			RedisString datastr = niter->second->getData();
+			String datastr = niter->second->getData();
 			data[niter->first] = datastr;
 		}
 
@@ -81,7 +81,7 @@ public:
 	{
 		datalist[data->name()] = data;
 	}
-	uint32_t scan(uint32_t cursor, const std::string& pattern, uint32_t count, std::vector<RedisString>& keys)
+	uint32_t scan(uint32_t cursor, const std::string& pattern, uint32_t count, std::vector<String>& keys)
 	{
 		uint32_t currcursor = 0;
 		RegEx oRegex(pattern == "*" ? "" : pattern);
@@ -94,7 +94,7 @@ public:
 			{
 				keys.push_back(iter->first);
 
-				RedisString datastr = iter->second->getData();
+				String datastr = iter->second->getData();
 
 				keys.push_back(datastr);
 			}

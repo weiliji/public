@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../common/redisstring.h"
 #include "Base/Base.h"
 using namespace Public::Base;
 
@@ -104,13 +103,13 @@ struct ValueData
 		m_factory->deleteValueData(this);
 	}
 	shared_ptr<ValueHeader> header() { return m_header.lock(); }
-	virtual void setData(const RedisString& data)
+	virtual void setData(const String& data)
 	{
 		m_data = data;
 
 		m_factory->updateValueData(this);
 	}
-	const RedisString& getData()
+	const String& getData()
 	{
 		return m_data;
 	}
@@ -120,5 +119,5 @@ protected:
 	weak_ptr<ValueHeader>	m_header;
 	std::string				m_name;
 	uint32_t				m_len;
-	RedisString				m_data;
+	String				m_data;
 };

@@ -2,10 +2,11 @@
 
 #include "Base/Base.h"
 #include "Network/Network.h"
-#include "value/valuehash.h"
-#include "value/valuestring.h"
-#include "value/valuezset.h"
-#include "value/valuelist.h"
+#include "../value/valuedata.h"
+#include "../value/valuehash.h"
+#include "../value/valuestring.h"
+#include "../value/valuezset.h"
+#include "../value/valuelist.h"
 #include "../common/redisvalue.h"
 using namespace Public::Base;
 using namespace Public::Network;
@@ -133,10 +134,10 @@ private:
 
 		std::vector<RedisValue> keysval;
 
-		boost::regex oRegex(pattern == "*" ? "" : pattern);
+		RegEx oRegex(pattern == "*" ? "" : pattern);
 		for (std::map<std::string, shared_ptr<ValueObject> >::iterator iter = valuelist.begin(); iter != valuelist.end(); iter++)
 		{
-			if (pattern != "" && pattern != "*" && !boost::regex_match(iter->first, oRegex))
+			if (pattern != "" && pattern != "*" && !RegEx::regex_match(iter->first, oRegex))
 			{
 				continue;
 			}
@@ -216,13 +217,13 @@ private:
 
 		std::vector<RedisValue> keys;
 		uint32_t currcursor = 0;
-		boost::regex oRegex(pattern == "*" ? "" : pattern);
+		RegEx oRegex(pattern == "*" ? "" : pattern);
 		for (std::map<std::string, shared_ptr<ValueObject> >::iterator iter = valuelist.begin(); iter != valuelist.end(); iter++, currcursor++)
 		{
 			if(currcursor < cursor) continue;
 			if (count != -1 && keys.size() > count) break;
 			
-			if (pattern == "" || pattern == "*" || boost::regex_match(iter->first, oRegex))
+			if (pattern == "" || pattern == "*" || RegEx::regex_match(iter->first, oRegex))
 			{
 				keys.push_back(RedisValue(iter->first));
 			}

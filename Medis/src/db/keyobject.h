@@ -1,7 +1,7 @@
 #pragma once
 
 #include "db.h"
-
+#include "../common/config.h"
 
 class KeyObject
 {

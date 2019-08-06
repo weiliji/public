@@ -88,13 +88,13 @@ struct RedisMQ::RedisMQInternal
 			Guard locker(mutex);
 			event = AsyncEvent_Init;
 		}
-		void authenCallback(const redisclient::RedisValue &v)
+		void authenCallback(const RedisValue &v)
 		{
 			Guard locker(mutex);
 			if (v.toString() == "OK") event = AsyncEvent_AuthenEnd;
 			else event = AsyncEvent_Init;
 		}
-		void selectCallback(const redisclient::RedisValue &v) 
+		void selectCallback(const RedisValue &v) 
 		{
 			Guard locker(mutex);
 			if (v.toString() == "OK")

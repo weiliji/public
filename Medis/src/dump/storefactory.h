@@ -34,10 +34,10 @@ public:
 		shared_ptr<Storer> storer = make_shared<Storer>();
 		if (storer->open(savefilename, false))
 		{
-			std::map<std::string, RedisString> headerinfos;
+			std::map<std::string, String> headerinfos;
 			storer->load(headerinfos);
 
-			for (std::map<std::string, RedisString>::iterator iter = headerinfos.begin(); iter != headerinfos.end(); iter++)
+			for (std::map<std::string, String>::iterator iter = headerinfos.begin(); iter != headerinfos.end(); iter++)
 			{
 				std::map<std::string, Value> headerarray;
 				parseHeaderString(iter->first, headerarray);
@@ -171,7 +171,7 @@ private:
 
 			buildHeaderString(headerarray, headerstr);
 		}
-		storer->write(headerstr, RedisString());
+		storer->write(headerstr, String());
 	}
 	shared_ptr<ValueHeader> parseAndBuildHeader(const std::map<std::string, Value>& headerarray)
 	{
@@ -203,7 +203,7 @@ private:
 		}
 		storer->write(headerstr, data->m_data);
 	}
-	shared_ptr<ValueData> parseAndBuildData(const std::map<std::string, Value>& headerarray,const std::vector<shared_ptr<ValueHeader> >& headerlist,const RedisString& datastr)
+	shared_ptr<ValueData> parseAndBuildData(const std::map<std::string, Value>& headerarray,const std::vector<shared_ptr<ValueHeader> >& headerlist,const String& datastr)
 	{
 		DataType type = (DataType)getHeaderValue(headerarray, HEADER_TYPE).readInt();
 		std::string key = getHeaderValue(headerarray, HEADER_KEY).readString();

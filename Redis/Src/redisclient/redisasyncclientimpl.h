@@ -9,7 +9,7 @@ using namespace Public::Base;
 using namespace Public::Network;
 
 #include "redisvalue.h"
-#include "redisparser.h"
+#include "redisprotocol.h"
 
 namespace redisclient{
 

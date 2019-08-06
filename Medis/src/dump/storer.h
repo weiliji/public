@@ -61,7 +61,7 @@ public:
 		return true;
 	}
 
-	bool load(std::map<std::string, RedisString>& data)
+	bool load(std::map<std::string, String>& data)
 	{
 		if (fd == NULL) return false;
 
@@ -74,7 +74,7 @@ public:
 			if (memcmp(header.flag, STOREFLAG, 4) != 0) break;
 			
 			std::string headerstr;
-			RedisString datastr;
+			String datastr;
 			{
 				char* buffertmp = new char[header.headerlen];
 				if (buffertmp == NULL) break;
@@ -109,7 +109,7 @@ public:
 
 		return true;
 	}
-	bool write(const std::string& headerstr,const RedisString& data)
+	bool write(const std::string& headerstr,const String& data)
 	{
 		if (fd == NULL) return false;
 		StoreHeader header;
@@ -120,7 +120,7 @@ public:
 		ret = fwrite(headerstr.c_str(), 1, headerstr.length(), fd);
 
 		if(data.length() > 0)
-			ret = fwrite(data.ptr(), 1, data.length(), fd);
+			ret = fwrite(data.c_str(), 1, data.length(), fd);
 
 		return true;
 	}

@@ -29,12 +29,7 @@ inline Value transValue(const RedisValue& val)
 	Value valtmp;
 	if (val.isInt()) valtmp = Value(val.toInt());
 	else if (val.isString()) valtmp = Value(String::utf82ansi(val.toString()));
-	else if (val.isByteArray())
-	{
-		std::vector<char> bytearray = val.toByteArray();
 
-		valtmp = Value(String::utf82ansi(std::string(bytearray.begin(), bytearray.end())));
-	}
 
 	return std::move(valtmp);
 }

@@ -39,7 +39,7 @@ private:
 		uint32_t count = 0;
 		for (uint32_t i = 2; i < val.size(); i++)
 		{
-			RedisString data = val[i].toString();
+			String data = val[i].toString();
 			if(data.length() == 0) continue;
 
 			listobject->push_front(data);
@@ -74,7 +74,7 @@ private:
 		uint32_t count = 0;
 		for (uint32_t i = 2; i < val.size(); i++)
 		{
-			RedisString data = val[i].toString();
+			String data = val[i].toString();
 			if (data.length() == 0) continue;
 
 			listobject->push_back(data);
@@ -99,7 +99,7 @@ private:
 		if (iter->second->type() != DataType_List) return RedisValue(0);
 		ValueList* listobject = (ValueList*)iter->second.get();
 		
-		RedisString data;
+		String data;
 		listobject->pop_front(data);
 
 		return RedisValue(data);
@@ -119,7 +119,7 @@ private:
 		if (iter->second->type() != DataType_List) return RedisValue(0);
 		ValueList* listobject = (ValueList*)iter->second.get();
 
-		RedisString data;
+		String data;
 		listobject->pop_back(data);
 
 		return RedisValue(data);
@@ -162,7 +162,7 @@ private:
 		ValueList* listobject = (ValueList*)iter->second.get();
 
 
-		std::vector<RedisString> dataarray;
+		std::vector<String> dataarray;
 		listobject->range(start, stop, dataarray);
 
 		std::vector<RedisValue> values;

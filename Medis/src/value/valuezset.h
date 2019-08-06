@@ -14,7 +14,7 @@ public:
 	ValueZSet(const shared_ptr<ValueHeader>& _header):ValueObject(_header){}
 	~ValueZSet() {}
 
-	bool add(uint64_t score, const RedisString& data)
+	bool add(uint64_t score, const String& data)
 	{
 		shared_ptr<ValueData> node;
 		std::map<uint64_t, shared_ptr<ValueData> >::iterator niter = datalist.find(score);
@@ -54,7 +54,7 @@ public:
 		}
 		return zcount;
 	}
-	bool range(int64_t start, int64_t top, std::map<uint64_t, RedisString>& datamap)
+	bool range(int64_t start, int64_t top, std::map<uint64_t, String>& datamap)
 	{
 		if (start <= -1) start = indexmap.size() + start + 1;
 		if(top <= -1) top = indexmap.size() + top + 1;
@@ -65,7 +65,7 @@ public:
 			if(readpos < start) continue;
 			if (readpos > top) break;
 
-			RedisString datastr = datalist[*iter]->getData();
+			String datastr = datalist[*iter]->getData();
 
 			datamap[*iter] = datastr;
 		}
@@ -73,14 +73,14 @@ public:
 		return true;
 	}
 
-	bool rangeByScore(uint64_t minscore, uint64_t maxscore, std::map<uint64_t, RedisString>& datamap)
+	bool rangeByScore(uint64_t minscore, uint64_t maxscore, std::map<uint64_t, String>& datamap)
 	{
 		for (std::list<uint64_t>::iterator iter = indexmap.begin(); iter != indexmap.end(); iter++)
 		{
 			if (*iter < minscore) continue;
 			if (*iter > maxscore) break;
 
-			RedisString datastr = datalist[*iter]->getData();
+			String datastr = datalist[*iter]->getData();
 
 			datamap[*iter] = datastr;
 		}
