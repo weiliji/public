@@ -259,26 +259,48 @@ int main()
 
 
 #if 1
-#include "Base/Base.h"
+//#include "Base/Base.h"
+#include "Base/Variant.h"
+#include "Base/Time.h"
 using namespace Public::Base;
 
 using namespace std;
 const int times = 1000000;
 
+struct AAA
+{
+	int a;
+};
+
 int main(int argc, char** argv)
 {
-	{
-		RegEx reg("abc", RegExType_Normal);
-
-		bool val = RegEx::regex_match("Abc", reg);
-	}
+	Variant value;
 
 	{
-		RegEx reg("abc", RegExType_InCase);
+		value = 1;
 
-		bool val = RegEx::regex_match("Abc", reg);
+		std::string type = value.type();
 	}
 	
+	{
+		value = std::string("0");
+
+		std::string type = value.type();
+	}
+
+	{
+		value = Time::getCurrentTime();
+
+		std::string type = value.type();
+	}
+
+	{
+		AAA a;
+
+		value = a;
+
+		std::string type = value.type();
+	}
 	return 0;
 }
 #endif

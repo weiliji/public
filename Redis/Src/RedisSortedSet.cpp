@@ -46,7 +46,7 @@ std::vector<Value> RedisSortedSet::values(int startpos, int stoppos)
 
 	if(!retval.isArray()) { return std::vector<Value>(); }
 
-	const std::vector<RedisValue> retarray = retval.getArray();
+	const std::vector<RedisValue>& retarray = retval.getArray();
 
 	std::vector<Value> values;
 	for (uint32_t i = 0; retval.isArray() && i < retarray.size(); i++)
@@ -69,7 +69,7 @@ Value RedisSortedSet::front()
 
 	if(!retval.isArray()) return Value();
 
-	std::vector<RedisValue> vals = retval.getArray();
+	const std::vector<RedisValue>& vals = retval.getArray();
 	if (vals.size() <= 0) return Value();
 
 	return std::move(transValue(vals[0]));

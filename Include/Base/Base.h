@@ -55,6 +55,7 @@
 #include "Base/Expression.h"
 #include "Base/CoreDump.h"
 #include "Base/Value.h"
+#include "Base/Variant.h"
 #include "Base/URL.h"
 #include "Base/Guid.h"
 #include "Base/Host.h"

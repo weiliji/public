@@ -54,7 +54,7 @@ RedisValue::RedisValue(std::vector<RedisValue> array)
 
 std::vector<RedisValue> RedisValue::toArray() const
 {
-    return castTo< std::vector<RedisValue> >();
+    return value.get< std::vector<RedisValue> >();
 }
 
 std::string RedisValue::toString() const
@@ -65,12 +65,12 @@ std::string RedisValue::toString() const
 
 std::vector<char> RedisValue::toByteArray() const
 {
-    return castTo<std::vector<char> >();
+    return value.get<std::vector<char> >();
 }
 
 int64_t RedisValue::toInt() const
 {
-    return castTo<int64_t>();
+    return value.get<int64_t>();
 }
 
 std::string RedisValue::inspect() const
@@ -160,36 +160,31 @@ bool RedisValue::isArray() const
 
 std::vector<char> &RedisValue::getByteArray()
 {
-    assert(isByteArray());
-    return boost::get<std::vector<char>>(value);
+	return value.get<std::vector<char>>();
 }
 
 const std::vector<char> &RedisValue::getByteArray() const
 {
-    assert(isByteArray());
-    return boost::get<std::vector<char>>(value);
+	return value.get<std::vector<char>>();
 }
 
 std::vector<RedisValue> &RedisValue::getArray()
 {
-    assert(isArray());
-    return boost::get<std::vector<RedisValue>>(value);
+	return value.get<std::vector<RedisValue>>();
 }
 
 const std::vector<RedisValue> &RedisValue::getArray() const
 {
-    assert(isArray());
-    return boost::get<std::vector<RedisValue>>(value);
+	return value.get<std::vector<RedisValue>>();
 }
 
-bool RedisValue::operator == (const RedisValue &rhs) const
+template<typename T>
+bool RedisValue::typeEq() const
 {
-    return value == rhs.value;
-}
-
-bool RedisValue::operator != (const RedisValue &rhs) const
-{
-    return !(value == rhs.value);
+	if (value.type() == typeid(T).name())
+		return true;
+	else
+		return false;
 }
 
 }

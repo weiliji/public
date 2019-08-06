@@ -6,7 +6,6 @@
 #ifndef REDISCLIENT_REDISVALUE_H
 #define REDISCLIENT_REDISVALUE_H
 
-#include <boost/variant.hpp>
 #include "Base/Base.h"
 #include "Network/Network.h"
 using namespace Public::Base;
@@ -74,15 +73,7 @@ public:
      const std::vector<char> &getByteArray() const;
      std::vector<RedisValue> &getArray();
      const std::vector<RedisValue> &getArray() const;
-
-
-     bool operator == (const RedisValue &rhs) const;
-     bool operator != (const RedisValue &rhs) const;
-
 protected:
-    template<typename T>
-     T castTo() const;
-
     template<typename T>
     bool typeEq() const;
 
@@ -94,33 +85,11 @@ private:
     };
 
 
-    boost::variant<NullTag, int64_t, std::vector<char>, std::vector<RedisValue> > value;
+    Variant value;
     bool error;
 };
 
 
-template<typename T>
-T RedisValue::castTo() const
-{
-    if( value.type() == typeid(T) )
-        return boost::get<T>(value);
-    else
-        return T();
 }
-
-template<typename T>
-bool RedisValue::typeEq() const
-{
-    if( value.type() == typeid(T) )
-        return true;
-    else
-        return false;
-}
-
-}
-
-#ifdef REDIS_CLIENT_HEADER_ONLY
-#include "redisclient/impl/redisvalue.cpp"
-#endif
 
 #endif // REDISCLIENT_REDISVALUE_H
