@@ -201,9 +201,9 @@ void RTSPServerSession::setAuthenInfo(const std::string& username, const std::st
 	internal->rtspurl.username = username;
 	internal->rtspurl.password = password;
 }
-const std::string& RTSPServerSession::url() const
+const RTSPUrl& RTSPServerSession::url() const
 {
-	return internal->rtspurl.rtspurl;
+	return internal->rtspurl;
 }
 uint32_t RTSPServerSession::sendListSize() const
 {

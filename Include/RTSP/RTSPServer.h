@@ -11,6 +11,7 @@
 
 #include "RTSP/Defs.h"
 #include "RTSP/RTSPStructs.h"
+#include "RTSP/RTSPUrl.h"
 #include "Network/Network.h"
 #include "Base/Base.h"
 #include "HTTP/HTTPParse.h"
@@ -54,7 +55,7 @@ public:
 	void disconnect();
 
 	void setAuthenInfo(const std::string& username, const std::string& password);
-	const std::string& url() const;
+	const RTSPUrl& url() const;
 	uint32_t sendListSize() const;
 	uint64_t prevAlivetime() const;
 	shared_ptr<RTSPServerHandler> handler();

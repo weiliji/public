@@ -22,8 +22,10 @@ struct RTSPClient::RTSPClientInternal:public RTSPSession
 	std::list<shared_ptr<CommandInfo> >	sendcmdlist;
 
 	uint32_t				tcpinterval;
+
+	bool					isHavdBuildAuthen;
 	RTSPClientInternal(const shared_ptr<RTSPClientHandler>& _handler, const AllockUdpPortCallback& allockport, const shared_ptr<IOWorker>& worker, const RTSPUrl& url, const std::string& _useragent)
-		:RTSPSession(false),handler(_handler), socketconnected(false), connecttimeout(10000), tcpinterval(0)
+		:RTSPSession(false),handler(_handler), socketconnected(false), connecttimeout(10000), tcpinterval(0), isHavdBuildAuthen(false)
 	{
 		ioworker = worker;
 		rtspurl = url;
@@ -235,12 +237,18 @@ private:
 				handler->onErrorResponse(cmdinfo->cmd, cmdheader->statuscode, cmdheader->statusmsg);
 				handler->onClose("no authenticate info");
 			}
+			else if (isHavdBuildAuthen)
+			{
+				handler->onClose("authenticate error");
+			}
 			else
 			{
 				std::string wwwauthen = cmdheader->header("WWW-Authenticate").readString();
 				cmdinfo->wwwauthen = wwwauthen;
 
 				sendRequest(cmdinfo);
+
+				isHavdBuildAuthen = true;
 			}
 		}
 		else if (cmdheader->statuscode != 200)

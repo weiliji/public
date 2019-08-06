@@ -3,19 +3,13 @@ using namespace Public::RTSP;
 
 #if 1
 class RTSPServerSessiontmp;
+class RTSPClintessiontmp;
 
-Mutex			mutex;
-std::map< RTSPServerSession*, shared_ptr< RTSPServerSessiontmp> > serverlist;
+Mutex													g_mutex;
+std::map<std::string, shared_ptr<RTSPClintessiontmp> > g_clientlist;
+std::map< RTSPServerSession*, shared_ptr< RTSPServerSessiontmp> >	g_totalserverlist;
 
-struct RTSPBufferInfo
-{
-	StringBuffer		buffer;
-	uint32_t			timestmap;
-	bool				mark;
-};
 
-std::list< RTSPBufferInfo>		cache;
-MEDIA_INFO						sourcemedia;
 
 class RTSPServerSessiontmp :public RTSPServerHandler
 {
@@ -32,30 +26,25 @@ public:
 	shared_ptr<RTSPServerSession> session;
 	bool						  isplaying;
 	shared_ptr<MEDIA_INFO>		 mediainfo;
+	shared_ptr<RTSPClintessiontmp>	client;
 
 	virtual void onOptionRequest(const shared_ptr<RTSPServerSession>& session, const shared_ptr<RTSPCommandInfo>& cmdinfo)
 	{
 		session->sendOptionResponse(cmdinfo);
 	}
-	virtual void onDescribeRequest(const shared_ptr<RTSPServerSession>& session, const shared_ptr<RTSPCommandInfo>& cmdinfo)
-	{
-		MEDIA_INFO info = sourcemedia;
-		//info.bHasVideo = true;
-		//info.bHasAudio = true;
+	virtual void onDescribeRequest(const shared_ptr<RTSPServerSession>& session, const shared_ptr<RTSPCommandInfo>& cmdinfo);
 
-		session->sendDescribeResponse(cmdinfo, info);
-	}
 	virtual void onPlayRequest(const shared_ptr<RTSPServerSession>& session, const shared_ptr<RTSPCommandInfo>& cmdinfo, const shared_ptr<MEDIA_INFO>& _mediainfo, const RANGE_INFO& range)
 	{
 		session->sendPlayResponse(cmdinfo);
 		isplaying = true;
 		mediainfo = _mediainfo;
 
-		Guard locker(mutex);
+		/*Guard locker(mutex);
 		for (std::list< RTSPBufferInfo>::iterator iter = cache.begin(); iter != cache.end(); iter++)
 		{
 			session->sendMediaPackage(mediainfo->videoStreamInfo(), iter->timestmap, iter->buffer, iter->mark);
-		}
+		}*/
 	}
 	virtual void onPauseRequest(const shared_ptr<RTSPServerSession>& session, const shared_ptr<RTSPCommandInfo>& cmdinfo)
 	{
@@ -67,22 +56,18 @@ public:
 	}
 	virtual void onGetparameterRequest(const shared_ptr<RTSPServerSession>& session, const shared_ptr<RTSPCommandInfo>& cmdinfo, const std::string& content) { session->sendErrorResponse(cmdinfo, 500, "NOT SUPPORT"); }
 
-	virtual void onClose(const shared_ptr<RTSPServerSession>& session,const std::string& errmsg)
-	{
-		shared_ptr< RTSPServerSessiontmp> tmp;
-		{
-			Guard locker(mutex);
-			std::map< RTSPServerSession*, shared_ptr< RTSPServerSessiontmp> >::iterator iter = serverlist.find(session.get());
-			if (iter != serverlist.end())
-			{
-				tmp = iter->second;
-				serverlist.erase(iter);
-			}
-		}		
-	}
+	virtual void onClose(const shared_ptr<RTSPServerSession>& session, const std::string& errmsg);
 };
-class RTSPSessiontmp :public RTSPClientHandler
+class RTSPClintessiontmp :public RTSPClientHandler
 {
+public:
+	Mutex		clientmutex;
+	std::map< RTSPServerSession*, shared_ptr< RTSPServerSessiontmp> > serverlist;
+	shared_ptr<MEDIA_INFO>		sourcemediainfo;
+
+
+	shared_ptr<RTSPClient>		clienttmp;
+
 	virtual void onConnectResponse(bool success, const std::string& errmsg) 
 	{
 		int a = 0;
@@ -90,8 +75,7 @@ class RTSPSessiontmp :public RTSPClientHandler
 
 	virtual void onDescribeResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, const shared_ptr<MEDIA_INFO>& info)
 	{
-		sourcemedia = info->cloneStreamInfo();
-		int a = 0;
+		sourcemediainfo = info;
 	}
 	virtual void onSetupResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, const shared_ptr<STREAM_TRANS_INFO>& transport)
 	{
@@ -130,24 +114,9 @@ class RTSPSessiontmp :public RTSPClientHandler
 		if (strcasecmp(mediainfo->streaminfo.szMediaName.c_str(), "video") != 0) return;
 
 		{
-			Guard locker(mutex);
+			Guard locker(clientmutex);
 			sendlist = serverlist;
 		}
-
-		/*RTSPBufferInfo info;
-		info.buffer = buffer.read();
-		info.timestmap = ntohl(rtpheader.ts);
-		info.mark = rtpheader.m;
-
-		if(1)
-		{
-			Guard locker(mutex);
-			sendlist = serverlist;
-
-			if (rtpheader.m) cache.clear();
-
-			cache.push_back(info);
-		}*/
 
 		for (std::map< RTSPServerSession*, shared_ptr< RTSPServerSessiontmp> >::iterator iter = sendlist.begin(); iter != sendlist.end(); iter++)
 		{
@@ -164,6 +133,74 @@ class RTSPSessiontmp :public RTSPClientHandler
 	}
 };
 
+void RTSPServerSessiontmp::onDescribeRequest(const shared_ptr<RTSPServerSession>& session, const shared_ptr<RTSPCommandInfo>& cmdinfo)
+{
+	shared_ptr<RTSPClintessiontmp> client;
+
+	URL url(session->url().rtspurl);
+
+	std::string urlstr = url.pathname;
+
+	{
+		Guard locker(g_mutex);
+		std::map<std::string, shared_ptr<RTSPClintessiontmp> >::iterator iter = g_clientlist.find(urlstr);
+		if (iter != g_clientlist.end())
+		{
+			client = iter->second;
+		}
+	}
+
+	if (client == NULL || client->sourcemediainfo == NULL)
+	{
+		session->sendErrorResponse(cmdinfo, 500, "Source Not Find");
+	}
+	else
+	{
+		MEDIA_INFO info = client->sourcemediainfo->cloneStreamInfo();
+		//info.bHasVideo = true;
+		//info.bHasAudio = true;
+
+		session->sendDescribeResponse(cmdinfo, info);
+
+
+		shared_ptr< RTSPServerSessiontmp> servertmp;
+		{
+			std::map< RTSPServerSession*, shared_ptr< RTSPServerSessiontmp> >::iterator iter = g_totalserverlist.find(session.get());
+			if (iter != g_totalserverlist.end())
+			{
+				servertmp = iter->second;
+			}
+		}
+
+		if(servertmp)
+		{
+			servertmp->client = client;
+
+			Guard locker(client->clientmutex);
+			client->serverlist[session.get()] = servertmp;
+		}
+	}
+}
+
+void RTSPServerSessiontmp::onClose(const shared_ptr<RTSPServerSession>& session, const std::string& errmsg)
+{
+	shared_ptr< RTSPServerSessiontmp> tmp;
+	{
+		Guard locker(g_mutex);
+		std::map< RTSPServerSession*, shared_ptr< RTSPServerSessiontmp> >::iterator iter = g_totalserverlist.find(session.get());
+		if (iter != g_totalserverlist.end())
+		{
+			tmp = iter->second;
+			g_totalserverlist.erase(iter);
+		}
+	}
+	if (client)
+	{
+		Guard locker(client->clientmutex);
+		client->serverlist.erase(session.get());
+	}
+}
+
 
 struct RTSPClientInfo
 {
@@ -173,33 +210,37 @@ struct RTSPClientInfo
 
 static shared_ptr<RTSPServerHandler> rtspAceeptCallback(const shared_ptr<RTSPServerSession>& server)
 {
-	Guard locker(mutex);
+	Guard locker(g_mutex);
 
 	shared_ptr< RTSPServerSessiontmp> servertmp = make_shared<RTSPServerSessiontmp>();
 	servertmp->session = server;
 
-	serverlist[server.get()] = servertmp;
+	g_totalserverlist[server.get()] = servertmp;
 
 
 	return servertmp;
 }
 
 
-int main()
+int runserver(const std::list<std::string>& rtsplist)
 {
 	shared_ptr<IOWorker>	worker = make_shared<IOWorker>(32);
 	shared_ptr<RTSPClientManager> manager = make_shared<RTSPClientManager>(worker,"test");
 
-	std::list< RTSPClientInfo> clientlist;
-
+	
+	for(std::list<std::string>::const_iterator iter = rtsplist.begin();iter != rtsplist.end();iter ++)
 	{
-		RTSPClientInfo info;
-		info.handler = make_shared<RTSPSessiontmp>();
-		info.client = manager->create(info.handler, RTSPUrl("rtsp://192.168.9.230:554/cam/realmonitor?channel=1&subtype=0&unicast=true&proto=Onvif"));
-	//	info.client->initRTPOverUdpType();
-		info.client->start(10000);
+		shared_ptr<RTSPClintessiontmp> handler = make_shared<RTSPClintessiontmp>();
+		handler->clienttmp = manager->create(handler,RTSPUrl(*iter));
 
-		clientlist.push_back(info);
+	//	info.client->initRTPOverUdpType();
+		handler->clienttmp->start(10000);
+
+		Guard locker(g_mutex);
+
+		std::string urlflag = Base64::encode(*iter);
+
+		g_clientlist["/"+urlflag] = handler;
 	}
 
 	shared_ptr<RTSPServer> servermanager = make_shared<RTSPServer>(worker, "test");

@@ -258,49 +258,90 @@ int main()
 #endif
 
 
-#if 0
-//#include "Base/Base.h"
-#include "Base/Variant.h"
-#include "Base/Time.h"
+
+
+#if 1
+#include "Base/Base.h"
 using namespace Public::Base;
 
-using namespace std;
-const int times = 1000000;
+extern int runClient(const std::string& ipaddr, const std::list<std::string>& rtsplist);
+extern int runserver(const std::list<std::string>& rtsplist);
 
-struct AAA
-{
-	int a;
-};
 
 int main(int argc, char** argv)
 {
-	Variant value;
+
+	std::list<std::string> rtspaddrlist;
+	{
+		std::string filename = File::getExcutableFileFullPath() + "/rtsplist.ini";
+		
+		FILE* fd = fopen(filename.c_str(), "rb");
+		if (fd == NULL)
+		{
+			logerror("load config %s err",filename.c_str());
+			getchar();
+
+			return -1;
+		}
+
+		char addr[256];
+		while (fgets(addr, 255, fd))
+		{
+			int len = strlen(addr);
+			while (len > 0)
+			{
+				if (addr[len - 1] == '\r' || addr[len - 1] == '\n')
+				{
+					addr[len - 1] = 0;
+					len -= 1;
+				}
+				else
+				{
+					break;
+				}
+			}
+
+			rtspaddrlist.push_back(addr);
+		}
+		fclose(fd);
+	}
+
+	if (rtspaddrlist.size() == 0)
+	{
+		logerror("not rtsp addr");
+		getchar();
+
+		return -2;
+	}
 
 	{
-		value = 1;
+		std::string tranrtspaddrlist = File::getExcutableFileFullPath() + "/rtsplist_trans.ini";
+		FILE* fd = fopen(tranrtspaddrlist.c_str(), "wb+");
 
-		std::string type = value.type();
+		if (fd != NULL)
+		{
+			std::list<std::string> rtsplisttmp;
+			for (std::list<std::string>::const_iterator iter = rtspaddrlist.begin(); iter != rtspaddrlist.end(); iter++)
+			{
+				std::string rtspaddr = "rtsp://127.0.0.1:5554/" + Base64::encode(*iter)+"\r\n";
+
+				fwrite(rtspaddr.c_str(), 1, rtspaddr.length(), fd);
+			}
+
+			fclose(fd);
+		}
 	}
+
+	if (argc == 1)
+	{
+		runserver(rtspaddrlist);
+	}
+	else
+	{
+		runClient(argv[1], rtspaddrlist);
+	}
+
 	
-	{
-		value = std::string("0");
-
-		std::string type = value.type();
-	}
-
-	{
-		value = Time::getCurrentTime();
-
-		std::string type = value.type();
-	}
-
-	{
-		AAA a;
-
-		value = a;
-
-		std::string type = value.type();
-	}
 	return 0;
 }
 #endif
