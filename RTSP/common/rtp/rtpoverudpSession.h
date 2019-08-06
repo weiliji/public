@@ -1,6 +1,7 @@
 #pragma once
 #include "rtpSession.h"
-#include "RTSPProtocol.h"
+#include "../RTSPProtocol.h"
+#include "rtpsort.h"
 #include "RTSP/RTSPStructs.h"
 
 #define MAXUDPPACKGELEN		56*1024
@@ -23,8 +24,10 @@ class rtpOverUdpSession:public RTPSession
 	};
 public:
 	rtpOverUdpSession(bool _isserver, const shared_ptr<IOWorker>& ioworker,const std::string& _dstaddr, const shared_ptr<STREAM_TRANS_INFO>& _transport, const RTPSession::MediaDataCallback& _datacallback, const RTPSession::ContorlDataCallback& _contorlcallback)
-		:RTPSession(_transport,_datacallback,_contorlcallback),isserver(_isserver), rtp_sendrtpsn(0), dstaddr(_dstaddr),rtp_prevframesn(0)
+		:RTPSession(_transport,_datacallback,_contorlcallback),isserver(_isserver), rtp_sendrtpsn(0), dstaddr(_dstaddr)
 	{
+		rtpsort = make_shared<RTPSort>(_transport,_datacallback);
+
 		rtp_sock = UDP::create(ioworker);
 		rtp_sock->bind(isserver ? transportinfo->transportinfo.rtp.u.server_port1 : transportinfo->transportinfo.rtp.u.client_port1);
 		rtp_sock->setSocketBuffer(1024 * 1024 * 8, 0);
@@ -184,18 +187,7 @@ public:
 				//assert(0);
 			}
 
-			RTPHEADER* header = (RTPHEADER*)buffer;
-
-			if (header->v == RTP_VERSION)
-			{
-				FrameInfo info;
-				info.framedata = rtp_RecvBuffer;
-				info.mark = header->m;
-				info.sn = ntohs(header->seq);
-				info.tiemstmap = ntohl(header->ts);
-
-				_checkRTPFramelistData(info);
-			}
+			rtpsort->inputRtpData(rtp_RecvBuffer);
 		}
 		
 		shared_ptr<Socket> socktmp = sock.lock();
@@ -217,88 +209,6 @@ public:
 			socktmp->async_recvfrom((char*)rtcp_RecvBuffer.c_str(), MAXUDPPACKGELEN, Socket::RecvFromCallback(&rtpOverUdpSession::RTCP_RecvCallback, this));
 		}
 	}
-	void _checkRTPFramelistData(const FrameInfo& info)
-	{
-		//todo：这个函数有些问题，当来一个0后，再来一个65534 这样的数据会出问题
-		std::list<FrameInfo>& framelist = rtp_framelist;
-		uint16_t& prevsn = rtp_prevframesn;
-
-		//当新数据来了，清空来数据
-		if (info.sn == 0 && framelist.size() > 0)
-		{
-			for (std::list<FrameInfo>::iterator iter = framelist.begin(); iter != framelist.end(); iter++)
-			{
-				if ((uint16_t)(prevsn + 1) != iter->sn)
-				{
-				//	logwarn("RTSP start sn %d to sn :%d loss", prevsn, iter->sn);
-				}
-				RTPHEADER* header = (RTPHEADER*)iter->framedata.c_str();
-				const char* framedataaddr = iter->framedata.c_str() + sizeof(RTPHEADER);
-				size_t framedatasize = iter->framedata.length() - sizeof(RTPHEADER);
-
-				StringBuffer buffer;
-				buffer.push_back(framedataaddr, (uint32_t)framedatasize);
-
-				datacallback(transportinfo, *header, buffer);
-
-				prevsn = iter->sn;
-			}
-			framelist.clear();
-			prevsn = 0;
-		}
-
-		FrameInfo frametmp = info;
-		do 
-		{
-			if (prevsn == 0 || (uint16_t)(prevsn + 1) == frametmp.sn)
-			{
-				//连续数据
-				RTPHEADER* header = (RTPHEADER*)frametmp.framedata.c_str();
-				const char* framedataaddr = frametmp.framedata.c_str() + sizeof(RTPHEADER);
-				size_t framedatasize = frametmp.framedata.length() - sizeof(RTPHEADER);
-
-				StringBuffer buffer;
-				buffer.push_back(framedataaddr, (uint32_t)framedatasize);
-
-				datacallback(transportinfo, *header, buffer);
-
-				prevsn = frametmp.sn;
-			}
-			else
-			{
-				//数据序号不连续放入缓存中去
-				framelist.push_back(frametmp);
-
-				framelist.sort();
-			}
-
-			if (framelist.size() <= 0) break;
-
-			if (framelist.front().sn == (uint16_t)(prevsn + 1) || framelist.size() > MAXRTPFRAMESIZE)
-			{
-				frametmp = framelist.front();
-				
-				if (prevsn > frametmp.sn)
-				{
-					int a = 0;
-				}
-				
-				framelist.pop_front();
-
-
-				if (frametmp.sn != (uint16_t)(prevsn + 1))
-				{
-				//	logwarn("RTSP start sn %d to sn :%d loss", prevsn, frametmp.sn);
-				}
-
-				prevsn = 0;
-			}
-			else
-			{
-				break;
-			}
-		} while (1);
-	}
 private:
 	bool					 isserver;
 
@@ -312,9 +222,7 @@ private:
 	String					 rtp_RecvBuffer;
 	String 					 rtcp_RecvBuffer;
 
-	std::list<FrameInfo>	 rtp_framelist;
-	uint16_t				 rtp_prevframesn;
-
+	shared_ptr<RTPSort>		 rtpsort;
 
 	std::list<String>		 rtp_sendlist;
 	std::list<String>		 rtcp_sendlist;

@@ -270,7 +270,7 @@ extern int runserver(const std::list<std::string>& rtsplist);
 
 int main(int argc, char** argv)
 {
-
+	
 	std::list<std::string> rtspaddrlist;
 	{
 		std::string filename = File::getExcutableFileFullPath() + "/rtsplist.ini";
@@ -331,14 +331,14 @@ int main(int argc, char** argv)
 			fclose(fd);
 		}
 	}
-//	if(0)
-	if (argc == 1)
+	if(0)
+//	if (argc == 1)
 	{
 		runserver(rtspaddrlist);
 	}
 	else
 	{
-		runClient(argv[1], rtspaddrlist);
+		runClient(argc == 1 ? "" : argv[1], rtspaddrlist);
 	}
 
 	

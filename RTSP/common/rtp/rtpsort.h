@@ -1,13 +1,15 @@
 #pragma  once
 #include "rtpSession.h"
 
+#define MAXSNNUM	0xffff
+#define MAXRTPFRAMESIZE		100
+
 //RTP包排序算法
 class RTPSort
 {
 	struct RTPPackgeInfo
 	{
 		String			framedata;
-		StringBuffer	rtpbuffer;
 		uint32_t		sn;
 		uint32_t		tiemstmap;
 		bool			mark;
@@ -36,25 +38,48 @@ public:
 		info.mark = header->m;
 		info.sn = ntohs(header->seq);
 		info.tiemstmap = ntohl(header->ts);
-		info.rtpbuffer = StringBuffer(buffer.c_str() + sizeof(RTPHEADER), buffer.length() - sizeof(RTPHEADER));
-
-
-		//第一包或者包连续
-		if (prevframesn == 0 || (uint16_t)(prevframesn + 1) == info.sn)
+		
+		if (prevframesn != 0 && info.sn < prevframesn && prevframesn - info.sn > 5000)
 		{
-			datacalblack(transportinfo, *header, info.rtpbuffer);
-
-			prevframesn = info.sn;
+			info.sn += (MAXSNNUM + 1);
 		}
 
+		rtplist.push_back(info);
+		rtplist.sort();
 
+		while (rtplist.size() > 0)
+		{
+			RTPPackgeInfo info = rtplist.front();
 
+			if (prevframesn == 0 || (uint16_t)(prevframesn + 1) == (uint16_t)info.sn || rtplist.size() > MAXRTPFRAMESIZE)
+			{
+				rtplist.pop_front();
+
+				datacalblack(transportinfo, *header, StringBuffer(info.framedata.c_str() + sizeof(RTPHEADER), info.framedata.length() - sizeof(RTPHEADER)));
+
+				if (prevframesn != 0 && (uint16_t)(prevframesn + 1) != (uint16_t)info.sn)
+				{
+					logwarn("RTP start sn %d to sn :%d loss", prevframesn, info.sn);
+				}
+
+				prevframesn = info.sn;
+			}
+			else
+			{
+				break;
+			}
+		}
+		
+		if (rtplist.size() == 0 && prevframesn >= MAXSNNUM)
+		{
+			prevframesn -= (MAXSNNUM + 1);
+		}
 	}
 private:
 	shared_ptr<STREAM_TRANS_INFO>	transportinfo;
 	RTPSession::MediaDataCallback	datacalblack;
 
-	std::vector<RTPSort>	rtplist;
+	std::list<RTPPackgeInfo>		rtplist;
 
-	uint16_t				 prevframesn;
+	uint32_t						prevframesn;
 };

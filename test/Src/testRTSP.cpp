@@ -55,7 +55,7 @@ class RTSPClintSessiontmp1 :public RTSPClientHandler
 	}
 };
 
-#define MAXTESTRTSPCLIENT		50
+#define MAXTESTRTSPCLIENT		1
 
 struct RTSPClientInfo
 {
@@ -92,8 +92,8 @@ int runClient(const std::string& ipaddr,const std::list<std::string>& rtsplist)
 		rtsplisttmp.push_back(rtspaddr);
 	}
 
-//	if(1)
-	if (0)
+	if(1)
+//	if (0)
 	{
 		rtsplisttmp.clear();
 
