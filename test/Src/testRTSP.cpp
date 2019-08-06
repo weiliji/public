@@ -45,7 +45,7 @@ class RTSPSessiontmp :public RTSPClientHandler
 	{
 		int a = 0;
 	}
-	virtual void onMediaPackageCallback(const shared_ptr<STREAM_TRANS_INFO> mediainfo, const RTPHEADER& rtpheader, const char*  buffer, uint32_t bufferlen)
+	virtual void onMediaPackageCallback(const shared_ptr<STREAM_TRANS_INFO> mediainfo, const RTPHEADER& rtpheader, const StringBuffer& buffer)
 	{
 		int a = 0;
 	}

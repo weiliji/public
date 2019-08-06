@@ -40,13 +40,13 @@ uint32_t CircleBuffer::dataLenght() const
 	return internal->dataLen;
 }
 	
-bool CircleBuffer::consumeBuffer(uint32_t pos, std::vector<BufferInfo>& buffer, uint32_t length)
+StringBuffer CircleBuffer::consumeBuffer(uint32_t pos, uint32_t length)
 {
-	if (!readBuffer(pos, buffer, length)) return false;
+	StringBuffer buffer = readBuffer(pos, length);
+	
+	setConsumeLength(buffer.length());
 
-	setConsumeLength(length);
-
-	return true;
+	return buffer;
 }
 
 bool CircleBuffer::consumeLine(std::string& str, const std::string& flag)
@@ -177,7 +177,30 @@ bool CircleBuffer::production(const String& str)
 {
 	return production(str.c_str(), str.length());
 }
+bool CircleBuffer::production(const StringBuffer& str)
+{
+	if (str.length() > internal->bufferLen - internal->dataLen) return false;
 
+	uint32_t offset = 0;
+	uint32_t readlen = 0;
+
+	while (readlen < str.length())
+	{
+		char* productionAddr = getProductionAddr();
+		uint32_t producationLen = getProductionLength();
+
+		uint32_t canreadlen = min(producationLen, str.length() - readlen);
+
+		str.read(offset, productionAddr, canreadlen);
+
+		setProductionLength(canreadlen);
+
+		offset += canreadlen;
+		readlen += canreadlen;
+	}
+
+	return true;
+}
 char CircleBuffer::readChar(uint32_t pos) const
 {
 	if (pos >= internal->dataLen) return 0;
@@ -226,11 +249,13 @@ bool CircleBuffer::readBuffer(uint32_t pos, void* dstptr, uint32_t length) const
 	return true;
 }
 
-bool CircleBuffer::readBuffer(uint32_t pos, std::vector<BufferInfo>& buffer, uint32_t length)
+StringBuffer CircleBuffer::readBuffer(uint32_t pos,  uint32_t length)
 {
+	StringBuffer buffer;
+
 	if (length == -1) length = internal->dataLen;
 
-	if (internal->dataLen == 0 || pos < 0 || length + pos > internal->dataLen) return false;
+	if (internal->dataLen == 0 || pos < 0 || length + pos > internal->dataLen) return buffer;
 
 	uint32_t readpos = internal->consumePos + pos;
 
@@ -240,30 +265,30 @@ bool CircleBuffer::readBuffer(uint32_t pos, std::vector<BufferInfo>& buffer, uin
 
 	while (length > 0)
 	{
-		BufferInfo info;
-		info.bufferAddr = internal->bufferAddr + readpos;
+		const char* bufferAddr = internal->bufferAddr + readpos;
+		uint32_t bufferLen = 0;
 
 		//消费者在生产者后面，那么数据只有 生产者-消费者 长度
 		if (readpos <= internal->productionPos)
 		{
-			info.bufferLen = min(length, internal->productionPos - readpos);
+			bufferLen = min(length, internal->productionPos - readpos);
 		}
 		//消费者在生产者前面，那么数据由 buffer-消费者 + 生产者 长度
 		else
 		{
-			info.bufferLen = min(internal->bufferLen - readpos, length);
+			bufferLen = min(internal->bufferLen - readpos, length);
 		}
 
-		buffer.push_back(info);
+		buffer.push_back(bufferAddr, bufferLen);
 
-		readpos += info.bufferLen;
+		readpos += bufferLen;
 		if (readpos >= internal->bufferLen)
 			readpos = readpos - internal->bufferLen;
 
-		length -= info.bufferLen;
+		length -= bufferLen;
 	}
 
-	return true;
+	return buffer;
 }
 char  CircleBuffer::operator[](uint32_t pos) const
 {

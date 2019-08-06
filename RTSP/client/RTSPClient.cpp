@@ -328,9 +328,9 @@ private:
 	{
 		handler->onContorlPackageCallback(transinfo, buffer, len);
 	}
-	void onMediaDataCallback(const shared_ptr<STREAM_TRANS_INFO>& transinfo, const RTPHEADER& rtpheader, const char* buffer, uint32_t bufferlen)
+	void onMediaDataCallback(const shared_ptr<STREAM_TRANS_INFO>& transinfo, const RTPHEADER& rtpheader, const StringBuffer& buffer)
 	{
-		handler->onMediaPackageCallback(transinfo, rtpheader, buffer, bufferlen);
+		handler->onMediaPackageCallback(transinfo, rtpheader, buffer);
 	}
 	void socketDisconnectCallback()
 	{
@@ -429,13 +429,13 @@ bool RTSPClient::sendTeradownRequest(uint32_t timeout)
 	return cmdinfo->responseheader->statuscode == 200;
 }
 
-bool RTSPClient::sendMediaPackage(const shared_ptr<STREAM_TRANS_INFO> mediainfo, uint32_t timestmap, const char*  buffer, uint32_t bufferlen, bool mark)
+bool RTSPClient::sendMediaPackage(const shared_ptr<STREAM_TRANS_INFO> mediainfo, uint32_t timestmap, const StringBuffer& buffer, bool mark)
 {
 	shared_ptr<RTPSession> rtpsession = mediainfo->rtpsession;
 
-	if (mediainfo == NULL || rtpsession == NULL || buffer == NULL || bufferlen <= 0) return false;
+	if (mediainfo == NULL || rtpsession == NULL || buffer.length() <= 0) return false;
 
-	rtpsession->sendMediaData(mediainfo, timestmap, buffer, bufferlen, mark);
+	rtpsession->sendMediaData(mediainfo, timestmap, buffer, mark);
 
 	return true;
 }

@@ -62,11 +62,12 @@ public:
 
 		_sendAndCheckSend(false);
 	}
-	void sendMediaData(const shared_ptr<STREAM_TRANS_INFO>& transportinfo, uint32_t timestmap, const char*  buffer, uint32_t bufferlen, bool mark)
+	void sendMediaData(const shared_ptr<STREAM_TRANS_INFO>& transportinfo, uint32_t timestmap, const StringBuffer&  buffer, bool mark)
 	{
-		while (bufferlen > 0)
+		uint32_t readlen = 0;
+		while (readlen < buffer.length())
 		{
-			uint32_t cansendlen =  min(MAXRTPPACKETLEN, bufferlen);
+			uint32_t cansendlen =  min(MAXRTPPACKETLEN, buffer.length() - readlen);
 
 			uint32_t sendtotallen = cansendlen + sizeof(RTPHEADER);
 
@@ -81,10 +82,10 @@ public:
 			header->ts = htonl(timestmap);
 			header->seq = htons(rtp_sendrtpsn ++);
 			header->pt = transportinfo->streaminfo.nPayLoad;
-			header->m = bufferlen == cansendlen ? mark : false;
+			header->m = (buffer.length() - readlen) == cansendlen ? mark : false;
 			header->ssrc = htonl(transportinfo->transportinfo.ssrc);
 
-			memcpy((char*)(senddatabuffer + sizeof(RTPHEADER)), buffer , cansendlen);
+			buffer.read(readlen, senddatabuffer + sizeof(RTPHEADER), cansendlen);
 			
 			senddata.resize(sendtotallen);
 
@@ -96,8 +97,7 @@ public:
 				_sendAndCheckSend(true);
 			}
 
-			buffer += cansendlen;
-			bufferlen -= cansendlen;
+			readlen += cansendlen;
 		}
 	}
 	void _sendAndCheckSend(bool isdata, const char* buffer = NULL,size_t len = 0)
@@ -236,7 +236,10 @@ public:
 				const char* framedataaddr = iter->framedata.c_str() + sizeof(RTPHEADER);
 				size_t framedatasize = iter->framedata.length() - sizeof(RTPHEADER);
 
-				datacallback(transportinfo, *header, framedataaddr, framedatasize);
+				StringBuffer buffer;
+				buffer.push_back(framedataaddr, framedatasize);
+
+				datacallback(transportinfo, *header, buffer);
 
 				prevsn = iter->sn;
 			}
@@ -254,7 +257,10 @@ public:
 				const char* framedataaddr = frametmp.framedata.c_str() + sizeof(RTPHEADER);
 				size_t framedatasize = frametmp.framedata.length() - sizeof(RTPHEADER);
 
-				datacallback(transportinfo, *header, framedataaddr, framedatasize);
+				StringBuffer buffer;
+				buffer.push_back(framedataaddr, framedatasize);
+
+				datacallback(transportinfo, *header, buffer);
 
 				prevsn = frametmp.sn;
 			}

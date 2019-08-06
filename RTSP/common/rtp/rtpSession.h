@@ -8,7 +8,7 @@ class RTPSession
 {
 public:
 	//Fucntion4<bool isvideo,uint32_t timestmap,const char* buffer,uint32_t bufferlen,bool mark>RTPDataCallback
-	typedef Function4<void, const shared_ptr<STREAM_TRANS_INFO>&,const RTPHEADER&,const char*, uint32_t> MediaDataCallback;
+	typedef Function3<void, const shared_ptr<STREAM_TRANS_INFO>&,const RTPHEADER&, const StringBuffer&> MediaDataCallback;
 
 	//控制数据回调
 	typedef Function3<void, const shared_ptr<STREAM_TRANS_INFO>&,const char*, uint32_t> ContorlDataCallback;
@@ -18,10 +18,10 @@ public:
 	virtual ~RTPSession() {}
 
 	virtual void rtpovertcpContorlCallback(const shared_ptr<STREAM_TRANS_INFO>& mediainfo, const char*  buffer, uint32_t bufferlen){}
-	virtual void rtpovertcpMediaCallback(const shared_ptr<STREAM_TRANS_INFO>& mediainfo, const RTPHEADER& rtpheader, const std::vector<CircleBuffer::BufferInfo>& buffer) {}
+	virtual void rtpovertcpMediaCallback(const shared_ptr<STREAM_TRANS_INFO>& mediainfo, const RTPHEADER& rtpheader, const StringBuffer& buffer) {}
 
 	virtual void sendContorlData(const shared_ptr<STREAM_TRANS_INFO>& transportinfo, const char*  buffer, uint32_t bufferlen) = 0;
-	virtual void sendMediaData(const shared_ptr<STREAM_TRANS_INFO>& transportinfo, uint32_t timestmap, const char*  buffer, uint32_t bufferlen, bool mark) = 0;
+	virtual void sendMediaData(const shared_ptr<STREAM_TRANS_INFO>& transportinfo, uint32_t timestmap, const StringBuffer& buffer, bool mark) = 0;
 	virtual bool onPoolHeartbeat() { return false; }
 protected:
 	shared_ptr<STREAM_TRANS_INFO>	transportinfo;

@@ -66,22 +66,22 @@ public:
 
 		_checkSendData();
 	}
-	void sendMedia(const shared_ptr<STREAM_TRANS_INFO>& mediainfo, const RTPHEADER& rtpheader,const char*  buffer, uint32_t bufferlen)
+	void sendMedia(const shared_ptr<STREAM_TRANS_INFO>& mediainfo, const RTPHEADER& rtpheader, const StringBuffer& buffer)
 	{
 		INTERLEAVEDFRAME frame;
 		frame.magic = RTPOVERTCPMAGIC;
 		frame.channel = mediainfo->transportinfo.rtp.t.dataChannel;
-		frame.rtp_len = htons((uint16_t)(bufferlen + sizeof(RTPHEADER)));
+		frame.rtp_len = htons((uint16_t)(buffer.length() + sizeof(RTPHEADER)));
 
 
 		Guard locker(m_mutex);
-		if (MAXPARSERTSPBUFFERLEN - m_sendBuffer.dataLenght() < sizeof(INTERLEAVEDFRAME) + sizeof(RTPHEADER) + bufferlen)
+		if (MAXPARSERTSPBUFFERLEN - m_sendBuffer.dataLenght() < sizeof(INTERLEAVEDFRAME) + sizeof(RTPHEADER) + buffer.length())
 		{
 			assert(0);
 		}
 		m_sendBuffer.production((const char*)& frame, sizeof(INTERLEAVEDFRAME));
 		m_sendBuffer.production((const char*)& rtpheader, sizeof(RTPHEADER));
-		m_sendBuffer.production(buffer, bufferlen);
+		m_sendBuffer.production(buffer);
 
 		_checkSendData();
 	}
@@ -173,13 +173,9 @@ private:
 
 					uint32_t needlen = m_bodylen - m_cmdinfo->body.length();
 
-					std::vector<CircleBuffer::BufferInfo> info;
-					if (!m_recvBuffer.consumeBuffer(0 ,info, needlen)) break;
+					StringBuffer buffer = m_recvBuffer.consumeBuffer(0, needlen);
 
-					for (size_t i = 0; i < info.size(); i++)
-					{
-						m_cmdinfo->body += std::string(info[i].bufferAddr, info[i].bufferLen);
-					}
+					m_cmdinfo->body += buffer.read();
 				}
 				
 				{
@@ -266,31 +262,18 @@ private:
 								assert(0);
 								break;
 							}
-							std::vector<CircleBuffer::BufferInfo> info;
-							if (!m_recvBuffer.readBuffer(sizeof(INTERLEAVEDFRAME) + sizeof(RTPHEADER), info, datalen - sizeof(RTPHEADER))) break;
+							StringBuffer buffer = m_recvBuffer.readBuffer(sizeof(INTERLEAVEDFRAME) + sizeof(RTPHEADER), datalen - sizeof(RTPHEADER));
 
-							rtpsession->rtpovertcpMediaCallback(transportinfo,rtpheader, info);
+							rtpsession->rtpovertcpMediaCallback(transportinfo,rtpheader, buffer);
 							break;
 						}
 						else if (frame.channel == transportinfo->transportinfo.rtp.t.contorlChannel)
 						{
-							std::vector<CircleBuffer::BufferInfo> info;
-							if (!m_recvBuffer.readBuffer(sizeof(INTERLEAVEDFRAME), info, datalen)) break;
+							StringBuffer buffer = m_recvBuffer.readBuffer(sizeof(INTERLEAVEDFRAME), datalen);
+							
+							std::string bufferstr = buffer.read();
 
-							std::string bufferstrtmp;
-							const char* buffertmpaddr = NULL;
-
-							if (info.size() == 1) buffertmpaddr = info[0].bufferAddr;
-							else
-							{
-								for (size_t i = 0; i < info.size(); i++)
-								{
-									bufferstrtmp += std::string(info[i].bufferAddr, info[i].bufferLen);
-								}
-								buffertmpaddr = bufferstrtmp.c_str();
-							}
-
-							rtpsession->rtpovertcpContorlCallback(transportinfo, buffertmpaddr, datalen);
+							rtpsession->rtpovertcpContorlCallback(transportinfo, bufferstr.c_str(), bufferstr.length());
 							break;
 						}
 					}

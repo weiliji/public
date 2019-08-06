@@ -166,11 +166,11 @@ private:
 		URL url(commu->recvHeader->url);
 
 		Guard locker(mutex);
-		std::string requestPathname = String::tolower(url.pathname);
+		std::string requestPathname = url.pathname;
 		
 		for (std::map<std::string, HTTPServer::WebsocketCallback>::iterator iter = websocketlistencallbackmap.begin(); iter != websocketlistencallbackmap.end(); iter++)
 		{
-			RegEx oRegex(iter->first);
+			RegEx oRegex(iter->first,RegExType_InCase);
 			if (iter->first == "*" || RegEx::regex_match(requestPathname, oRegex))
 			{
 				return iter->second;
@@ -186,14 +186,14 @@ private:
 
 		ListenInfo liteninfo;
 		{
-			std::string requestPathname = String::tolower(url.pathname);
-			std::string method = String::tolower(commu->recvHeader->method);
+			std::string requestPathname = url.pathname;
+			std::string method =commu->recvHeader->method;
 
 			Guard locker(mutex);
 
 			for (std::map<std::string, std::map<std::string, ListenInfo> >::iterator citer = httplistencallbackmap.begin(); citer != httplistencallbackmap.end() && liteninfo.callback == NULL; citer++)
 			{
-				RegEx oRegex(citer->first);
+				RegEx oRegex(citer->first, RegExType_InCase);
 				if(citer->first!= "*" && !RegEx::regex_match(requestPathname,oRegex))
 				{
 					continue;
@@ -301,8 +301,8 @@ HTTPServer::~HTTPServer()
 
 bool HTTPServer::listen(const std::string& path, const std::string& method, const HTTPCallback& callback, HTTPCacheType type)
 {
-	std::string flag1 = String::tolower(path);
-	std::string flag2 = String::tolower(method);
+	std::string flag1 =path;
+	std::string flag2 = method;
 
 	Guard locker(internal->manager->mutex);
 
@@ -322,7 +322,7 @@ bool HTTPServer::listen(const std::string& path, const std::string& method, cons
 }
 bool HTTPServer::listen(const std::string& path, const HTTPServer::WebsocketCallback& callback)
 {
-	std::string flag1 = String::tolower(path);
+	std::string flag1 = path;
 	
 	Guard locker(internal->manager->mutex);
 
@@ -332,7 +332,7 @@ bool HTTPServer::listen(const std::string& path, const HTTPServer::WebsocketCall
 }
 bool HTTPServer::defaultListen(const std::string& method, const HTTPCallback& callback, HTTPCacheType type)
 {
-	std::string flag2 = String::tolower(method);
+	std::string flag2 = method;
 	
 	Guard locker(internal->manager->mutex);
 
