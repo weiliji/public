@@ -34,7 +34,7 @@ public:
 		m_bodylen = 0;
 		m_haveFindHeaderStart = false;
 
-		m_sock->setSocketBuffer(1024 * 1024 * 4, 1024 * 1024);
+		m_sock->setSocketBuffer(1024 * 1024 * 4, 1024 * 1024 * 4);
 		m_sock->setDisconnectCallback(Socket::DisconnectedCallback(&RTSPProtocol::onSocketDisconnectCallback, this));
 		m_sock->async_recv(m_recvBuffer.getProductionAddr(), m_recvBuffer.getProductionLength(), Socket::ReceivedCallback(&RTSPProtocol::onSocketRecvCallback, this));
 	}
@@ -171,7 +171,7 @@ private:
 					//Êý¾Ý²»¹»
 					if (m_recvBuffer.dataLenght() < m_bodylen - m_cmdinfo->body.length()) break;
 
-					uint32_t needlen = m_bodylen - m_cmdinfo->body.length();
+					uint32_t needlen = m_bodylen - (uint32_t)m_cmdinfo->body.length();
 
 					StringBuffer buffer = m_recvBuffer.consumeBuffer(0, needlen);
 
@@ -273,7 +273,7 @@ private:
 							
 							std::string bufferstr = buffer.read();
 
-							rtpsession->rtpovertcpContorlCallback(transportinfo, bufferstr.c_str(), bufferstr.length());
+							rtpsession->rtpovertcpContorlCallback(transportinfo, bufferstr.c_str(), (uint32_t)bufferstr.length());
 							break;
 						}
 					}

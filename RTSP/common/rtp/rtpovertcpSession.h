@@ -59,7 +59,7 @@ public:
 		std::string hearbeatadata = firsthearbeta ? firstRtpOverTcpRTCPHeartBeat() : normalRtpOverTcpRTCPHeartBeat();
 		firsthearbeta = false;
 
-		sendcontorlcallback(transportinfo, hearbeatadata.c_str(), hearbeatadata.length());	
+		sendcontorlcallback(transportinfo, hearbeatadata.c_str(), (uint32_t)hearbeatadata.length());
 
 		return true;
 	}

@@ -47,7 +47,8 @@ public:
 	{
 		if (iocp == NULL) return;
 
-		DWORD bytes = 0, key = 0;
+		DWORD bytes = 0;
+		ULONG_PTR key = 0;
 		OVERLAPPED* poverlaped = NULL;
 
 		BOOL ret = ::GetQueuedCompletionStatus(iocp, &bytes, &key, &poverlaped, INFINITE);

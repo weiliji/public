@@ -29,8 +29,8 @@ struct String::StringInternal
 	struct StringBufer
 	{
 		char* buffer;
-		size_t bufferSize;
-		size_t dataLength;
+		uint32_t bufferSize;
+		uint32_t dataLength;
 		shared_ptr<IMempoolInterface> mempool;
 
 		StringBufer(const shared_ptr<IMempoolInterface>& _mempool,uint32_t size = 0) :buffer(NULL), bufferSize(0), dataLength(0) ,mempool(_mempool)
@@ -68,7 +68,7 @@ struct String::StringInternal
 		shared_ptr<StringBufer> newbuffer;
 		if (size > 0)
 		{
-			newbuffer = make_shared<StringBufer>(mempool,size);
+			newbuffer = make_shared<StringBufer>(mempool, (uint32_t)size);
 		}
 
 		buffer = newbuffer;
@@ -86,7 +86,7 @@ struct String::StringInternal
 		if (buffer == NULL || buffer->buffer == NULL) return;
 
 		memcpy(buffer->buffer, ptr, size);
-		buffer->dataLength = size;
+		buffer->dataLength = (uint32_t)size;
 	}
 
 	void append(const char* ptr, size_t size)
@@ -108,7 +108,7 @@ struct String::StringInternal
 
 		if (buffer == NULL || buffer->buffer == NULL || buffer->dataLength + size > buffer->bufferSize) return;
 		memcpy(buffer->buffer + buffer->dataLength, ptr, size);
-		buffer->dataLength += size;
+		buffer->dataLength += (uint32_t)size;
 	}
 };
 
@@ -166,7 +166,7 @@ void  String::resize(size_t size)
 {
 	if (internal->buffer != NULL || size <= internal->buffer->bufferSize)
 	{
-		internal->buffer->dataLength = size;
+		internal->buffer->dataLength = (uint32_t)size;
 	}
 }
 void String::clear() { resize(0); }

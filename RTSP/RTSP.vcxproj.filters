@@ -114,6 +114,9 @@
     <ClInclude Include="Analyzer\rtpNoneAnalyzer.h">
       <Filter>源文件\Analyzer</Filter>
     </ClInclude>
+    <ClInclude Include="common\rtp\rtpsort.h">
+      <Filter>源文件\common\rtp</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Include\RTSP\Version.tpl">

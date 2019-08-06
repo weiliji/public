@@ -136,7 +136,7 @@ public:
 
 		//处理数据的零拷贝问题，添加前置数据		
 		const char* sendbuffer = item.c_str();
-		uint32_t sendbufferlen = item.length();
+		uint32_t sendbufferlen = (uint32_t)item.length();
 
 		if (isdata)
 		{
@@ -181,7 +181,7 @@ public:
 
 			if (otearaddr.getPort() != (isserver ? transportinfo->transportinfo.rtp.u.client_port1 : transportinfo->transportinfo.rtp.u.server_port1))
 			{
-				assert(0);
+				//assert(0);
 			}
 
 			RTPHEADER* header = (RTPHEADER*)buffer;
@@ -230,14 +230,14 @@ public:
 			{
 				if ((uint16_t)(prevsn + 1) != iter->sn)
 				{
-					logwarn("RTSP start sn %d to sn :%d loss", prevsn, iter->sn);
+				//	logwarn("RTSP start sn %d to sn :%d loss", prevsn, iter->sn);
 				}
 				RTPHEADER* header = (RTPHEADER*)iter->framedata.c_str();
 				const char* framedataaddr = iter->framedata.c_str() + sizeof(RTPHEADER);
 				size_t framedatasize = iter->framedata.length() - sizeof(RTPHEADER);
 
 				StringBuffer buffer;
-				buffer.push_back(framedataaddr, framedatasize);
+				buffer.push_back(framedataaddr, (uint32_t)framedatasize);
 
 				datacallback(transportinfo, *header, buffer);
 
@@ -258,7 +258,7 @@ public:
 				size_t framedatasize = frametmp.framedata.length() - sizeof(RTPHEADER);
 
 				StringBuffer buffer;
-				buffer.push_back(framedataaddr, framedatasize);
+				buffer.push_back(framedataaddr, (uint32_t)framedatasize);
 
 				datacallback(transportinfo, *header, buffer);
 
@@ -288,7 +288,7 @@ public:
 
 				if (frametmp.sn != (uint16_t)(prevsn + 1))
 				{
-					logwarn("RTSP start sn %d to sn :%d loss", prevsn, frametmp.sn);
+				//	logwarn("RTSP start sn %d to sn :%d loss", prevsn, frametmp.sn);
 				}
 
 				prevsn = 0;

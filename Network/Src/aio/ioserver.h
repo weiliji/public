@@ -18,7 +18,7 @@ public:
 		uint32_t threadPoolnum = threadnum - poolThreadnum;
 
 #ifdef WIN32
-		poolThreadnum = threadnum / 4;
+		poolThreadnum = threadnum / 8;
 		if (poolThreadnum == 0) poolThreadnum = 1;
 		threadPoolnum = threadnum - poolThreadnum;
 #endif

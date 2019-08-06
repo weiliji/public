@@ -52,7 +52,7 @@ StringBuffer CircleBuffer::consumeBuffer(uint32_t pos, uint32_t length)
 bool CircleBuffer::consumeLine(std::string& str, const std::string& flag)
 {
 	const char* flagaddr = flag.c_str();
-	uint32_t flaglen = flag.length();
+	uint32_t flaglen = (uint32_t)flag.length();
 	uint32_t datalen = dataLenght();
 
 	str.reserve(datalen + 10);
@@ -140,7 +140,7 @@ bool CircleBuffer::production(const char* bufferaddr)
 {
 	if (bufferaddr == NULL) return false;
 
-	return production(bufferaddr, strlen(bufferaddr));
+	return production(bufferaddr, (uint32_t)strlen(bufferaddr));
 }
 bool CircleBuffer::production(const char* bufferaddr, uint32_t bufferlen)
 {
@@ -171,11 +171,11 @@ bool CircleBuffer::production(const char* bufferaddr, uint32_t bufferlen)
 }
 bool CircleBuffer::production(const std::string& str)
 {
-	return production(str.c_str(), str.length());
+	return production(str.c_str(), (uint32_t)str.length());
 }
 bool CircleBuffer::production(const String& str)
 {
-	return production(str.c_str(), str.length());
+	return production(str.c_str(), (uint32_t)str.length());
 }
 bool CircleBuffer::production(const StringBuffer& str)
 {

@@ -224,7 +224,7 @@ static shared_ptr<RTSPServerHandler> rtspAceeptCallback(const shared_ptr<RTSPSer
 
 int runserver(const std::list<std::string>& rtsplist)
 {
-	shared_ptr<IOWorker>	worker = make_shared<IOWorker>(32);
+	shared_ptr<IOWorker>	worker = make_shared<IOWorker>(16);
 	shared_ptr<RTSPClientManager> manager = make_shared<RTSPClientManager>(worker,"test");
 
 	
@@ -233,7 +233,7 @@ int runserver(const std::list<std::string>& rtsplist)
 		shared_ptr<RTSPClintessiontmp> handler = make_shared<RTSPClintessiontmp>();
 		handler->clienttmp = manager->create(handler,RTSPUrl(*iter));
 
-	//	info.client->initRTPOverUdpType();
+		handler->clienttmp->initRTPOverUdpType();
 		handler->clienttmp->start(10000);
 
 		Guard locker(g_mutex);

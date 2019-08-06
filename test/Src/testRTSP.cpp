@@ -65,17 +65,17 @@ struct RTSPClientInfo
 
 string rtspaddr[] = {
 	"rtsp://admin:ms123456@192.168.7.104:554/main",
-	"rtsp://admin:ms123456@192.168.3.135:554/main",
-	"rtsp://192.168.9.230:554/cam/realmonitor?channel=1&subtype=0&unicast=true&proto=Onvif",
-	"rtsp://admin:support2019@192.168.9.205:554/Streaming/Channels/102",
-	"rtsp://admin:ms123456@192.168.10.230:554/main",
-	"rtsp://admin:ms123456@192.168.11.230:554/main",
-	"rtsp://admin:ms123456@192.168.4.150:554/main",
-	"rtsp://admin:ms123456@192.168.4.111:554/main",
-	"rtsp://admin:ms123456@192.168.2.172:554/main",
-	"rtsp://admin:ms123456@192.168.4.105:554/main",
-	"rtsp://admin:ms123456@192.168.10.236:554/main",
-	"rtsp://192.168.2.46:5554/111",
+	//"rtsp://admin:ms123456@192.168.3.135:554/main",
+	//"rtsp://192.168.9.230:554/cam/realmonitor?channel=1&subtype=0&unicast=true&proto=Onvif",
+	//"rtsp://admin:support2019@192.168.9.205:554/Streaming/Channels/102",
+	//"rtsp://admin:ms123456@192.168.10.230:554/main",
+	//"rtsp://admin:ms123456@192.168.11.230:554/main",
+	//"rtsp://admin:ms123456@192.168.4.150:554/main",
+	//"rtsp://admin:ms123456@192.168.4.111:554/main",
+	//"rtsp://admin:ms123456@192.168.2.172:554/main",
+	//"rtsp://admin:ms123456@192.168.4.105:554/main",
+	//"rtsp://admin:ms123456@192.168.10.236:554/main",
+	//"rtsp://192.168.2.46:5554/111",
 };
 
 int runClient(const std::string& ipaddr,const std::list<std::string>& rtsplist)
@@ -92,6 +92,7 @@ int runClient(const std::string& ipaddr,const std::list<std::string>& rtsplist)
 		rtsplisttmp.push_back(rtspaddr);
 	}
 
+//	if(1)
 	if (0)
 	{
 		rtsplisttmp.clear();
@@ -112,7 +113,7 @@ int runClient(const std::string& ipaddr,const std::list<std::string>& rtsplist)
 		RTSPClientInfo info;
 		info.handler = make_shared<RTSPClintSessiontmp1>();
 		info.client = manager->create(info.handler, RTSPUrl(*iter));
-		//	info.client->initRTPOverUdpType();
+		info.client->initRTPOverUdpType();
 		info.client->start(10000);
 
 		clientlist.push_back(info);

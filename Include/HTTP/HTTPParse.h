@@ -75,7 +75,7 @@ public:
 				*usedstr += linestr + "\r\n";
 			}
 
-			contentIsOk = parseLine(linestr.c_str(), linestr.length());
+			contentIsOk = parseLine(linestr.c_str(), (uint32_t)linestr.length());
 		}
 
 		shared_ptr<HTTPHeader> contenttmp = content;
@@ -100,14 +100,14 @@ public:
 
 
 			{
-				uint32_t poslen = pos + strlen(HTTPSEPERATOR);
+				uint32_t poslen = (uint32_t)pos + (uint32_t)strlen(HTTPSEPERATOR);
 
 				data += poslen;
 				datalen -= poslen;
 				useddata += poslen;
 			}
 
-			contentIsOk = parseLine(data, pos);
+			contentIsOk = parseLine(data, (uint32_t)pos);
 		}
 		shared_ptr<HTTPHeader> contenttmp = content;
 		if (contenttmp != NULL && contentIsOk)
