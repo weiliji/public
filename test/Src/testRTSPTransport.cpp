@@ -1,7 +1,7 @@
 #include "RTSP/RTSP.h"
 using namespace Public::RTSP;
 
-#if 0
+#if 1
 class RTSPServerSessiontmp;
 
 Mutex			mutex;
@@ -9,9 +9,9 @@ std::map< RTSPServerSession*, shared_ptr< RTSPServerSessiontmp> > serverlist;
 
 struct RTSPBufferInfo
 {
-	String		buffer;
-	uint32_t	timestmap;
-	bool		mark;
+	StringBuffer		buffer;
+	uint32_t			timestmap;
+	bool				mark;
 };
 
 std::list< RTSPBufferInfo>		cache;
@@ -54,7 +54,7 @@ public:
 		Guard locker(mutex);
 		for (std::list< RTSPBufferInfo>::iterator iter = cache.begin(); iter != cache.end(); iter++)
 		{
-			session->sendMediaPackage(mediainfo->videoStreamInfo(), iter->timestmap, iter->buffer.c_str(),iter->buffer.length(), iter->mark);
+			session->sendMediaPackage(mediainfo->videoStreamInfo(), iter->timestmap, iter->buffer, iter->mark);
 		}
 	}
 	virtual void onPauseRequest(const shared_ptr<RTSPServerSession>& session, const shared_ptr<RTSPCommandInfo>& cmdinfo)
@@ -123,14 +123,19 @@ class RTSPSessiontmp :public RTSPClientHandler
 	{
 		int a = 0;
 	}
-	virtual void onMediaPackageCallback(const shared_ptr<STREAM_TRANS_INFO> mediainfo, const RTPHEADER& rtpheader, const char*  buffer, uint32_t bufferlen)
+	virtual void onMediaPackageCallback(const shared_ptr<STREAM_TRANS_INFO> mediainfo, const RTPHEADER& rtpheader, const StringBuffer& buffer)
 	{
 		std::map< RTSPServerSession*, shared_ptr< RTSPServerSessiontmp> > sendlist;
 		
 		if (strcasecmp(mediainfo->streaminfo.szMediaName.c_str(), "video") != 0) return;
 
-		RTSPBufferInfo info;
-		info.buffer = String(buffer, bufferlen);
+		{
+			Guard locker(mutex);
+			sendlist = serverlist;
+		}
+
+		/*RTSPBufferInfo info;
+		info.buffer = buffer.read();
 		info.timestmap = ntohl(rtpheader.ts);
 		info.mark = rtpheader.m;
 
@@ -139,10 +144,10 @@ class RTSPSessiontmp :public RTSPClientHandler
 			Guard locker(mutex);
 			sendlist = serverlist;
 
-			if (rtpheader.m) cache.clear();			
+			if (rtpheader.m) cache.clear();
 
 			cache.push_back(info);
-		}
+		}*/
 
 		for (std::map< RTSPServerSession*, shared_ptr< RTSPServerSessiontmp> >::iterator iter = sendlist.begin(); iter != sendlist.end(); iter++)
 		{
@@ -152,7 +157,7 @@ class RTSPSessiontmp :public RTSPClientHandler
 			shared_ptr<RTSPServerSession> session = tmp->session;
 			if(session == NULL) continue;
 
-			session->sendMediaPackage(tmp->mediainfo->videoStreamInfo(), info.timestmap, buffer, bufferlen, info.mark);
+			session->sendMediaPackage(tmp->mediainfo->videoStreamInfo(), ntohl(rtpheader.ts), buffer, rtpheader.m);
 		}
 
 		int a = 0;

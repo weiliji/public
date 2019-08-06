@@ -4,9 +4,6 @@
 
 class _WinSocket:public ASocket
 {
-	LPFN_CONNECTEX					connectExFunc;
-	LPFN_ACCEPTEX					acceptExFunc;
-	LPFN_GETACCEPTEXSOCKADDRS		getAcceptAddExFunc;
 public:
 	_WinSocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, NetType _type)
 	:ASocket(_ioworker,_ioserver,_sockptr,_type){}
@@ -27,31 +24,7 @@ public:
 			return false;
 		}
 
-		if(type != NetType_Udp)
-		{
-			GUID acceptEX = WSAID_ACCEPTEX;
-			GUID getAcceptAddrEx = WSAID_GETACCEPTEXSOCKADDRS;
-			GUID connetEx = WSAID_CONNECTEX;
-			DWORD bytes = 0;
-
-			int ret = WSAIoctl(sock, SIO_GET_EXTENSION_FUNCTION_POINTER, &acceptEX, sizeof(acceptEX), &acceptExFunc, sizeof(acceptExFunc), &bytes, NULL, NULL);
-
-			bytes = 0;
-			ret |= WSAIoctl(sock, SIO_GET_EXTENSION_FUNCTION_POINTER, &getAcceptAddrEx, sizeof(getAcceptAddrEx), &getAcceptAddExFunc, sizeof(getAcceptAddExFunc), &bytes, NULL, NULL);
-
-			bytes = 0;
-			ret |= WSAIoctl(sock, SIO_GET_EXTENSION_FUNCTION_POINTER, &connetEx, sizeof(connetEx), &connectExFunc, sizeof(connectExFunc), &bytes, NULL, NULL);
-
-			if (ret == SOCKET_ERROR)
-			{
-				assert(0);
-			}
-		}
-
-#ifdef WIN32
-		unsigned long on_windows = 1;
-		ioctlsocket(sock, FIONBIO, &on_windows);
-#endif
+		nonBlocking(true);
 
 		return true;
 	}
@@ -73,12 +46,24 @@ public:
 		{
 			return false;
 		}
+
+		if (type == NetType_TcpServer && !ishavelisten)
+		{
+			int ret = listen(sock, SOMAXCONN);
+			if (ret == SOCKET_ERROR)
+			{
+				return false;
+			}
+
+			ishavelisten = true;
+		}
+
 		//AcceptEvent(const shared_ptr<IOWorker>& _ioworker,const shared_ptr<Socket>& sock, LPFN_ACCEPTEX	acceptExFunc, LPFN_GETACCEPTEXSOCKADDRS _getAcceptAddExFunc,const Socket::AcceptedCallback& _acceptcallback) :WinEvent(sock)
 		shared_ptr<AcceptEvent> event = make_shared<AcceptEvent>(socketptr.lock(), userthread);
 
 		ioserver->pushEvent(&event->overlped, event);
 
-		if (!event->init(ioworker, acceptExFunc, getAcceptAddExFunc, accepted))
+		if (!event->init(ioworker,accepted))
 		{
 			ioserver->popEvent(event.get());
 			return false;
@@ -106,7 +91,7 @@ public:
 
 		ioserver->pushEvent(&event->overlped, event);
 
-		if (!event->init(addr, connectExFunc, connected))
+		if (!event->init(addr,connected))
 		{
 			ioserver->popEvent(event.get());
 			return false;
@@ -234,4 +219,12 @@ public:
 
 		return true;
 	}	
+	virtual bool nonBlocking(bool nonblock)
+	{
+		if (sock <= 0) return false;
+
+		unsigned long on_windows = nonblock ? 1 : 0;
+		
+		return ioctlsocket(sock, FIONBIO, &on_windows) == 0;
+	}
 };

@@ -8,6 +8,7 @@ typedef int socklen_t;
 
 #include "../common/_pool.h"
 #include "../common/_eventthreadpool.h"
+#define SWAPBUFFERLEN			100
 
 struct WinEvent
 {
@@ -164,13 +165,14 @@ struct AcceptEvent :public Event,public WinEvent
 {
 	weak_ptr<IOWorker>		 ioworker;
 	Socket::AcceptedCallback acceptcallback;
-	LPFN_ACCEPTEX	acceptExFunc;
-	LPFN_GETACCEPTEXSOCKADDRS		getAcceptAddExFunc;
+	char						swapBuffer[SWAPBUFFERLEN];
 
 	AcceptEvent(const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& userthread) :Event(sock, userthread)
 	{		
+		wbuf.buf = swapBuffer;
+		wbuf.len = SWAPBUFFERLEN;
 	}
-	bool init(const shared_ptr<IOWorker>& _ioworker, LPFN_ACCEPTEX	_acceptExFunc, LPFN_GETACCEPTEXSOCKADDRS _getAcceptAddExFunc, const Socket::AcceptedCallback& _acceptcallback)
+	bool init(const shared_ptr<IOWorker>& _ioworker, const Socket::AcceptedCallback& _acceptcallback)
 	{
 		shared_ptr<Socket> sock = weak_sock.lock();
 		if (sock == NULL)
@@ -180,9 +182,18 @@ struct AcceptEvent :public Event,public WinEvent
 		{
 			ioworker = _ioworker;
 			acceptcallback = _acceptcallback;
-			acceptExFunc = _acceptExFunc;
-			getAcceptAddExFunc = _getAcceptAddExFunc;
 		}
+
+		LPFN_ACCEPTEX	acceptExFunc;
+		GUID acceptEX = WSAID_ACCEPTEX;
+		DWORD bytes = 0;
+
+		int ret = WSAIoctl(sock->getHandle(), SIO_GET_EXTENSION_FUNCTION_POINTER, &acceptEX, sizeof(acceptEX), &acceptExFunc, sizeof(acceptExFunc), &bytes, NULL, NULL);
+		if (ret == SOCKET_ERROR)
+		{
+			assert(0);
+		}
+
 		newsock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 		if (newsock == INVALID_SOCKET)
 		{
@@ -214,6 +225,17 @@ struct AcceptEvent :public Event,public WinEvent
 		}
 		else
 		{
+			LPFN_GETACCEPTEXSOCKADDRS		getAcceptAddExFunc;
+			GUID getAcceptAddrEx = WSAID_GETACCEPTEXSOCKADDRS;
+			DWORD bytes = 0;
+
+			int ret = WSAIoctl(sock->getHandle(), SIO_GET_EXTENSION_FUNCTION_POINTER, &getAcceptAddrEx, sizeof(getAcceptAddrEx), &getAcceptAddExFunc, sizeof(getAcceptAddExFunc), &bytes, NULL, NULL);
+			if (ret == SOCKET_ERROR)
+			{
+				assert(0);
+			}
+
+
 			SOCKADDR_IN* clientAddr = NULL, *localAddr = NULL;
 			int clientlen = sizeof(SOCKADDR_IN), locallen = sizeof(SOCKADDR_IN);
 
@@ -231,14 +253,12 @@ struct AcceptEvent :public Event,public WinEvent
 
 struct ConnectEvent :public Event,public WinEvent
 {
-#define SWAPBUFFERLEN			64
 	char						swapBuffer[SWAPBUFFERLEN];
-
 	Socket::ConnectedCallback connectcallback;
-	LPFN_CONNECTEX			connectExFunc;
+	
 	
 	ConnectEvent(const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& userthread) :Event(sock, userthread){}
-	bool init(const NetAddr& toaddr, LPFN_CONNECTEX _connectExFunc, const Socket::ConnectedCallback& _connectcallback)
+	bool init(const NetAddr& toaddr, const Socket::ConnectedCallback& _connectcallback)
 	{
 		shared_ptr<Socket> sock = weak_sock.lock();
 		if (sock == NULL)
@@ -250,11 +270,22 @@ struct ConnectEvent :public Event,public WinEvent
 			wbuf.buf = swapBuffer;
 			wbuf.len = SWAPBUFFERLEN;
 			connectcallback = _connectcallback;
-			connectExFunc = _connectExFunc;
 
 			addr = *(SOCKADDR*)toaddr.getAddr();
 			addrlen = toaddr.getAddrLen();
 		}
+
+		GUID connetEx = WSAID_CONNECTEX;
+		DWORD bytes = 0;
+		LPFN_CONNECTEX			connectExFunc;
+
+		int ret = WSAIoctl(sock->getHandle(), SIO_GET_EXTENSION_FUNCTION_POINTER, &connetEx, sizeof(connetEx), &connectExFunc, sizeof(connectExFunc), &bytes, NULL, NULL);
+
+		if (ret == SOCKET_ERROR)
+		{
+			assert(0);
+		}
+
 		if (false == connectExFunc(sock->getHandle(), &addr, addrlen, NULL, 0,NULL, &overlped))
 		{
 			int errorno = GetLastError();

@@ -90,7 +90,15 @@ Value::Value(const std::string& val)
 		internal->val->type = Type_String;
 	}
 }
-
+Value::Value(const String& val)
+{
+	internal = new ValueInternal();
+	{
+		internal->val->val._str = new char[val.length() + 1];
+		strcpy(internal->val->val._str, val.c_str());
+		internal->val->type = Type_String;
+	}
+}
 Value::Value(const std::vector<char>& val)
 {
 	internal = new ValueInternal();

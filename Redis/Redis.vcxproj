@@ -16,7 +16,7 @@
     <ClInclude Include="Src\redisclient\redisasyncclient.h" />
     <ClInclude Include="Src\redisclient\redisasyncclientimpl.h" />
     <ClInclude Include="Src\redisclient\redissyncclientimpl.h" />
-    <ClInclude Include="Src\redisclient\redisparser.h" />
+    <ClInclude Include="Src\redisclient\redisprotocol.h" />
     <ClInclude Include="Src\redisclient\redissyncclient.h" />
     <ClInclude Include="Src\redisclient\redisvalue.h" />
     <ClInclude Include="Src\RedisDefine.h" />
@@ -26,9 +26,7 @@
     <ClCompile Include="Src\redisclient\redisasyncclient.cpp" />
     <ClCompile Include="Src\redisclient\redisasyncclientimpl.cpp" />
     <ClCompile Include="Src\redisclient\redissyncclientimpl.cpp" />
-    <ClCompile Include="Src\redisclient\redisparser.cpp" />
     <ClCompile Include="Src\redisclient\redissyncclient.cpp" />
-    <ClCompile Include="Src\redisclient\redisvalue.cpp" />
     <ClCompile Include="Src\RedisHash.cpp" />
     <ClCompile Include="Src\RedisKey.cpp" />
     <ClCompile Include="Src\RedisList.cpp" />

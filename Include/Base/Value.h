@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Base/IntTypes.h"
-
+#include "String.h"
 namespace Public {
 namespace Base {
 
@@ -23,6 +23,7 @@ public:
 	Value();
 	Value(const std::string& val, Type Type);
 	Value(const std::string& val);
+	Value(const String& val);
 	Value(const std::vector<char>& val);
 	Value(char val);
 	Value(const char* val);

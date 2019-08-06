@@ -2,8 +2,6 @@
 
 #include "Base/Base.h"
 #include "Network/Network.h"
-#include <boost/variant.hpp>
-#include "redisstring.h"
 using namespace Public::Base;
 using namespace Public::Network;
 
@@ -26,9 +24,9 @@ public:
 	RedisValue(long long i): value(i){}
 	RedisValue(const StatusTag& err):value(err){}
 	RedisValue(bool success,const std::string& errmsg):value(StatusTag(success,errmsg)){}
-	RedisValue(const char *s,int len) : value(RedisString(std::string(s,len))) {}
-	RedisValue(const std::string &s): value(RedisString(s)){}
-	RedisValue(const RedisString &s):value(s){}
+	RedisValue(const char *s,int len) : value(String(std::string(s,len))) {}
+	RedisValue(const std::string &s): value(String(s)){}
+	RedisValue(const String &s):value(s){}
 	RedisValue(const std::vector<RedisValue>& array): value(std::move(array)){}
 
 	RedisValue(const RedisValue &) = default;
@@ -37,11 +35,11 @@ public:
 
 	// Return the value as a std::string if
 	// type is a byte string; otherwise returns an empty std::string.
-	RedisString toString() const
+	String toString() const
 	{
 		if (isInt()) return Value(toInt()).readString();
 
-		static const RedisString emptstr;
+		static const String emptstr;
 		if (!isString()) return emptstr;
 
 		return getString();
@@ -53,7 +51,7 @@ public:
 	{
 		if (isString()) return Value(toString()).readInt64();
 
-		return castTo<int64_t>();
+		return value.get<int64_t>();
 	}
 
 	const StatusTag& toStatus()const
@@ -100,68 +98,41 @@ public:
 	// Return true if type is a string/byte array. Alias for isByteArray().
 	bool isString() const
 	{
-		return typeEq<RedisString>();
-	}
-
-	bool operator == (const RedisValue &rhs) const
-	{
-		return value == rhs.value;
-	}
-	bool operator != (const RedisValue &rhs) const
-	{
-		return !(value == rhs.value);
+		return typeEq<String>();
 	}
 
 	std::vector<RedisValue> &getArray()
 	{
-		assert(isArray());
-		return boost::get<std::vector<RedisValue>>(value);
+		return value.get<std::vector<RedisValue>>();
 	}
 
 	const std::vector<RedisValue> &getArray() const
 	{
-		assert(isArray());
-		return boost::get<std::vector<RedisValue>>(value);
+		return value.get<std::vector<RedisValue>>();
 	}
 
 	StatusTag& getStatus()
 	{
-		assert(isStatus());
-
-		return boost::get<StatusTag>(value);
+		return value.get<StatusTag>();
 	}
 
 	const StatusTag& getStatus() const
 	{
-		assert(isStatus());
-
-		return boost::get<StatusTag>(value);
+		return value.get<StatusTag>();
 	}
-	RedisString& getString()
+	String& getString()
 	{
-		assert(isString());
-		return boost::get<RedisString>(value);
+		return value.get<String>();
 	}
-	const RedisString& getString()const
+	const String& getString()const
 	{
-		assert(isString());
-
-		return boost::get<RedisString>(value);
+		return value.get<String>();
 	}
 protected:
 	template<typename T>
-	T castTo() const
-	{
-		if (value.type() == typeid(T))
-			return boost::get<T>(value);
-		else
-			return T();
-	}
-
-	template<typename T>
 	bool typeEq() const
 	{
-		if (value.type() == typeid(T))
+		if (value.type() == typeid(T).name())
 			return true;
 		else
 			return false;
@@ -175,7 +146,7 @@ private:
 	};
 
 
-	boost::variant<NullTag, StatusTag, int64_t, RedisString, std::vector<RedisValue> > value;
+	Variant value;
 };
 
 

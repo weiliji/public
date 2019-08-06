@@ -6,13 +6,14 @@ class ASocket:public Socket
 {
 protected:
 	ASocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, NetType _type)
-		:ioworker(_ioworker), ioserver(_ioserver), status(NetStatus_disconnected), type(_type), socketptr(_sockptr)
+		:ioworker(_ioworker), ioserver(_ioserver), status(NetStatus_disconnected), type(_type), socketptr(_sockptr),ishavelisten(false)
 	{
 		userthread = make_shared<_UserThread>();
 	}
 	ASocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, const NewSocketInfo& newsock)
-		:ioworker(_ioworker), ioserver(_ioserver), status(NetStatus_connected), type(NetType_TcpConnection), socketptr(_sockptr)
+		:ioworker(_ioworker), ioserver(_ioserver), status(NetStatus_connected), type(NetType_TcpConnection), socketptr(_sockptr),ishavelisten(false)
 	{
+		userthread = make_shared<_UserThread>();
 		sock = newsock.newsocket;
 		otheraddr = newsock.otheraddr;
 
@@ -106,6 +107,17 @@ public:
 		if (sock <= 0 || type != NetType_TcpServer)
 		{
 			return shared_ptr<Socket>();
+		}
+
+		if (type == NetType_TcpServer && !ishavelisten)
+		{
+			int ret = listen(sock, SOMAXCONN);
+			if (ret == SOCKET_ERROR)
+			{
+				return false;
+			}
+
+			ishavelisten = true;
 		}
 
 		SOCKADDR_IN accept_addr;
@@ -205,6 +217,9 @@ public:
 
 	virtual void socketReady()
 	{
+		int flag = 1;
+		setSocketOpt(IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
+
 		status = NetStatus_connected;
 	}
 
@@ -259,4 +274,6 @@ protected:
 
 	NetAddr				 myaddr;
 	NetAddr				 otheraddr;
+
+	bool				ishavelisten;
 };

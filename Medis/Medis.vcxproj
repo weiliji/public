@@ -24,7 +24,6 @@
     <ClInclude Include="src\common\config.h" />
     <ClInclude Include="src\common\memory.h" />
     <ClInclude Include="src\common\redisprotocol.h" />
-    <ClInclude Include="src\common\redisstring.h" />
     <ClInclude Include="src\common\redisvalue.h" />
     <ClInclude Include="src\communication\communication.h" />
     <ClInclude Include="src\communication\connection.h" />

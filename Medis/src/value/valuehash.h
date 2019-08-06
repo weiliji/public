@@ -62,10 +62,10 @@ public:
 	}
 	bool hkeys(const std::string& field, std::set<std::string>& fields)
 	{
-		boost::regex oRegex(field == "*" ? "" : field);
+		RegEx oRegex(field == "*" ? "" : field);
 		for (std::map<std::string, shared_ptr<ValueData> >::iterator niter = datalist.begin(); niter != datalist.end(); niter++)
 		{
-			if (field == "" || field == "*" || boost::regex_match(niter->first, oRegex))
+			if (field == "" || field == "*" || RegEx::regex_match(niter->first, oRegex))
 			{
 				fields.insert(niter->first);
 			}
@@ -84,13 +84,13 @@ public:
 	uint32_t scan(uint32_t cursor, const std::string& pattern, uint32_t count, std::vector<RedisString>& keys)
 	{
 		uint32_t currcursor = 0;
-		boost::regex oRegex(pattern == "*" ? "" : pattern);
+		RegEx oRegex(pattern == "*" ? "" : pattern);
 		for (std::map<std::string, shared_ptr<ValueData> >::iterator iter = datalist.begin(); iter != datalist.end(); iter++, currcursor++)
 		{
 			if (currcursor < cursor) continue;
 			if (count != -1 && keys.size() > count) break;
 
-			if (pattern == "" || pattern == "*" || boost::regex_match(iter->first, oRegex))
+			if (pattern == "" || pattern == "*" || RegEx::regex_match(iter->first, oRegex))
 			{
 				keys.push_back(iter->first);
 

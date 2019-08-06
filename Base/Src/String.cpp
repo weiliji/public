@@ -169,12 +169,32 @@ void  String::resize(size_t size)
 		internal->buffer->dataLength = size;
 	}
 }
+void String::clear() { resize(0); }
 char*  String::alloc(size_t size)
 {
 	internal->alloc(size);
 
 	return internal->buffer ? internal->buffer->buffer : NULL;
 }
+bool String::empty() const { return length() == 0; }
+
+bool String::operator ==(const String& tmp) const
+{
+	if (internal->buffer == NULL && tmp.internal->buffer == NULL) return true;
+	if (internal->buffer != NULL && tmp.internal->buffer != NULL)
+	{
+		if (internal->buffer->dataLength != tmp.internal->buffer->dataLength) return false;
+
+		if (memcmp(internal->buffer->buffer, internal->buffer->buffer, internal->buffer->dataLength) == 0) return true;
+	}
+
+	return false;
+}
+bool String::operator !=(const String& tmp) const
+{
+	return !(*this == tmp);
+}
+
 String& String::operator = (const char* str)
 {
 	if (str != NULL)
@@ -191,7 +211,12 @@ String& String::operator = (const String& str)
 	internal->buffer = str.internal->buffer;
 	return *this;
 }
+String& String::operator +=(char ch)
+{
+	append(ch);
 
+	return *this;
+}
 String& String::operator +=(const char* str)
 {
 	if (str != NULL)
@@ -209,7 +234,12 @@ String& String::operator +=(const String& str)
 		internal->append(str.internal->buffer->buffer, str.internal->buffer->dataLength);
 	return *this;
 }
+String& String::append(char ch)
+{
+	char str[2] = { ch,0 };
 
+	return append(str, 1);
+}
 String& String::append(const char* str, size_t size)
 {
 	if (str != NULL)

@@ -71,18 +71,24 @@ public:
 	void  resize(size_t size);
 	//分配数据长度，原始数据会丢,length置为0
 	char*  alloc(size_t size);
+	void clear();
+	bool empty() const;
 
+	bool operator ==(const String& tmp) const;
+	bool operator !=(const String& tmp) const;
 
 	//操作符重载
 	String& operator = (const char* str);
 	String& operator = (const std::string& str);
 	String& operator = (const String& str);
 
+	String& operator +=(char ch);
 	String& operator +=(const char* str);
 	String& operator +=(const std::string& str);
 	String& operator +=(const String& str);
 
 	//追加数据
+	String& append(char ch);
 	String& append(const char* str,size_t size = 0);
 	String& append(const std::string& str);
 	String& append(const String& str);
@@ -165,6 +171,32 @@ inline	const char* strcasestr(const char* srcstr, const char* substr)
 }
 
 #endif
+
+
+inline String operator +(const char* str1, const String& str2)
+{
+	String dstsrc(str1);
+
+	return dstsrc += str2;
+}
+inline String operator +(const String& str1, const char* str2)
+{
+	String dstsrc(str1);
+
+	return dstsrc += str2;
+}
+inline String operator +(const std::string& str1, const String& str2)
+{
+	String dstsrc(str1);
+
+	return dstsrc += str2;
+}
+inline String operator +(const String& str1, const std::string& str2)
+{
+	String dstsrc(str1);
+
+	return dstsrc += str2;
+}
 
 } // namespace Base
 } // namespace Public

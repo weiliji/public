@@ -6,7 +6,7 @@
 #include "value/valuestring.h"
 #include "value/valuezset.h"
 #include "value/valuelist.h"
-#include "boost/regex.hpp"
+#include "../common/redisvalue.h"
 using namespace Public::Base;
 using namespace Public::Network;
 

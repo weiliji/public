@@ -288,16 +288,16 @@ StringBuffer StringBuffer::readBuffer(uint32_t offset, uint32_t readlen) const
 }
 std::string StringBuffer::read(uint32_t offset, uint32_t readlen) const
 {
-	std::string buffer;
-
 	uint32_t needbufferlen = readlen == -1 ? internal->length : readlen;
+	char* buffer = new char[needbufferlen + 100];
 
-	buffer.reserve(needbufferlen);
+	uint32_t realreadlen = read(offset, buffer, needbufferlen);
 
-	uint32_t realreadlen = read(offset, (char*)buffer.c_str(), needbufferlen);
-	buffer.resize(realreadlen);
+	std::string bufferstr(buffer, realreadlen);
 
-	return buffer;
+	delete[] buffer;
+
+	return bufferstr;
 }
 
 
