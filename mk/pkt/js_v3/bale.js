@@ -188,7 +188,7 @@ module.exports = class Bale {
         }
     }
     _signaturefile(currpath,file,readme){
-        var cmd = "call \""+fileos.getPath(currpath+"\\mk\\pkt\\tool\\signtool.exe")+"\" sign -t http://timestamp.verisign.com/scripts/timstamp.dll -d \""+(readme?readme:"")+"\" -du http://www.xunmei.com -n \"Xunmei Electronic Technology Co.,Ltd.\" \""+file+"\"";
+        var cmd = "call \""+fileos.getPath(currpath+"\\mk\\pkt\\tool\\signtool.exe")+"\" sign -t http://timestamp.verisign.com/scripts/timstamp.dll -d \""+(readme?readme:"")+"\" -du http://www.Public.com -n \"Public Electronic Technology Co.,Ltd.\" \""+file+"\"";
 
         try {
             cp.execSync(cmd);

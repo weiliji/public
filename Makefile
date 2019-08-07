@@ -1,5 +1,5 @@
 #
-#  Copyright (c)1998-2012, Chongqing Xunmei Technology
+#  Copyright (c)1998-2012, Chongqing Public Technology
 #  All Rights Reserved.
 #
 #	 Description:
@@ -15,19 +15,15 @@
 
 #编译文件 列表
 ifneq ($(strip ${DISAPP}), YES)
-	SubFile += Base/Base.mk 
+#	SubFile += Base/Base.mk 
 #	SubFile += Excel/Excel.mk 
 	SubFile += Network/Network.mk 
-	SubFile += sqlite3/sqlite3.mk	
-	SubFile += HostIPC/HostIPC.mk	
-	SubFile += JSON/JSON.mk	
-	SubFile += HTTP/HTTP.mk
-	SubFile += Log/Log.mk	
-	SubFile += zip/zip.mk	
-	SubFile += mqtt/mqtt.mk	
-	SubFile += SIPStack/SIPStack.mk
-	SubFile += GBStack/GBStack.mk
-	SubFile += RTSPClient/RTSPClient.mk
+#	SubFile += sqlite3/sqlite3.mk	
+#	SubFile += JSON/JSON.mk	
+#	SubFile += HTTP/HTTP.mk
+#	SubFile += Log/Log.mk	
+#	SubFile += zip/zip.mk	
+#	SubFile += RTSP/RTSP.mk
 endif
 
 #设置打包功能

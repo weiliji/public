@@ -5,14 +5,14 @@
         <version>{version}</version>
         <title>{name}</title>
         <authors>{authors}@cdxm.com</authors>
-        <owners>Xunmei Technology Co.Ltd</owners>
+        <owners>Public Technology Co.Ltd</owners>
         <licenseUrl>{giturl}</licenseUrl>
         <projectUrl>{giturl}</projectUrl>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
         <description>{description}</description>
         <summary>{summary}</summary>
         <releaseNotes>{giturl}</releaseNotes>
-        <copyright>Xunmei Technology Co.Ltd</copyright>
+        <copyright>Public Technology Co.Ltd</copyright>
         <tags>native, {name}, C++</tags>
         <dependencies>
 			{dependency}

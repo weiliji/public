@@ -10,7 +10,7 @@ const oszip = require("../js/oszip.js");
 const log = require("../js/pktlog.js");
 const Sln = require('../js_v4/sln.js');
 
-var _nugetServerUrl = "http://nuget.cd.xunmei.com/nuget/cpp/package/{name}/{version}";
+var _nugetServerUrl = "http://nuget.cd.Public.com/nuget/cpp/package/{name}/{version}";
 
 module.exports = class Nuget {
     restore(currpath,slnfile){

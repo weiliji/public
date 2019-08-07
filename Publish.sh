@@ -7,7 +7,7 @@ function checkMountSharedDirFlag()
 	fi
 
 	if [ ! -f "$2" ]; then
-		/bin/mount -t cifs -o noatime -o nodiratime -o username="cd.xunmei.com/lixiaoqiang",password='123abc!!',rw,uid=0,dir_mode=0777,file_mode=0777 $3 $1
+		/bin/mount -t cifs -o noatime -o nodiratime -o username="cd.Public.com/lixiaoqiang",password='123abc!!',rw,uid=0,dir_mode=0777,file_mode=0777 $3 $1
 	fi
 }
 

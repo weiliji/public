@@ -96,7 +96,7 @@ public:
 		while (!contentIsOk)
 		{
 			size_t pos = String::indexOf(data, datalen, HTTPSEPERATOR);
-			if (pos == -1) break;
+			if (pos == (size_t)-1) break;
 
 
 			{

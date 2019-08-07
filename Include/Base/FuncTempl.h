@@ -114,7 +114,7 @@ class FUNCTION_TEMPL
 		virtual IDENT ident()
 		{
 			IDENT identi;
-			identi.func = f;
+			identi.func = (void*)f;
 			identi.obj = NULL;
 			return identi;
 		}

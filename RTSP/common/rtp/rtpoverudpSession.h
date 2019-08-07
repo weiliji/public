@@ -70,7 +70,7 @@ public:
 		uint32_t readlen = 0;
 		while (readlen < buffer.length())
 		{
-			uint32_t cansendlen =  min(MAXRTPPACKETLEN, buffer.length() - readlen);
+			uint32_t cansendlen =  min(MAXRTPPACKETLEN, (int)(buffer.length() - readlen));
 
 			uint32_t sendtotallen = cansendlen + sizeof(RTPHEADER);
 
@@ -80,7 +80,7 @@ public:
 			char* senddatabuffer = (char*)senddata.c_str();
 
 			RTPHEADER* header = (RTPHEADER*)senddatabuffer;
-			memset(header, 0, sizeof(header));
+			memset(header, 0, sizeof(RTPHEADER));
 			header->v = 2;
 			header->ts = htonl(timestmap);
 			header->seq = htons(rtp_sendrtpsn ++);
@@ -178,7 +178,7 @@ public:
 	{
 		if (buffer != rtp_RecvBuffer.c_str() || len <= 0 || len > MAXUDPPACKGELEN) return;
 
-		if (len > sizeof(RTPHEADER))
+		if ((size_t)len > sizeof(RTPHEADER))
 		{
 			rtp_RecvBuffer.resize(len);
 

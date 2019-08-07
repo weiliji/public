@@ -300,7 +300,6 @@ private:
 			else
 			{
 				assert(0);
-				int a = 0;
 			}
 		}
 				

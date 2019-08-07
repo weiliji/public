@@ -259,7 +259,7 @@ uint32_t StringBuffer::read(uint32_t offset, char* buffer, uint32_t bufferlen) c
 }
 StringBuffer StringBuffer::readBuffer(uint32_t offset, uint32_t readlen) const
 {
-	if (readlen == -1) readlen = internal->length - offset;
+	if (readlen == (uint32_t)-1) readlen = internal->length - offset;
 
 	uint32_t nowoffset = 0;
 	
@@ -288,7 +288,7 @@ StringBuffer StringBuffer::readBuffer(uint32_t offset, uint32_t readlen) const
 }
 std::string StringBuffer::read(uint32_t offset, uint32_t readlen) const
 {
-	uint32_t needbufferlen = readlen == -1 ? internal->length : readlen;
+	uint32_t needbufferlen = (readlen == (uint32_t)-1) ? internal->length : readlen;
 	char* buffer = new char[needbufferlen + 100];
 
 	uint32_t realreadlen = read(offset, buffer, needbufferlen);

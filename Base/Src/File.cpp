@@ -547,7 +547,7 @@ bool File::copy(const std::string& srcfile, const std::string& tofile)
 		size_t readlen = fread(buffer, 1, 1024, srcfd);
 		if (readlen <= 0) break;
 
-		if ((int)fwrite(buffer, 1, readlen, tofd) != readlen)
+		if (fwrite(buffer, 1, readlen, tofd) != readlen)
 		{
 			if (srcfd != NULL) fclose(srcfd);
 			if (tofd != NULL) fclose(tofd);

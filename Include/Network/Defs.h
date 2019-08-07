@@ -23,6 +23,9 @@
 
 #else
 
+typedef unsigned long SOCKET;
+
+
 #define NETWORK_API
 #define NETWORK_CALLBACK 
 #endif

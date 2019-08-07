@@ -29,7 +29,7 @@ public:
 		CommandInfo(uint32_t _timeout = -1) :starttime(Time::getCurrentMilliSecond()), timeout(_timeout)
 		{
 			cmd = make_shared<RTSPCommandInfo>();
-			if (_timeout != -1) waitsem = make_shared<Semaphore>();
+			if (_timeout != (uint32_t)-1) waitsem = make_shared<Semaphore>();
 		}
 	};
 public:
@@ -47,7 +47,7 @@ public:
 
 	uint32_t					protocolstartcseq;
 
-	uint32_t					ssrc;
+	size_t						ssrc;
 
 	bool						transportbytcp;
 
@@ -57,7 +57,7 @@ public:
 	{
 		protocolstartcseq = 0;
 		transportbytcp = true;
-		ssrc = (uint32_t)this;
+		ssrc = (size_t)this;
 	}
 	~RTSPSession()
 	{
@@ -211,7 +211,7 @@ public:
 
 		sendResponse(cmdinfo, header);
 	}
-	void sendResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, HTTPHeader& header, const std::string& body = "", const std::string& contentype = "")
+	void sendResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo,const HTTPHeader& header, const std::string& body = "", const std::string& contentype = "")
 	{
 		shared_ptr<RTSPCommandInfo> respcmd = make_shared<RTSPCommandInfo>();
 		respcmd->statuscode = header.statuscode;

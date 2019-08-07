@@ -40,7 +40,7 @@ BEGIN
             VALUE "CompanyName", "讯美科技股份有限公司" 
             VALUE "FileVersion", "{major}.{minor}.{build}" 
             VALUE "InternalName", "{filename}" 
-            VALUE "LegalCopyright", "Xunmei Copyright(C) 1998-{year}" 
+            VALUE "LegalCopyright", "Public Copyright(C) 1998-{year}" 
             VALUE "OriginalFilename", "{filename}" 
             VALUE "ProductName", "{productname}" 
             VALUE "ProductVersion", "{major}.{minor}.{build}" 

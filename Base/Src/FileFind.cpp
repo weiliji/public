@@ -258,7 +258,7 @@ shared_ptr<FileFind::FileFindInfo> FileFind::find()
 
 	while (true)
 	{
-		if (internal->handle == -1)
+		if (internal->handle == (size_t)-1)
 		{
 			internal->handle = _findfirst(internal->searchfile.c_str(), &finddata);
 			if (internal->handle <= 0)

@@ -89,7 +89,7 @@ std::string	Host::guessMyIpaddr(const std::string& destip)
 {
 	networkInitial();
 
-	SOCKET sockFd = socket(AF_INET, SOCK_DGRAM, 0);
+	int sockFd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (sockFd <= 0)
 	{
 		return "";
@@ -224,7 +224,8 @@ bool Host::getNowUsedPortMap(std::set<uint16_t>& portmap, SocketType type)
 	const char* tmp = NULL;
 	while((tmp = fgets(buffer,255,fd)) != NULL)
 	{
-		const char* ftmp = strstr(tmp,flag);
+		//这里需要解析buffer的内容
+		const char* ftmp = NULL;// strstr(tmp, flag);
 		if(ftmp == NULL)
 		{
 			continue;
@@ -1073,7 +1074,7 @@ bool Host::getNetworkInfos(std::map<std::string, NetworkInfo>& infos, std::strin
 				close(fd);
 				return false;
 			}
-			char mac[16] = { 0 };
+			char mac[32] = { 0 };
 			snprintf(mac, sizeof(mac), "%02X-%02X-%02X-%02X-%02X-%02X",
 				(unsigned char)buf[interfaceNum].ifr_hwaddr.sa_data[0],
 				(unsigned char)buf[interfaceNum].ifr_hwaddr.sa_data[1],

@@ -88,7 +88,7 @@ shared_ptr<WorkBook::Cell> Write_Sheet::cell(uint32_t rowNum, uint32_t colNum)
 
 bool Write_Sheet::font(const shared_ptr<WorkBook::Font>& font, const std::string& name)
 { 
-	if (&font == NULL || name == "")
+	if (name == "")
 	{
 		return false;
 	}
@@ -100,10 +100,6 @@ bool Write_Sheet::font(const shared_ptr<WorkBook::Font>& font, const std::string
 //--------------填充颜色
 bool Write_Sheet::fill(const WorkBook::Color& color)
 { 
-	if (&color == NULL)
-	{
-		return false;
-	}
 	WorkBook::Color _color = color;
 	return true;
 }
@@ -116,10 +112,6 @@ bool Write_Sheet::fill(const shared_ptr<WorkBook::Color>& color)
 //--------------显示格式
 bool Write_Sheet::format(const WorkBook::Format& fmt)
 { 
-	if (&fmt == NULL)
-	{
-		return false;
-	}
 	WorkBook::Format _fmt = fmt;
 	return true;
 }

@@ -253,7 +253,7 @@ StringBuffer CircleBuffer::readBuffer(uint32_t pos,  uint32_t length)
 {
 	StringBuffer buffer;
 
-	if (length == -1) length = internal->dataLen;
+	if (length == (uint32_t)-1) length = internal->dataLen;
 
 	if (internal->dataLen == 0 || pos < 0 || length + pos > internal->dataLen) return buffer;
 

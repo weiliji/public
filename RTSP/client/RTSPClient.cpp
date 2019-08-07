@@ -1,4 +1,3 @@
-#pragma once
 #include "RTSP/RTSPClient.h"
 #include "../common/rtspSession.h"
 
@@ -34,7 +33,7 @@ struct RTSPClient::RTSPClientInternal:public RTSPSession
 
 		prevheartbeattime = Time::getCurrentMilliSecond();
 	}
-	~RTSPClientInternal()
+	virtual ~RTSPClientInternal()
 	{
 		stop();
 	}
@@ -161,7 +160,7 @@ private:
 		
 		for (std::list<shared_ptr<STREAM_TRANS_INFO> >::const_iterator iter = rtspmedia->infos.begin(); iter != rtspmedia->infos.end(); iter++)
 		{
-			if (String::indexOfByCase(cmdinfo->cmd->url, (*iter)->streaminfo.szTrackID) != -1)
+			if (String::indexOfByCase(cmdinfo->cmd->url, (*iter)->streaminfo.szTrackID) != (size_t)-1)
 			{
 				transportinfo = *iter;
 

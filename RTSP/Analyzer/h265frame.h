@@ -30,6 +30,7 @@
 
 #include <stdint.h>
 #include <iostream>
+#include <string.h>
 
 #define AV_RB16(x) ((((const uint8_t*)(x))[0] << 8)|((const uint8_t*)(x))[1])
 

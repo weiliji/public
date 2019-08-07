@@ -1,4 +1,3 @@
-#pragma  once
 #include "RTSP/RTSPServer.h"
 #include "../common/rtspSession.h"
 
@@ -27,7 +26,7 @@ struct RTSPServerSession::RTSPServerSessionInternal:public RTSPSession
 		protocol = make_shared<RTSPProtocol>(sock, RTSPProtocol::CommandCallback(&RTSPServerSessionInternal::rtspCommandCallback, this),
 			RTSPProtocol::DisconnectCallback(&RTSPServerSessionInternal::socketDisconnectCallback, this), true);
 	}
-	~RTSPServerSessionInternal() 
+	virtual ~RTSPServerSessionInternal() 
 	{
 		handler = NULL;
 		RTSPSession::stop();
@@ -113,7 +112,7 @@ struct RTSPServerSession::RTSPServerSessionInternal:public RTSPSession
 			{
 				for (std::list<shared_ptr<STREAM_TRANS_INFO> >::const_iterator iter = rtspmedia->infos.begin(); iter != rtspmedia->infos.end(); iter++)
 				{
-					if (String::indexOfByCase(cmdinfo->url, (*iter)->streaminfo.szTrackID) != -1)
+					if (String::indexOfByCase(cmdinfo->url, (*iter)->streaminfo.szTrackID) != (size_t)-1)
 					{
 						transportinfo = *iter;
 						break;

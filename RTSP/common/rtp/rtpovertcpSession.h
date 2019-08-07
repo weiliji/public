@@ -34,7 +34,7 @@ public:
 		uint32_t readlen = 0;
 		while (readlen < buffer.length())
 		{
-			uint32_t cansendlen = min(MAXRTPPACKETLEN, buffer.length() - readlen);
+			uint32_t cansendlen = min(MAXRTPPACKETLEN, (int)(buffer.length() - readlen));
 
 			RTPHEADER rtpheader;
 			memset(&rtpheader, 0, sizeof(RTPHEADER));

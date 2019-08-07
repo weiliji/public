@@ -1,9 +1,9 @@
 #
-#  Copyright (c)1998-2012, Chongqing Xunmei Technology
+#  Copyright (c)1998-2012, Chongqing Public Technology
 #  All Rights Reserved.
 #
 #	 Description:
-#  $Id: Base.mk 2055 2014-07-31 03:58:39Z lixiaoqiang $  
+#  $Id: RTSP.mk 2055 2014-07-31 03:58:39Z lixiaoqiang $  
 #
 
 #可以自己写一个.platform 用于配置 平台，静态库拷贝的位置, 否则自己指定编译选项，参见.platform
@@ -11,11 +11,11 @@
 
 # 生成库的设置
 # 定义库的文件目录
-   SRCS_PATH =  Src Src/Analyzer Src/RTSP Src/StringParse
+   SRCS_PATH =  Analyzer client common  common/rtp common/StringParse  server
 	
 # 库的名称
    SHARDLIB_NAME = 
-   STATICLIB_NAME = RTSPClient
+   STATICLIB_NAME = RTSP
 
 # 应用程序选项
 # 应用程序的代码路径

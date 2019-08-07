@@ -41,7 +41,7 @@ RtpH264Analyzer::~RtpH264Analyzer()
 		m_pSpsBuffer = NULL;
 	}
 
-	if (m_pPpsBuffer = NULL)
+	if (m_pPpsBuffer != NULL)
 	{
 		delete[] m_pPpsBuffer;
 		m_pPpsBuffer = NULL;

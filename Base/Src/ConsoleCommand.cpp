@@ -221,7 +221,7 @@ bool ConsoleCommand::separatePara(const char* command, int& argc, char** argv)
 	{
 		int startPos = 0;
 		size_t cmdSize = strlen(command);
-		for (int i = 0; i != cmdSize; i++)
+		for (size_t i = 0; i != cmdSize; i++)
 		{
 			if(' ' == command[i])
 			{
