@@ -4,20 +4,20 @@
 
 #ifdef WIN32
 
-class _WinSocket:public ASocket
+class _SystemSocket :public ASocket
 {
 public:
-	_WinSocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, NetType _type)
+	_SystemSocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, NetType _type)
 	:ASocket(_ioworker,_ioserver,_sockptr,_type){}
 
-	_WinSocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, const NewSocketInfo& newsock)
+	_SystemSocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, const NewSocketInfo& newsock)
 	:ASocket(_ioworker,_ioserver,_sockptr ,newsock)
 	{
 		int flag = 1;
 		setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (const char*)&flag, sizeof(flag));
 	}
 
-	~_WinSocket() {}
+	~_SystemSocket() {}
 
 	virtual bool creatSocket(NetType type)
 	{

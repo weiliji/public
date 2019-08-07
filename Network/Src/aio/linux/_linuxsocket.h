@@ -4,18 +4,18 @@
 
 #ifndef WIN32
 
-class _LinuxSocket:public ASocket
+class _SystemSocket:public ASocket
 {
 public:
-	_LinuxSocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, NetType _type)
+	_SystemSocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, NetType _type)
 	:ASocket(_ioworker,_ioserver,_sockptr,_type){}
 
-	_LinuxSocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, const NewSocketInfo& newsock)
+	_SystemSocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, const NewSocketInfo& newsock)
 	:ASocket(_ioworker,_ioserver,_sockptr ,newsock)
 	{
 	}
 
-	~_WinSocket() {}
+	~_SystemSocket() {}
 
 	virtual bool creatSocket(NetType type)
 	{
