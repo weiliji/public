@@ -97,5 +97,6 @@
     <ClCompile Include="Src\IOWorker.cpp" />
     <ClCompile Include="Src\Udp.cpp" />
     <ClCompile Include="Src\Strand.cpp" />
+    <ClCompile Include="Src\Network.cpp" />
   </ItemGroup>
 </Project>

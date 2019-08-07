@@ -9,12 +9,13 @@ shared_ptr<ASocket> ASocket::create(const shared_ptr<IOWorker>& _ioworker, const
 	{
 		sock->ioserver->create(sock->sock);
 	}
-
+#ifdef WIN32
 	if (sock->type == NetType_TcpClient)
 	{
 		int flag = 1;
 		sock->setSocketOpt(IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
 	}
+#endif
 
 	return sock;
 }

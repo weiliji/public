@@ -12,6 +12,7 @@ class SocketInitObjec
 public:
 	SocketInitObjec()
 	{
+#ifdef WIN32
 		WSADATA wsaData;
 		WORD wVersionRequested;
 
@@ -27,6 +28,8 @@ public:
 			WSACleanup();
 			return;
 		}
+#else
+#endif
 	}
 
 	~SocketInitObjec() {}

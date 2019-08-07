@@ -23,11 +23,19 @@ using namespace Public::Base;
 namespace Public{
 namespace Network{
 
-typedef  sockaddr 		SockAddr;
-typedef  sockaddr_in 	SockAddrIPv4;
+
 #ifdef SUPPORT_IPV6
 typedef  struct sockaddr_in6	SockAddrIPv6;
 #endif
+
+#ifndef WIN32
+typedef struct sockaddr_in SOCKADDR_IN;
+typedef struct sockaddr SOCKADDR;
+#endif
+
+typedef  SOCKADDR 		SockAddr;
+typedef  SOCKADDR_IN 	SockAddrIPv4;
+
 class NETWORK_API NetAddr{
 	struct NetAddrInternal;
 public:

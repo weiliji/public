@@ -3,6 +3,10 @@
 #include "../common/_EventThreadPool.h"
 
 #ifndef WIN32
+#include <sys/epoll.h>
+#include <unistd.h>
+#include <sys/types.h>   
+#include <sys/socket.h>
 
 #define EVENT_INIT		0
 #define EVENT_ERROR		(EPOLLHUP | EPOLLERR)
@@ -13,7 +17,7 @@
 #define EVENTISWRITE(event) (event&EPOLLOUT)
 #define EVENTISERROR(event) (event&EPOLLHUP  || event&EPOLLERR)
 
-class EPool :public Pool
+class _SystemPool :public _Pool
 {
 	struct EpoolEventInfo
 	{
@@ -23,26 +27,28 @@ class EPool :public Pool
 
 		EpoolEventInfo():event(EVENT_INIT),readeventid(NULL),writeeventid(NULL){}
 	};
+	int 										epoll;
+	Mutex										mutex;
+	std::map<int, shared_ptr< EpoolEventInfo> >	 eventmap;
 public:
-	EPool(const shared_ptr<EventThreadPool>&_eventpool) :Pool(_eventpool)
+	_SystemPool() :epoll(0){}
+	~_SystemPool(){}
+
+	virtual bool start(_EventThreadPool*_eventpool, uint32_t threadnum)
 	{
 		epoll = ::epoll_create(10000);
-		if (epoll <= 0) return;
+		if (epoll <= 0) return false;
 
-		createThread();
+		return _Pool::start(_eventpool, threadnum);
 	}
-	~EPool()
+	virtual bool stop()
 	{
-		cancelThread();
-
-		if(epoll > 0) ::close(epoll);
-
+		if (epoll > 0) close(epoll);
 		epoll = 0;
 
-		destroyThread();
+		return _Pool::stop();
 	}
-
-	virtual void create(int sockfd, int& poolid)
+	virtual void create(int sockfd)
 	{
 		if (epoll <= 0) return;
 
@@ -57,7 +63,7 @@ public:
 
 		::epoll_ctl(epoll, EPOLL_CTL_ADD, sockfd, &pevent);
 	}
-	virtual void destory(int sockfd, int poolid)
+	virtual void destory(int sockfd)
 	{
 		if (epoll <= 0) return;
 
@@ -93,12 +99,9 @@ public:
 
 		::epoll_ctl(epoll, EPOLL_CTL_MOD, sockfd, &pevent);
 	}
-	virtual void clean(int sockfd, PoolType type) 
+	virtual void clean(int sockfd, PoolType type,shared_ptr<EpoolEventInfo>& eventinfo)
 	{
 		if (epoll <= 0) return;
-
-		shared_ptr< EpoolEventInfo> eventinfo = getEventInfo(sockfd);
-		if (eventinfo == NULL)	return;
 
 		if (type == PoolType_Read)
 		{
@@ -139,14 +142,14 @@ public:
 			if (EVENTISERROR(workEpoolEvent[i].events))
 			{
 				eventid = eventinfo->readeventid;
-				clean(sockfd, PoolType_Read);
+				clean(sockfd, PoolType_Read, eventinfo);
 
 				eventpool->postEvent(eventid, false);
 			}
 			if (EVENTISREAD(workEpoolEvent[i].events))
 			{
 				eventid = eventinfo->readeventid;
-				clean(sockfd, PoolType_Read);
+				clean(sockfd, PoolType_Read, eventinfo);
 
 				eventpool->postEvent(eventid, true);
 			}
@@ -154,7 +157,7 @@ public:
 			if (EVENTISWRITE(workEpoolEvent[i].events))
 			{
 				eventid = eventinfo->writeeventid;
-				clean(sockfd, PoolType_Write);
+				clean(sockfd, PoolType_Write, eventinfo);
 
 				eventpool->postEvent(eventid, true);
 			}
@@ -163,30 +166,25 @@ public:
 private:
 	void addEventInfo(int socketfd, const shared_ptr< EpoolEventInfo>& info)
 	{
-		GuardWriteMutex(rwmutex);
+		Guard((Mutex&)mutex);
 
 		eventmap[socketfd] = info;
 	}
 	void delEventInfo(int socketfd)
 	{
-		GuardWriteMutex(rwmutex);
+		Guard((Mutex&)mutex);
 
 		eventmap.erase(socketfd);
 	}
 	shared_ptr< EpoolEventInfo> getEventInfo(int socketfd)
 	{
-		GuardReadMutex(rwmutex);
+		Guard((Mutex&)mutex);
 
 		std::map<int, shared_ptr< EpoolEventInfo> >::iterator iter = eventmap.find(socketfd);
 		if (iter == eventmap.end()) return iter->second;
 
 		return iter->second;
-	}
-private:
-	int 										epoll;
-
-	ReadWriteMutex     						     rwmutex;
-	std::map<int, shared_ptr< EpoolEventInfo> >	 eventmap;
+	}	
 };
 
 #endif

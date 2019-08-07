@@ -36,7 +36,6 @@ public:
 	}
 	virtual void create(int sockfd) = 0;
 	virtual void destory(int sockfd) = 0;
-	virtual void clean(int sockfd, PoolType type){}
 	virtual void add(int sockfd,PoolType type,void* eventid){}
 private:
 	void threadProc(Thread* t,void*)

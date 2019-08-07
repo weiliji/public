@@ -49,6 +49,7 @@
     <ClCompile Include="Src\aio\asocket.cpp" />
     <ClCompile Include="Src\IOWorker.cpp" />
     <ClCompile Include="Src\NetAddr.cpp" />
+    <ClCompile Include="Src\Network.cpp" />
     <ClCompile Include="Src\Strand.cpp" />
     <ClCompile Include="Src\TcpClient.cpp" />
     <ClCompile Include="Src\TcpServer.cpp" />

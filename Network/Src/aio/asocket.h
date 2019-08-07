@@ -6,19 +6,20 @@ class ASocket:public Socket
 {
 protected:
 	ASocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, NetType _type)
-		:ioworker(_ioworker), ioserver(_ioserver), status(NetStatus_disconnected), type(_type), socketptr(_sockptr),ishavelisten(false)
+		:ioworker(_ioworker), ioserver(_ioserver), socketptr(_sockptr), status(NetStatus_disconnected),  type(_type), ishavelisten(false)
 	{
 		userthread = make_shared<_UserThread>();
 	}
 	ASocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, const NewSocketInfo& newsock)
-		:ioworker(_ioworker), ioserver(_ioserver), status(NetStatus_connected), type(NetType_TcpConnection), socketptr(_sockptr),ishavelisten(false)
+		:ioworker(_ioworker), ioserver(_ioserver), socketptr(_sockptr), status(NetStatus_connected),  type(NetType_TcpConnection), ishavelisten(false)
 	{
 		userthread = make_shared<_UserThread>();
 		sock = newsock.newsocket;
 		otheraddr = newsock.otheraddr;
-
+#ifdef WIN32
 		int flag = 1;
 		setSocketOpt(IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
+#endif
 	}
 public:
 	static shared_ptr<ASocket> create(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, NetType _type);
@@ -61,10 +62,10 @@ public:
 	
 	virtual bool getSocketBuffer(uint32_t& recvSize, uint32_t& sendSize) const 
 	{
-		socklen_t sendlen = sizeof(uint32_t), recvlen = sizeof(uint32_t);
+		int sendlen = sizeof(uint32_t), recvlen = sizeof(uint32_t);
 
-		bool ret = getSocketOpt(SOL_SOCKET, SO_SNDBUF, (char*)&sendSize, (socklen_t*)&sendlen);
-		ret |= getSocketOpt(SOL_SOCKET, SO_RCVBUF, (char*)&recvSize, (socklen_t*)&recvlen);
+		bool ret = getSocketOpt(SOL_SOCKET, SO_SNDBUF, (char*)&sendSize, &sendlen);
+		ret |= getSocketOpt(SOL_SOCKET, SO_RCVBUF, (char*)&recvSize, &recvlen);
 
 		return ret == 0;
 	}
@@ -72,7 +73,7 @@ public:
 	
 	virtual bool setSocketBuffer(uint32_t recvSize, uint32_t sendSize) 
 	{
-		socklen_t sendlen = sizeof(uint32_t), recvlen = sizeof(uint32_t);
+		int sendlen = sizeof(uint32_t), recvlen = sizeof(uint32_t);
 
 		bool ret = setSocketOpt(SOL_SOCKET, SO_SNDBUF, (char*)&sendSize, sendlen);
 		ret |= setSocketOpt(SOL_SOCKET, SO_RCVBUF, (char*)&recvSize, recvlen);
@@ -83,10 +84,10 @@ public:
 	
 	virtual bool getSocketTimeout(uint32_t& recvTimeout, uint32_t& sendTimeout) const 
 	{
-		socklen_t sendlen = sizeof(sendTimeout), recvlen = sizeof(recvTimeout);
+		int sendlen = sizeof(sendTimeout), recvlen = sizeof(recvTimeout);
 
-		bool ret = getSocketOpt(SOL_SOCKET, SO_SNDTIMEO, (char*)&sendTimeout, (socklen_t*)&sendlen);
-		ret |= getSocketOpt(SOL_SOCKET, SO_RCVTIMEO, (char*)&recvTimeout, (socklen_t*)&recvlen);
+		bool ret = getSocketOpt(SOL_SOCKET, SO_SNDTIMEO, (char*)&sendTimeout, &sendlen);
+		ret |= getSocketOpt(SOL_SOCKET, SO_RCVTIMEO, (char*)&recvTimeout, &recvlen);
 
 		return ret == 0;
 	}
@@ -94,7 +95,7 @@ public:
 	
 	virtual bool setSocketTimeout(uint32_t recvTimeout, uint32_t sendTimeout) 
 	{
-		socklen_t sendlen = sizeof(sendTimeout), recvlen = sizeof(recvTimeout);
+		int sendlen = sizeof(sendTimeout), recvlen = sizeof(recvTimeout);
 
 		bool ret = setSocketOpt(SOL_SOCKET, SO_SNDTIMEO, (char*)&sendTimeout, sendlen);
 		ret |= setSocketOpt(SOL_SOCKET, SO_RCVTIMEO, (char*)&recvTimeout, recvlen);
@@ -112,9 +113,9 @@ public:
 		if (type == NetType_TcpServer && !ishavelisten)
 		{
 			int ret = listen(sock, SOMAXCONN);
-			if (ret == SOCKET_ERROR)
+			if (ret <= 0)
 			{
-				return false;
+				return shared_ptr<Socket>();
 			}
 
 			ishavelisten = true;
@@ -123,10 +124,10 @@ public:
 		SOCKADDR_IN accept_addr;
 		memset(&accept_addr, 0, sizeof(accept_addr));
 		accept_addr.sin_family = AF_INET;
-		int accept_addrlen = sizeof(accept_addr);
+		socklen_t accept_addrlen = sizeof(accept_addr);
 
 		int s_accept = ::accept(sock, (SOCKADDR *)&accept_addr, &accept_addrlen);
-		if (s_accept == SOCKET_ERROR)
+		if (s_accept <= 0)
 		{
 			return shared_ptr<Socket>();
 		}
@@ -147,7 +148,7 @@ public:
 			return false;
 		}
 		
-		if (::connect(sock, addr.getAddr(), addr.getAddrLen()) == SOCKET_ERROR)
+		if (::connect(sock, addr.getAddr(), addr.getAddrLen()) < 0)
 		{
 			return false;
 		}
@@ -194,7 +195,7 @@ public:
 		struct sockaddr_in addr;
 		memset(&addr, 0, sizeof(addr));
 		addr.sin_family = AF_INET;
-		int addrlen = sizeof(addr);
+		socklen_t addrlen = sizeof(addr);
 
 		int readlen = ::recvfrom(sock, buf, len, 0, (struct sockaddr*)&addr, &addrlen);
 		
@@ -217,9 +218,6 @@ public:
 
 	virtual void socketReady()
 	{
-		int flag = 1;
-		setSocketOpt(IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
-
 		status = NetStatus_connected;
 	}
 
