@@ -14,6 +14,8 @@
 #   include <inttypes.h>
 #else
 
+typedef int socklen_t;
+
 #if _MSC_VER > 1500 //VGS2008
 #   include <stdint.h>
 #else

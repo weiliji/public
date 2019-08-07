@@ -17,7 +17,7 @@ struct StrandInfo:public enable_shared_from_this<StrandInfo>
 	bool							callruning;
 	shared_ptr<IOWorker>			worker;
 
-	void strandRunFunc()
+	void strandRunFunc(const shared_ptr<IOWorker::EventInfo>&)
 	{
 		StrandInternalCallbackObj info;
 		{
@@ -51,7 +51,7 @@ struct StrandInfo:public enable_shared_from_this<StrandInfo>
 			callruning = false;
 		}
 
-		worker->internal->ioserver->postEvent(_EventThreadPool::EventFunc(&StrandInfo::checkRunFunc, shared_from_this()));
+		worker->internal->ioserver->postExtExentFunction(IOWorker::EventCallback(&StrandInfo::strandRunFunc,shared_from_this()), shared_ptr<IOWorker::EventInfo>());
 	}
 };
 

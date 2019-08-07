@@ -93,6 +93,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>$(ProjectName)_debug</TargetName>
     <TargetExt>.dll</TargetExt>
+    <OutDir>$(SolutionDir)\Lib\$(Platform)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)\__Compile\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>$(SolutionDir)\__Compile\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
@@ -132,12 +134,12 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\Include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;Base/Base_debug.lib;Network/Network_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>$(SolutionDir)\Lib\win32</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\Lib\$(Platform)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

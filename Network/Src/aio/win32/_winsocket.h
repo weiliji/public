@@ -2,6 +2,8 @@
 #include "_winevent.h"
 #include "../asocket.h"
 
+#ifdef WIN32
+
 class _WinSocket:public ASocket
 {
 public:
@@ -9,7 +11,11 @@ public:
 	:ASocket(_ioworker,_ioserver,_sockptr,_type){}
 
 	_WinSocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, const NewSocketInfo& newsock)
-	:ASocket(_ioworker,_ioserver,_sockptr ,newsock){}
+	:ASocket(_ioworker,_ioserver,_sockptr ,newsock)
+	{
+		int flag = 1;
+		setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (const char*)&flag, sizeof(flag));
+	}
 
 	~_WinSocket() {}
 
@@ -25,6 +31,12 @@ public:
 		}
 
 		nonBlocking(true);
+
+		if (type == NetType_TcpClient)
+		{
+			int flag = 1;
+			setsockopt(sock,IPPROTO_TCP, TCP_NODELAY, (const char*)&flag, sizeof(flag));
+		}
 
 		return true;
 	}
@@ -59,13 +71,9 @@ public:
 		}
 
 		//AcceptEvent(const shared_ptr<IOWorker>& _ioworker,const shared_ptr<Socket>& sock, LPFN_ACCEPTEX	acceptExFunc, LPFN_GETACCEPTEXSOCKADDRS _getAcceptAddExFunc,const Socket::AcceptedCallback& _acceptcallback) :WinEvent(sock)
-		shared_ptr<AcceptEvent> event = make_shared<AcceptEvent>(socketptr.lock(), userthread);
-
-		ioserver->pushEvent(&event->overlped, event);
-
-		if (!event->init(ioworker,accepted))
+		shared_ptr<AcceptEvent> event = make_shared<AcceptEvent>(ioworker, accepted);
+		if(!resourece->postEvent(&event->overlped, event))
 		{
-			ioserver->popEvent(event.get());
 			return false;
 		}
 		return true;
@@ -87,13 +95,10 @@ public:
 		otheraddr = addr;
 
 		//ConnectEvent(const NetAddr& toaddr , LPFN_CONNECTEX _connectExFunc,const Socket::ConnectedCallback& _connectcallback)
-		shared_ptr<ConnectEvent> event = make_shared<ConnectEvent>(socketptr.lock(), userthread);
+		shared_ptr<ConnectEvent> event = make_shared<ConnectEvent>(addr, connected);
 
-		ioserver->pushEvent(&event->overlped, event);
-
-		if (!event->init(addr,connected))
+		if (!resourece->postEvent(&event->overlped, event))
 		{
-			ioserver->popEvent(event.get());
 			return false;
 		}
 
@@ -107,13 +112,10 @@ public:
 		}
 
 		//RecvEvent(char* buffer, uint32_t len, const Socket::ReceivedCallback& _recvcallback, const Socket::RecvFromCallback& _recvfromcallback)
-		shared_ptr<RecvEvent> event = make_shared<RecvEvent>(socketptr.lock(), userthread);
+		shared_ptr<RecvEvent> event = make_shared<RecvEvent>(buf, len, received, Socket::RecvFromCallback());
 
-		ioserver->pushEvent(&event->overlped, event);
-
-		if (!event->init(buf, len, received, Socket::RecvFromCallback()))
+		if (!resourece->postEvent(&event->overlped, event))
 		{
-			ioserver->popEvent(event.get());
 			return false;
 		}
 
@@ -126,14 +128,11 @@ public:
 			return false;
 		}
 
-		//RecvEvent(char* buffer, uint32_t len, const Socket::ReceivedCallback& _recvcallback, const Socket::RecvFromCallback& _recvfromcallback)
-		shared_ptr<RecvEvent> event = make_shared<RecvEvent>(socketptr.lock(), userthread);
+		//(char* buffer, uint32_t len, const Socket::ReceivedCallback& _recvcallback, const Socket::RecvFromCallback& _recvfromcallback)
+		shared_ptr<RecvEvent> event = make_shared<RecvEvent>((char*)NULL, maxlen, received, Socket::RecvFromCallback());
 
-		ioserver->pushEvent(&event->overlped, event);
-
-		if (!event->init(NULL, maxlen, received, Socket::RecvFromCallback()))
+		if (!resourece->postEvent(&event->overlped, event))
 		{
-			ioserver->popEvent(event.get());
 			return false;
 		}
 
@@ -147,13 +146,10 @@ public:
 		}
 
 		//SendEvent(const char* buffer, uint32_t len, const Socket::SendedCallback& _callback, const NetAddr& toaddr)
-		shared_ptr<SendEvent> event = make_shared<SendEvent>(socketptr.lock(), userthread);
+		shared_ptr<SendEvent> event = make_shared<SendEvent>(buf, len, sended, NetAddr());
 
-		ioserver->pushEvent(&event->overlped, event);
-
-		if (!event->init(buf, len, sended, NetAddr()))
+		if (!resourece->postEvent(&event->overlped, event))
 		{
-			ioserver->popEvent(event.get());
 			return false;
 		}
 
@@ -167,13 +163,10 @@ public:
 		}
 
 		//RecvEvent(char* buffer, uint32_t len, const Socket::ReceivedCallback& _recvcallback, const Socket::RecvFromCallback& _recvfromcallback)
-		shared_ptr<RecvEvent> event = make_shared<RecvEvent>(socketptr.lock(), userthread);
+		shared_ptr<RecvEvent> event = make_shared<RecvEvent>(buf, len, Socket::ReceivedCallback(), received);
 
-		ioserver->pushEvent(&event->overlped, event);
-
-		if (!event->init(buf, len, Socket::ReceivedCallback(), received))
+		if (!resourece->postEvent(&event->overlped, event))
 		{
-			ioserver->popEvent(event.get());
 			return false;
 		}
 
@@ -187,13 +180,10 @@ public:
 		}
 
 		//RecvEvent(char* buffer, uint32_t len, const Socket::ReceivedCallback& _recvcallback, const Socket::RecvFromCallback& _recvfromcallback)
-		shared_ptr<RecvEvent> event = make_shared<RecvEvent>(socketptr.lock(), userthread);
-
-		ioserver->pushEvent(&event->overlped, event);
-
-		if (!event->init(NULL, maxlen, Socket::ReceivedCallback(), received))
+		shared_ptr<RecvEvent> event = make_shared<RecvEvent>((char*)NULL, maxlen, Socket::ReceivedCallback(), received);
+		
+		if (!resourece->postEvent(&event->overlped, event))
 		{
-			ioserver->popEvent(event.get());
 			return false;
 		}
 
@@ -207,13 +197,10 @@ public:
 		}
 
 		//SendEvent(const char* buffer, uint32_t len, const Socket::SendedCallback& _callback, const NetAddr& toaddr)
-		shared_ptr<SendEvent> event = make_shared<SendEvent>(socketptr.lock(), userthread);
-
-		ioserver->pushEvent(&event->overlped, event);
-
-		if (!event->init(buf, len, sended, other))
+		shared_ptr<SendEvent> event = make_shared<SendEvent>(buf, len, sended, other);
+		
+		if (!resourece->postEvent(&event->overlped, event))
 		{
-			ioserver->popEvent(event.get());
 			return false;
 		}
 
@@ -228,3 +215,5 @@ public:
 		return ioctlsocket(sock, FIONBIO, &on_windows) == 0;
 	}
 };
+
+#endif

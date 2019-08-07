@@ -26,12 +26,6 @@
       <Filter>Include</Filter>
     </ClInclude>
     <ClInclude Include="Src\IOWorker.h" />
-    <ClInclude Include="Src\aio\common\_eventpool.h">
-      <Filter>aio\common</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\aio\common\_eventthreadpool.h">
-      <Filter>aio\common</Filter>
-    </ClInclude>
     <ClInclude Include="Src\aio\common\_pool.h">
       <Filter>aio\common</Filter>
     </ClInclude>
@@ -39,9 +33,6 @@
       <Filter>aio\common</Filter>
     </ClInclude>
     <ClInclude Include="Src\aio\win32\_winevent.h">
-      <Filter>aio\win32</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\aio\win32\_winiocp.h">
       <Filter>aio\win32</Filter>
     </ClInclude>
     <ClInclude Include="Src\aio\win32\_winsocket.h">
@@ -53,7 +44,13 @@
     <ClInclude Include="Src\aio\asocket.h">
       <Filter>aio</Filter>
     </ClInclude>
-    <ClInclude Include="Src\aio\linux\_epool.h">
+    <ClInclude Include="Src\aio\common\_eventlist.h">
+      <Filter>aio\common</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\aio\win32\_winiocp.h">
+      <Filter>aio\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\aio\linux\_linuxepoll.h">
       <Filter>aio\linux</Filter>
     </ClInclude>
   </ItemGroup>

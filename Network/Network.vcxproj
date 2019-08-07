@@ -28,15 +28,14 @@
     <ClInclude Include="..\Include\Network\TcpServer.h" />
     <ClInclude Include="..\Include\Network\Udp.h" />
     <ClInclude Include="Src\aio\asocket.h" />
-    <ClInclude Include="Src\aio\common\_eventpool.h" />
-    <ClInclude Include="Src\aio\common\_eventthreadpool.h" />
+    <ClInclude Include="Src\aio\common\_eventlist.h" />
     <ClInclude Include="Src\aio\common\_pool.h" />
     <ClInclude Include="Src\aio\common\_userthread.h" />
     <ClInclude Include="Src\aio\ioserver.h" />
-    <ClInclude Include="Src\aio\linux\_epool.h" />
+    <ClInclude Include="Src\aio\linux\_linuxepoll.h" />
     <ClInclude Include="Src\aio\win32\_winevent.h" />
-    <ClInclude Include="Src\aio\win32\_winiocp.h" />
     <ClInclude Include="Src\aio\win32\_winsocket.h" />
+    <ClInclude Include="Src\aio\win32\_winiocp.h" />
     <ClInclude Include="Src\IOWorker.h" />
   </ItemGroup>
   <ItemGroup>

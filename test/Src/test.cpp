@@ -270,7 +270,6 @@ extern int runserver(const std::list<std::string>& rtsplist);
 
 int main(int argc, char** argv)
 {
-	
 	std::list<std::string> rtspaddrlist;
 	{
 		std::string filename = File::getExcutableFileFullPath() + "/rtsplist.ini";

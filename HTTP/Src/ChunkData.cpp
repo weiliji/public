@@ -67,7 +67,7 @@ uint32_t ChunkData::append(const char* bufferptr, uint32_t len)
 		else
 		{
 			//当数据还不够时，返回数据长度，当数据满了，返回chunk缺少长度
-			int datalen = min(len, (int)(internal->chunkbodysize > strlen(HTTPSEPERATOR) ?
+			int datalen = min(len, (uint32_t)(internal->chunkbodysize > strlen(HTTPSEPERATOR) ?
 				internal->chunkbodysize - strlen(HTTPSEPERATOR) : internal->chunkbodysize));
 
 			//数据不够时，处理数据

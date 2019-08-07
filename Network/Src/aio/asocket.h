@@ -16,10 +16,6 @@ protected:
 		userthread = make_shared<_UserThread>();
 		sock = newsock.newsocket;
 		otheraddr = newsock.otheraddr;
-#ifdef WIN32
-		int flag = 1;
-		setSocketOpt(IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
-#endif
 	}
 public:
 	static shared_ptr<ASocket> create(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, NetType _type);
@@ -27,12 +23,12 @@ public:
 	
 	virtual ~ASocket()
 	{
-		userthread->waitAllOtherCallbackThreadUsedEnd();
 	}
 	virtual bool disconnect()
 	{
 		userthread->quit();
-		ioserver->destory(sock);
+		userthread->waitAllOtherCallbackThreadUsedEnd();
+		resourece = NULL;
 
 		return true;
 	}
@@ -262,6 +258,8 @@ protected:
 	shared_ptr<IOWorker>	ioworker;
 	shared_ptr<IOServer>	ioserver;
 	weak_ptr<Socket>		socketptr;
+
+	shared_ptr<_PoolResource> resourece;
 
 	int						sock;
 

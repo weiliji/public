@@ -13,64 +13,65 @@ struct NewSocketInfo
 };
 
 
+typedef enum {
+	EventType_Read,
+	EventType_Write,
+}EventType;
+
 class Event
 {
 public:
-	Event(const shared_ptr<Socket>& _sock, const shared_ptr<_UserThread>& _userthread)
-	{
-		if (_sock == NULL || _userthread == NULL)
-		{
-			assert(0);
-		}
-		weak_sock = _sock;
-		userthread = _userthread;
-	}
+	Event(EventType _pooltype):pooltype(_pooltype){}
 	virtual ~Event() {}
 
 	//处理事件，int 为事件当前的值，status为状态
 	void doEvent(int bytes, bool status)
 	{
-		shared_ptr<Socket> sock = weak_sock.lock();
-		if (sock == NULL || !userthread || !userthread->callbackThreadUsedStart())
+		shared_ptr<Socket> sockptr = sock.lock();
+		if (sockptr == NULL || !userthread || !userthread->callbackThreadUsedStart())
 		{
 			return;
 		}
 
-		doEvent(sock, bytes, status);
+		doEvent(sockptr, bytes, status);
 
 		userthread->callbackThreadUsedEnd();
 	}
 
 	//判断事件是否有效
-	virtual bool isValid() { return weak_sock.lock() != NULL; }
+	virtual bool isValid() { return sock.lock() != NULL; }
+	EventType type() const { return pooltype; }
+
+	virtual bool init(const shared_ptr<Socket>& _sock, const shared_ptr<_UserThread>& _userthread)
+	{
+		sock = _sock;
+		userthread = _userthread;
+	
+		return true;
+	}	
 private:
 	virtual void doEvent(const shared_ptr<Socket>& sock, int bytes, bool status) = 0;
-protected:
-	weak_ptr<Socket> weak_sock;
+
+private:
+	weak_ptr<Socket>		sock;
 	shared_ptr<_UserThread> userthread;
+	EventType				pooltype;
 };
 
+
 //事件池，存放当前正在使用的事件，定时判断事件是否过期
-class _EventPool
+class _EventList
 {
 public:
-	_EventPool(){}
-	~_EventPool(){}
-
-	bool start()
+	_EventList()
 	{
 		checkTimer = make_shared<Timer>("EventPool");
-		checkTimer->start(Timer::Proc(&_EventPool::doCheckTimerProc, this), 0, 10000);
-
-		return true;
+		checkTimer->start(Timer::Proc(&_EventList::doCheckTimerProc, this), 0, 10000);
 	}
-
-	bool stop()
+	~_EventList()
 	{
 		checkTimer = NULL;
 		eventmap.clear();
-
-		return true;
 	}
 
 	//放入事件

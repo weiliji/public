@@ -6,195 +6,188 @@
 //	$Id: ThreadPool.cpp 3 2013Äê8ÔÂ21ÈÕ10:18:30  $
 #include <string.h>
 #include "Base/ThreadPool.h"
-#include "ThreadPoolInternal.h"
 #include "Base/Semaphore.h"
 #include "Base/BaseTemplate.h"
 #include "Base/Shared_ptr.h"
 #include "Base/Guard.h"
 #include "Base/Time.h"
 #include "Base/PrintLog.h"
+#include "Base/ThreadEx.h"
 namespace Public{
 namespace Base{
 
-ThreadDispatch::ThreadDispatch(ThreadPool::ThreadPoolInternal* pool): Thread("[ThreadDispatch]", priorTop, policyRealtime)
-{
-	threadpool = pool;
-	Dispatchthreadstatus = false;
+#ifdef WIN32
 
-	createThread();
-}
-ThreadDispatch::~ThreadDispatch()
+class _WinThreadPoolCallbackInfo
 {
-	cancelThread();
-}
-void ThreadDispatch::cancelThread()
-{
-	Thread::cancelThread();
-	Dispatchcond.post();
-	Thread::destroyThread();
-}
-void 	ThreadDispatch::threadProc()
-{
-	while(looping())
+public:
+	_WinThreadPoolCallbackInfo(const ThreadPool::Proc& _callback, void*	 _param)
 	{
-		Dispatchcond.pend();
-		if(!looping())
+		param = _param;
+		callback = _callback;
+	}
+	~_WinThreadPoolCallbackInfo() {}
+public:
+	static VOID CALLBACK CALLBACKPTP_SIMPLE_CALLBACK(PTP_CALLBACK_INSTANCE Instance, PVOID Context)
+	{
+		_WinThreadPoolCallbackInfo* callbackinfo = (_WinThreadPoolCallbackInfo*)Context;
+		if (callbackinfo != NULL)
 		{
-			break;
+			callbackinfo->callback(callbackinfo->param);
 		}
-		Dispatchthreadstatus = true;
-		Dispatchfunc(Dispatchparam);
-		Dispatchthreadstatus = false;
-
-		threadpool->refreeThraed(this);
+		SAFE_DELETE(callbackinfo);
 	}
-}
+private:
+	void*				param;
+	ThreadPool::Proc	callback;
+};
 
-void ThreadDispatch::SetDispatchFunc(const ThreadPool::Proc& func,void* param)
+struct ThreadPool::ThreadPoolInternal
 {
-	if(!Dispatchthreadstatus)
+	TP_CLEANUP_GROUP*		tp_clean;
+	PTP_POOL				tp_pool;
+	TP_CALLBACK_ENVIRON		tp_env;
+
+
+	ThreadPoolInternal(uint32_t threadnum)
 	{
-		Dispatchfunc = func;
-		Dispatchparam = param;
-		Dispatchcond.post();
+		tp_pool = CreateThreadpool(NULL);
+
+		SetThreadpoolThreadMinimum(tp_pool, 1);
+		SetThreadpoolThreadMaximum(tp_pool, threadnum <= 1 ? 1 : threadnum);
+
+		InitializeThreadpoolEnvironment(&tp_env);
+		SetThreadpoolCallbackPool(&tp_env, tp_pool);
+		tp_clean = CreateThreadpoolCleanupGroup();;
+
+		SetThreadpoolCallbackCleanupGroup(&tp_env, tp_clean, NULL);
 	}
-}
-
-#define MAXPRINTTHREADPOOLTIME		5*60*1000
-#define CHECKTHREADIDELETIME		2*1000
-
-ThreadPool::ThreadPoolInternal::ThreadPoolInternal(uint32_t maxSize,uint64_t threadLivetime)
-:liveTime(threadLivetime),maxDiapathcerSize(maxSize)
-{
-	prevTime = 0, printtime = 0;
-}
-
-ThreadPool::ThreadPoolInternal::~ThreadPoolInternal(){}
-
-void ThreadPool::ThreadPoolInternal::start()
-{
-	pooltimer = make_shared<Timer>("ThreadPoolInternal");
-	pooltimer->start(Timer::Proc(&ThreadPoolInternal::poolTimerProc, this), 0, 1000);
-}
-void ThreadPool::ThreadPoolInternal::stop()
-{
-	pooltimer = NULL;
-
+	~ThreadPoolInternal()
 	{
-		Guard locker(mutex);
-		threadPoolList.clear();
-		threadIdelList.clear();
-	}
-	
-}
-void ThreadPool::ThreadPoolInternal::poolTimerProc(unsigned long)
-{
-	if(Time::getCurrentMilliSecond() < prevTime || Time::getCurrentMilliSecond() - prevTime >= CHECKTHREADIDELETIME)
-	{
-		checkThreadIsLiveOver();
+		CloseThreadpoolCleanupGroupMembers(tp_clean, false, NULL);
+		CloseThreadpoolCleanupGroup(tp_clean);
+		DestroyThreadpoolEnvironment(&tp_env);
+		CloseThreadpool(tp_pool);
 
-		prevTime = Time::getCurrentMilliSecond();
+		tp_clean = NULL;
 	}
 
-	if (Time::getCurrentMilliSecond() < printtime || Time::getCurrentMilliSecond() - printtime >= MAXPRINTTHREADPOOLTIME)
+	bool dispatch(const ThreadPool::Proc& func, void* param)
 	{
-		Guard locker(mutex);
+		_WinThreadPoolCallbackInfo* info = new _WinThreadPoolCallbackInfo(func, param);
 
-		logtrace("Base ThreadPoolInternal:	 threadPoolList:%d threadIdelList:%d maxDiapathcerSize:%d", threadPoolList.size(), threadIdelList.size(), maxDiapathcerSize);
-
-		printtime = Time::getCurrentMilliSecond();
-	}
-}
-
-void ThreadPool::ThreadPoolInternal::refreeThraed(ThreadDispatch* thread)
-{
-	Guard locker(mutex);
-	std::map<ThreadDispatch*,shared_ptr<ThreadItemInfo> >::iterator iter = threadPoolList.find(thread);
-	if(iter == threadPoolList.end())
-	{
-		return;
-	}
-
-	iter->second->prevUsedTime = Time::getCurrentTime().makeTime();
-	threadIdelList[thread] = iter->second;
-}
-bool ThreadPool::ThreadPoolInternal::doDispatcher(const ThreadPool::Proc& func,void* param)
-{
-	Guard locker(mutex);
-	if(threadIdelList.size() > 0)
-	{
-		std::map<ThreadDispatch*,shared_ptr<ThreadItemInfo> >::iterator iter = threadIdelList.begin();
-
-		iter->second->dispacher->SetDispatchFunc(func,param);
-
-		threadIdelList.erase(iter);
-	}
-	else if(threadPoolList.size() < maxDiapathcerSize)
-	{
-		shared_ptr<ThreadItemInfo> info = shared_ptr<ThreadItemInfo>(new ThreadItemInfo);
-		if(info == (void*)NULL)
+		bool ret =  TrySubmitThreadpoolCallback(_WinThreadPoolCallbackInfo::CALLBACKPTP_SIMPLE_CALLBACK, info, &tp_env);
+		if (!ret)
 		{
-			return false;
-		}
-		info->dispacher = make_shared<ThreadDispatch>(this);
-		if(info->dispacher == (void*)NULL)
-		{
+			SAFE_DELETE(info);
 			return false;
 		}
 
-		threadPoolList[info->dispacher.get()] = info;
-		info->dispacher->SetDispatchFunc(func,param);
+		return true;
 	}
-	else
+	void* threadpoolHandle() const
 	{
-		return false;
+		return (void*)&tp_env;
 	}
+};
 
-	return true;
-}
-
-void ThreadPool::ThreadPoolInternal::checkThreadIsLiveOver()
+#else
+struct ThreadPool::ThreadPoolInternal
 {
-	uint64_t nowtime = Time::getCurrentTime().makeTime();
-	std::list<shared_ptr<ThreadItemInfo> > needFreeThreadList;
-
+	struct ThreadPoolInfo
 	{
-		Guard locker(mutex);
+		ThreadPool::Proc callback;
+		void*			param;
+	};
+public:
+	ThreadPoolInternal(uint32_t threadnum)
+	{
+		if (threadnum <= 0) threadnum = 1;
+		if (threadnum >= 128) threadnum = 128;
 
-		std::map<ThreadDispatch*,shared_ptr<ThreadItemInfo> >::iterator iter;
-		std::map<ThreadDispatch*,shared_ptr<ThreadItemInfo> >::iterator iter1;
-		for(iter = threadIdelList.begin();iter != threadIdelList.end(); iter = iter1)
+		for (uint32_t i = 0; i < threadnum; i++)
 		{
-			iter1 = iter;
-			iter1 ++;
+			shared_ptr<Thread> thread = ThreadEx::creatThreadEx("ThreadPoolInternal", ThreadEx::Proc(&ThreadPoolInternal::threadProc, this), NULL);
+			thread->createThread();
 
-			if(liveTime == 0 || nowtime - iter->second->prevUsedTime >= liveTime || iter->second->prevUsedTime > nowtime)
+			threadlist.push_back(thread);
+		}
+	}
+	~ThreadPoolInternal()
+	{
+		for (std::list<shared_ptr<Thread> >::iterator iter = threadlist.begin(); iter != threadlist.end(); iter++)
+		{
+			(*iter)->cancelThread();
+		}
+		threadlist.clear();
+	}
+
+	bool dispatch(const ThreadPool::Proc& func, void* param)
+	{
+		ThreadPoolInfo info;
+
+		info.callback = func;
+		info.param = param;
+
+		{
+			Guard locker(mutex);
+
+			waitDoEventList.push_back(info);
+
+			eventsem.post();
+		}
+
+		return true;
+	}
+	void* threadpoolHandle() const { return NULL; }
+private:
+	void threadProc(Thread* t, void* param)
+	{
+		while (t->looping())
+		{
+			eventsem.pend(100);
+
+			ThreadPoolInfo info;
 			{
-				needFreeThreadList.push_back(iter->second);
-				threadPoolList.erase(iter->second->dispacher.get());
-				threadIdelList.erase(iter);
+				Guard locker(mutex);
+				if (waitDoEventList.size() <= 0) continue;
+
+				info = waitDoEventList.front();
+				waitDoEventList.pop_front();
 			}
+
+			info.callback(info.param);
 		}
 	}
-}
-ThreadPool::ThreadPool(uint32_t maxDiapathcerSize,uint32_t liveTime)
+private:
+	Mutex							mutex;
+	Semaphore						eventsem;
+
+	std::list<ThreadPoolInfo>		waitDoEventList;
+
+	uint32_t					    threadsize;
+	std::list<shared_ptr<Thread> >	threadlist;
+};
+#endif
+
+ThreadPool::ThreadPool(uint32_t threadnum)
 {
-	internal = new ThreadPoolInternal(maxDiapathcerSize,liveTime);
-	internal->start();
+	internal = new ThreadPoolInternal(threadnum);
 }
 
 ThreadPool::~ThreadPool()
 {
-	internal->stop();
 	SAFE_DELETE(internal);
 }
 
 bool ThreadPool::dispatch(const ThreadPool::Proc& func,void* param)
 {
-	return internal->doDispatcher(func,param);
+	return internal->dispatch(func,param);
 }
-
-
+void* ThreadPool::threadpoolHandle() const
+{
+	return internal->threadpoolHandle();
+}
 };//Base
 };//Public
 

@@ -7,7 +7,6 @@
 typedef int socklen_t;
 
 #include "../common/_pool.h"
-#include "../common/_eventthreadpool.h"
 #define SWAPBUFFERLEN			100
 
 struct WinEvent
@@ -38,25 +37,22 @@ struct SendEvent :public Event,public WinEvent
 {
 	Socket::SendedCallback sendcallback;
 
-	SendEvent(const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& userthread):Event(sock,userthread)
-	{}
-	bool init(const char* buffer, uint32_t len, const Socket::SendedCallback& _callback, const NetAddr& toaddr)
+	SendEvent(const char* buffer, uint32_t len, const Socket::SendedCallback& _callback, const NetAddr& toaddr):Event(EventType_Write)
 	{
-		shared_ptr<Socket> sock = weak_sock.lock();
-		if (sock == NULL)
-		{
-			assert(0);
-		}
-		{
-			addr = *(SOCKADDR*)toaddr.getAddr();
-			addrlen = toaddr.getAddrLen();
-			sendcallback = _callback;
-			wbuf.buf = (CHAR*)buffer;
-			wbuf.len = len;
-		}
-		
+		addr = *(SOCKADDR*)toaddr.getAddr();
+		addrlen = toaddr.getAddrLen();
+		sendcallback = _callback;
+		wbuf.buf = (CHAR*)buffer;
+		wbuf.len = len;
+	}
+	~SendEvent() {}
+	bool init(const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& _userthread)
+	{
+		Event::init(sock, _userthread);
+
+
 		int ret = 0;
-		if (toaddr.getPort() == 0)
+		if (NetAddr(addr).getPort() == 0)
 		{
 			ret = ::WSASend(sock->getHandle(), &wbuf, 1, &dwBytes, 0, &overlped, NULL);
 		}
@@ -88,34 +84,29 @@ struct RecvEvent :public Event,public WinEvent
 	Socket::RecvFromCallback recvfromcallback;
 
 	bool needFreeBuffer = false;
+	RecvEvent(char* buffer, uint32_t len, const Socket::ReceivedCallback& _recvcallback, const Socket::RecvFromCallback& _recvfromcallback):Event(EventType_Read)
+	{
+		if (buffer == NULL)
+		{
+			needFreeBuffer = true;
+			buffer = new char[len];
+		}
+		recvcallback = _recvcallback;
+		recvfromcallback = _recvfromcallback;
 
-	RecvEvent(const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& userthread) :Event(sock, userthread)
-	{}
+		wbuf.buf = (CHAR*)buffer;
+		wbuf.len = len;
+	}
 	~RecvEvent() 
 	{ 
 		if (needFreeBuffer) 
 			delete[](char*)wbuf.buf;
 	}
-	bool init(char* buffer, uint32_t len, const Socket::ReceivedCallback& _recvcallback, const Socket::RecvFromCallback& _recvfromcallback)
+	bool init(const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& _userthread)
 	{
-		shared_ptr<Socket> sock = weak_sock.lock();
-		if (sock == NULL)
-		{
-			assert(0);
-		}
+		Event::init(sock, _userthread);
 
-		{
-			if (buffer == NULL)
-			{
-				needFreeBuffer = true;
-				buffer = new char[len];
-			}
-			recvcallback = _recvcallback;
-			recvfromcallback = _recvfromcallback;
 
-			wbuf.buf = (CHAR*)buffer;
-			wbuf.len = len;
-		}
 		int ret = 0;
 		if (recvcallback)
 		{
@@ -167,22 +158,17 @@ struct AcceptEvent :public Event,public WinEvent
 	Socket::AcceptedCallback acceptcallback;
 	char						swapBuffer[SWAPBUFFERLEN];
 
-	AcceptEvent(const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& userthread) :Event(sock, userthread)
+	AcceptEvent(const shared_ptr<IOWorker>& _ioworker, const Socket::AcceptedCallback& _acceptcallback) :Event(EventType_Read)
 	{		
+		ioworker = _ioworker;
+		acceptcallback = _acceptcallback;
 		wbuf.buf = swapBuffer;
 		wbuf.len = SWAPBUFFERLEN;
 	}
-	bool init(const shared_ptr<IOWorker>& _ioworker, const Socket::AcceptedCallback& _acceptcallback)
+	bool init(const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& _userthread)
 	{
-		shared_ptr<Socket> sock = weak_sock.lock();
-		if (sock == NULL)
-		{
-			assert(0);
-		}
-		{
-			ioworker = _ioworker;
-			acceptcallback = _acceptcallback;
-		}
+		Event::init(sock, _userthread);
+
 
 		LPFN_ACCEPTEX	acceptExFunc;
 		GUID acceptEX = WSAID_ACCEPTEX;
@@ -257,23 +243,18 @@ struct ConnectEvent :public Event,public WinEvent
 	Socket::ConnectedCallback connectcallback;
 	
 	
-	ConnectEvent(const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& userthread) :Event(sock, userthread){}
-	bool init(const NetAddr& toaddr, const Socket::ConnectedCallback& _connectcallback)
+	ConnectEvent(const NetAddr& toaddr, const Socket::ConnectedCallback& _connectcallback) :Event(EventType_Write)
 	{
-		shared_ptr<Socket> sock = weak_sock.lock();
-		if (sock == NULL)
-		{
-			assert(0);
-		}
+		wbuf.buf = swapBuffer;
+		wbuf.len = SWAPBUFFERLEN;
+		connectcallback = _connectcallback;
 
-		{
-			wbuf.buf = swapBuffer;
-			wbuf.len = SWAPBUFFERLEN;
-			connectcallback = _connectcallback;
-
-			addr = *(SOCKADDR*)toaddr.getAddr();
-			addrlen = toaddr.getAddrLen();
-		}
+		addr = *(SOCKADDR*)toaddr.getAddr();
+		addrlen = toaddr.getAddrLen();
+	}
+	bool init(const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& _userthread)
+	{
+		Event::init(sock, _userthread);
 
 		GUID connetEx = WSAID_CONNECTEX;
 		DWORD bytes = 0;

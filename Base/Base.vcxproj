@@ -75,7 +75,6 @@
     <ClInclude Include="..\Include\Base\Version.h" />
     <ClInclude Include="Src\regex\regex.h" />
     <ClInclude Include="Src\Thread.h" />
-    <ClInclude Include="Src\ThreadPoolInternal.h" />
     <ClInclude Include="Src\TimerManager.h" />
   </ItemGroup>
   <ItemGroup>

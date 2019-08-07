@@ -25,6 +25,14 @@ namespace Network{
 class NETWORK_API IOWorker
 {
 public:
+	class NETWORK_API EventInfo
+	{
+	public:
+		EventInfo() {}
+		virtual ~EventInfo() {}
+	};
+	typedef Function1<void, const shared_ptr< EventInfo>& > EventCallback;
+public:
 	class NETWORK_API ThreadNum
 	{
 	public:
@@ -48,6 +56,8 @@ public:
 public:
 	IOWorker(const ThreadNum& num);
 	~IOWorker();
+
+	void postEvent(const EventCallback& callback,const shared_ptr<EventInfo>& info);
 
 	static shared_ptr<IOWorker> defaultWorker();
 public:

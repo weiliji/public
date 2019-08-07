@@ -5,17 +5,13 @@ shared_ptr<ASocket> ASocket::create(const shared_ptr<IOWorker>& _ioworker, const
 {
 	shared_ptr<ASocket> sock(new _WinSocket(_ioworker, _ioserver, _sockptr, _type));
 
-	if (sock->creatSocket(_type))
+	if (!sock->creatSocket(_type))
 	{
-		sock->ioserver->create(sock->sock);
+		assert(0);
 	}
-#ifdef WIN32
-	if (sock->type == NetType_TcpClient)
-	{
-		int flag = 1;
-		sock->setSocketOpt(IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
-	}
-#endif
+	
+	sock->resourece = _ioserver->addResource(sock->sock, _sockptr, sock->userthread);
+	
 
 	return sock;
 }
@@ -24,7 +20,7 @@ shared_ptr<ASocket> ASocket::create(const shared_ptr<IOWorker>& _ioworker, const
 {
 	shared_ptr<ASocket> sock(new _WinSocket(_ioworker, _ioserver, _sockptr, newsock));
 
-	sock->ioserver->create(sock->sock);
+	sock->resourece = _ioserver->addResource(sock->sock, _sockptr, sock->userthread);
 
 	return sock;
 }

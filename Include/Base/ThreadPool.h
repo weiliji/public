@@ -33,7 +33,7 @@ public:
 	/// param[in] type    线程池工作模式
 	/// param[in] maxDiapathcerSize 当type == Type_Manager，dispathcer池最大存放个数
 	/// param[in] liveTime 线程执行后空闲存活时间/0表示执行后自动关闭，< 0表示一直空闲一直挂起  单位秒
-	ThreadPool(uint32_t maxDiapathcerSize = 64,uint32_t liveTime = 60);
+	ThreadPool(uint32_t threadnum);
 	~ThreadPool(); 
 
 	///线程池执行新函数接口
@@ -41,6 +41,8 @@ public:
 	/// param param[n] 需要执行该函数指针的参数
 	/// param [out] 0成功、-1失败
 	bool dispatch(const Proc& func,void* param);
+
+	void* threadpoolHandle() const;
 private:
 	ThreadPoolInternal* internal;
 };
