@@ -45,11 +45,6 @@ namespace Base{
 
 struct Timer::TimerInternal:public TimerObject
 {
-	uint64_t 			runningTime;			///< 定时器执行累计时间，微秒为单位
-	uint64_t 			callTime;
-	uint64_t 			checkTime;
-	unsigned long 		period;
-	unsigned long 		timeout;
 	Timer::Proc 		fun;
 	unsigned long 		param;
 	std::string  		name;
@@ -63,11 +58,8 @@ struct Timer::TimerInternal:public TimerObject
 public:
 	TimerInternal()
 	{
-		runningTime = 0;
-		callTime = 0;
-		checkTime = 0;
+		delay = 0;
 		period = 0;
-		timeout = 0;
 		param = 0;
 		called = false;
 		started = false;
@@ -87,12 +79,10 @@ public:
 		{
 			Guard locker(mutex);
 
-			if (called || curTime <= callTime || !started)
+			if (called  || !started)
 			{
 				return false;
 			}
-			runningTime = 0;
-			checkTime = curTime;
 			called = true;
 		}
 
@@ -102,8 +92,6 @@ public:
 	bool reset()
 	{
 		Guard locker(mutex);
-		callTime = manager->curTime + period;
-		runningTime = manager->curTime - checkTime;
 		called = false;
 		calledId = 0;
 		if (quitsem != NULL)
@@ -150,10 +138,6 @@ public:
 
 		return true;
 	}
-	int getPeriod()
-	{
-		return period;
-	}
 };
 
 Timer::Timer(const std::string& pName)
@@ -170,12 +154,11 @@ Timer::~Timer()
 	delete internal;
 }
 
-bool Timer::start(const Proc& fun, uint32_t delay, uint32_t period, unsigned long param /* = 0 */, uint32_t timeout /* = 0 */)
+bool Timer::start(const Proc& fun, uint32_t delay, uint32_t period, unsigned long param /* = 0 */)
 {
 	internal->fun = fun;
-	internal->callTime = internal->manager->curTime + (uint64_t)delay;
+	internal->delay = (uint64_t)delay;
 	internal->period = period;
-	internal->timeout = timeout;
 	internal->param = param;
 	internal->started = true;
 

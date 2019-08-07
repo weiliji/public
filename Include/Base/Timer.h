@@ -47,7 +47,7 @@ public:
 	/// \reval false 在非延时的定时器的上次调用还没有完成的情况下
 	/// \reval true  其他情况
 	/// \note 把延时参数和周期参数都设置为0,即可实现异步调用
-	bool start(const Proc& fun, uint32_t delay, uint32_t period, unsigned long param = 0, uint32_t timeout = 60000);
+	bool start(const Proc& fun, uint32_t delay, uint32_t period, unsigned long param = 0);
 
 	/// 关闭定时器
 	/// \param callNow [in]	定时器停止时同时再调用一下回调函数，只对带延时的非周期定时器有效。

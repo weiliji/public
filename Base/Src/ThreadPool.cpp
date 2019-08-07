@@ -92,81 +92,152 @@ struct ThreadPool::ThreadPoolInternal
 };
 
 #else
+
+class ThreadPoolThread:public Thread
+{
+public:
+	ThreadPoolThread() :Thread("ThreadPoolThread"),prevusedtime(Time::getCurrentMilliSecond()), idelflag(false)
+	{
+		createThread();
+	}
+	~ThreadPoolThread()
+	{
+		cancelThread();
+		sem.post();
+		destroyThread();
+	}
+	uint64_t getPrevAliveTime() 
+	{
+		Guard locker(mutex);
+		return prevusedtime; 
+	}
+	void postEvent(const ThreadPool::Proc& _calblack, void* _param)
+	{
+		Guard locker(mutex);
+
+		idelflag = false;
+		callback = _calblack;
+		param = _param;
+
+		sem.post();
+	}
+	bool idel() 
+	{
+		Guard locker(mutex);
+		return idelflag;
+	}
+private:
+	void threadProc()
+	{
+		while (looping())
+		{
+			sem.pend(10000);
+
+			ThreadPool::Proc _callback;
+			void* _param;
+
+			{
+				Guard locker(mutex);
+				if (!callback) continue;
+
+				_callback = callback;
+				_param = param;
+
+				callback = NULL;
+				param = NULL;
+
+				prevusedtime = Time::getCurrentMilliSecond();
+			}
+
+			if (_callback) _callback(_param);
+
+			{
+				Guard locker(mutex);
+				idelflag = true;
+			}
+		}
+	}
+private:
+	uint64_t	prevusedtime;
+	bool			idelflag;
+
+	Semaphore	sem;
+	Mutex		mutex;
+
+	ThreadPool::Proc callback;
+	void*			param;
+};
+
+#define THREADTIMEOUT	2*60*1000
+
 struct ThreadPool::ThreadPoolInternal
 {
-	struct ThreadPoolInfo
-	{
-		ThreadPool::Proc callback;
-		void*			param;
-	};
+	Mutex			mutex;
+	std::map<Thread*, shared_ptr< ThreadPoolThread> > threadlist;
+	uint32_t		minthread;
+	uint32_t		maxthread;
 public:
 	ThreadPoolInternal(uint32_t threadnum)
 	{
 		if (threadnum <= 0) threadnum = 1;
 		if (threadnum >= 128) threadnum = 128;
 
-		for (uint32_t i = 0; i < threadnum; i++)
-		{
-			shared_ptr<Thread> thread = ThreadEx::creatThreadEx("ThreadPoolInternal", ThreadEx::Proc(&ThreadPoolInternal::threadProc, this), NULL);
-			thread->createThread();
-
-			threadlist.push_back(thread);
-		}
+		minthread = 1;
+		maxthread = threadnum;
 	}
 	~ThreadPoolInternal()
 	{
-		for (std::list<shared_ptr<Thread> >::iterator iter = threadlist.begin(); iter != threadlist.end(); iter++)
-		{
-			(*iter)->cancelThread();
-		}
 		threadlist.clear();
 	}
 
 	bool dispatch(const ThreadPool::Proc& func, void* param)
 	{
-		ThreadPoolInfo info;
+		std::list< shared_ptr< ThreadPoolThread> > freelist;
 
-		info.callback = func;
-		info.param = param;
-
+		shared_ptr< ThreadPoolThread> canusedthread;
 		{
+
 			Guard locker(mutex);
 
-			waitDoEventList.push_back(info);
-
-			eventsem.post();
-		}
-
-		return true;
-	}
-	void* threadpoolHandle() const { return NULL; }
-private:
-	void threadProc(Thread* t, void* param)
-	{
-		while (t->looping())
-		{
-			eventsem.pend(100);
-
-			ThreadPoolInfo info;
+			//查找能用的线程
+			for (std::map<Thread*, shared_ptr< ThreadPoolThread> >::iterator iter = threadlist.begin(); iter != threadlist.end(); iter++)
 			{
-				Guard locker(mutex);
-				if (waitDoEventList.size() <= 0) continue;
-
-				info = waitDoEventList.front();
-				waitDoEventList.pop_front();
+				if (iter->second->idel())
+				{
+					canusedthread = iter->second;
+					break;
+				}
 			}
 
-			info.callback(info.param);
+			//释放过期的线程
+			uint64_t nowtime = Time::getCurrentMilliSecond();
+			for (std::map<Thread*, shared_ptr< ThreadPoolThread> >::iterator iter = threadlist.begin(); iter != threadlist.end() && threadlist.size() > minthread; )
+			{
+				uint64_t threadusedtime = iter->second->getPrevAliveTime();
+				if (iter->second->idel() && iter->second.get() != canusedthread.get() && nowtime > threadusedtime && nowtime - threadusedtime >= THREADTIMEOUT)
+				{
+					freelist.push_back(iter->second);
+					threadlist.erase(iter++);
+				}
+				else
+				{
+					iter++;
+				}
+			}
+
+			//如果没线程，分配线程 
+			if (canusedthread == NULL && threadlist.size() < maxthread)
+			{
+				canusedthread = make_shared<ThreadPoolThread>();
+				threadlist[canusedthread.get()] = canusedthread;
+			}
+
+			if (canusedthread) canusedthread->postEvent(func, param);
 		}
+
+		return canusedthread != NULL;
 	}
-private:
-	Mutex							mutex;
-	Semaphore						eventsem;
-
-	std::list<ThreadPoolInfo>		waitDoEventList;
-
-	uint32_t					    threadsize;
-	std::list<shared_ptr<Thread> >	threadlist;
+	void* threadpoolHandle() const { return NULL; }
 };
 #endif
 
