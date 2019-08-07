@@ -23,7 +23,7 @@ class HTTPCommunication :public HTTPParse
 {
 public:
 	HTTPCommunication(bool _isserver,const shared_ptr<Socket> & _sock,const shared_ptr<HTTPCommunicationHandler>& _handler,const std::string& _useragent)
-		:HTTPParse(_isserver),socket(_sock),handler(_handler),recvContentLen(-1),recvContentTotalLen(0),
+		:HTTPParse(_isserver),socket(_sock),handler(_handler),recvContentLen(-1),recvContentTotalLen(0),isServer(_isserver),
 		sendContentLen(-1), sendTotalLen(0),sendHeaderLen(0), prevalivetime(Time::getCurrentMilliSecond()),useragent(_useragent)
 	{
 		socket->setDisconnectCallback(Socket::DisconnectedCallback(&HTTPCommunication::onSocketDisconnectCallback, this));
@@ -45,38 +45,9 @@ public:
 		{
 			sendHeader = header;
 
-			{
-				bool iswebsocket = false;
-				Value connectionval = sendHeader->header(CONNECTION);
-				if (!connectionval.empty() && strcasecmp(connectionval.readString().c_str(), CONNECTION_Upgrade) == 0)
-				{
-					iswebsocket = true;
-				}
+			buildSendDefaultHTTPHeader();
 
-				bool ischunk = false;
-				Value chunkval = sendHeader->header(Transfer_Encoding);
-				if (!chunkval.empty() && strcasecmp(chunkval.readString().c_str(), CHUNKED) == 0)
-				{
-					ischunk = true;
-				}
-
-				if (!iswebsocket && !ischunk)
-				{
-					Value contentlenval = sendHeader->header(Content_Length);
-					if (!connectionval.empty())
-					{
-						sendHeader->headers[Content_Length] = sendContent->size();
-					}
-					contentlenval = sendHeader->header(Content_Length);
-					if (!contentlenval.empty()) sendContentLen = contentlenval.readUint64();
-
-					sendHeader->headers[CONNECTION] = CONNECTION_KeepAlive;
-				}
-			}
-			if (useragent != "")
-			{
-				sendHeader->headers["User-Agent"] = useragent;
-			}
+			sendContentLen = parseHeaderContentLen(sendHeader);
 		}
 		if (!sendContent) sendContent = content;
 
@@ -141,7 +112,7 @@ private:
 			sendBuffer = HTTPBuild::build(!isServer, *sendHeader.get());
 			sendHeaderLen = sendBuffer.length();
 		}
-		else if (sendBuffer.length() == 0 && sendContent)
+		else if (sendContentLen > sendTotalLen - sendHeaderLen && sendBuffer.length() == 0 && sendContent)
 		{
 			sendContent->read(sendBuffer);
 		}
@@ -177,8 +148,7 @@ private:
 
 					if (recvHeader)
 					{
-						Value contentlenval = recvHeader->header(Content_Length);
-						if (!contentlenval.empty()) recvContentLen = contentlenval.readUint64();
+						recvContentLen = parseHeaderContentLen(recvHeader);
 
 						shared_ptr<HTTPCommunicationHandler> handlerobj = handler.lock();
 						if (handlerobj)
@@ -189,20 +159,21 @@ private:
 						}
 					}
 				}
-				else if(recvContentLen == -1 || recvContentLen > recvContentTotalLen)
+				else if(recvHeader && (recvContentLen == -1 || recvContentLen > recvContentTotalLen))
 				{
 					uint32_t needsize = buffertmplen;
 					if (recvContentLen != -1) needsize = min((uint32_t)(recvContentLen - recvContentTotalLen), buffertmplen);
 
-					uint32_t appendlen = recvContent->append(buffertmp, needsize);
+					bool endoffile = false;
+					uint32_t appendlen = recvContent->append(buffertmp, needsize, endoffile);
 
 					recvContentTotalLen += appendlen;
 					buffertmplen -= appendlen;
 					buffertmp += appendlen;
 
-					break;
+					if (recvContentLen == -1 && endoffile) recvContentLen = recvContentTotalLen;
 				}
-				if (recvContentLen != -1 && recvContentLen == recvContentTotalLen)
+				if (recvHeader && recvContentLen != -1 && recvContentLen == recvContentTotalLen)
 				{
 					shared_ptr<HTTPCommunicationHandler> handlerobj = handler.lock();
 					if (handlerobj)
@@ -222,6 +193,69 @@ private:
 		
 		shared_ptr<Socket> socktmp = socket;
 		if(socktmp && headerresultok) socktmp->async_recv(recvbufferaddr + recvBuffer.length(), MAXHTTPCACHELEN - recvBuffer.length(), Socket::ReceivedCallback(&HTTPCommunication::onSocketRecvCallback, this));
+	}
+
+	void buildSendDefaultHTTPHeader()
+	{
+		{
+			bool iswebsocket = false;
+			Value connectionval = sendHeader->header(CONNECTION);
+			if (!connectionval.empty() && strcasecmp(connectionval.readString().c_str(), CONNECTION_Upgrade) == 0)
+			{
+				iswebsocket = true;
+			}
+
+			bool ischunk = false;
+			Value chunkval = sendHeader->header(Transfer_Encoding);
+			if (!chunkval.empty() && strcasecmp(chunkval.readString().c_str(), CHUNKED) == 0)
+			{
+				ischunk = true;
+			}
+
+			if (!iswebsocket && !ischunk)
+			{
+				Value contentlenval = sendHeader->header(Content_Length);
+				if (!connectionval.empty())
+				{
+					sendHeader->headers[Content_Length] = sendContent->size();
+				}
+				contentlenval = sendHeader->header(Content_Length);
+				if (!contentlenval.empty()) sendContentLen = contentlenval.readUint64();
+
+				sendHeader->headers[CONNECTION] = CONNECTION_KeepAlive;
+			}
+
+			if (!isServer)
+			{
+				Value accaptval = sendHeader->header("Accept");
+				if (accaptval.empty()) sendHeader->headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3";
+
+			//	Value accapenctval = sendHeader->header("Accept-Encoding");
+			//	if (accapenctval.empty()) sendHeader->headers["Accept-Encoding"] = "gzip, deflate";
+
+				Value accaplangtval = sendHeader->header("Accept-Language");
+				if (accaplangtval.empty()) sendHeader->headers["Accept-Language"] = "zh-CN,zh;q=0.9";
+			}
+		}
+		if (useragent != "")
+		{
+			sendHeader->headers["User-Agent"] = useragent;
+		}
+	}
+
+	uint64_t parseHeaderContentLen(const shared_ptr<HTTPHeader>&  header)
+	{
+		Value contentlenval = header->header(Content_Length);
+		if (!contentlenval.empty()) return contentlenval.readUint64();
+
+		Value connectionval = header->header(CONNECTION);
+		if (!connectionval.empty() && strcasecmp(connectionval.readString().c_str(), CONNECTION_Upgrade) == 0) return -1;
+
+		Value chunkval = header->header(Transfer_Encoding);
+		if (!chunkval.empty() && strcasecmp(chunkval.readString().c_str(), CHUNKED) == 0) return -1;
+
+
+		return 0;
 	}
 	void onSocketSendCallback(const weak_ptr<Socket>& sock, const char* buffer, int len)
 	{

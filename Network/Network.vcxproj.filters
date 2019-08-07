@@ -53,6 +53,12 @@
     <ClInclude Include="Src\aio\linux\_linuxepoll.h">
       <Filter>aio\linux</Filter>
     </ClInclude>
+    <ClInclude Include="Src\aio\linux\_linuxevent.h">
+      <Filter>aio\linux</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\aio\linux\_linuxsocket.h">
+      <Filter>aio\linux</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Include\Network\Version.tpl">

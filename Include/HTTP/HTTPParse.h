@@ -98,7 +98,8 @@ public:
 			size_t pos = String::indexOf(data, datalen, HTTPSEPERATOR);
 			if (pos == (size_t)-1) break;
 
-
+			contentIsOk = parseLine(data, (uint32_t)pos);
+		
 			{
 				uint32_t poslen = (uint32_t)pos + (uint32_t)strlen(HTTPSEPERATOR);
 
@@ -106,8 +107,6 @@ public:
 				datalen -= poslen;
 				useddata += poslen;
 			}
-
-			contentIsOk = parseLine(data, (uint32_t)pos);
 		}
 		shared_ptr<HTTPHeader> contenttmp = content;
 		if (contenttmp != NULL && contentIsOk)
@@ -222,7 +221,7 @@ public:
 				requrl = url.getPath();
 			}
 
-			cmdstr = header.method + " " + requrl + " "+ String::toupper(header.verinfo.protocol)+"/"+header.verinfo.version + HTTPSEPERATOR;
+			cmdstr = String::toupper(header.method) + " " + requrl + " "+ String::toupper(header.verinfo.protocol)+"/"+header.verinfo.version + HTTPSEPERATOR;
 		}
 		else
 		{

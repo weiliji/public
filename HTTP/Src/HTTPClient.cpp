@@ -70,26 +70,20 @@ struct HTTPClientManager:public HTTPCommunicationHandler,public enable_shared_fr
 			//HTTPCommunication(bool _isserver,const shared_ptr<Socket> & _sock,const shared_ptr<HTTPCommunicationHandler>& _handler,const std::string& _useragent)
 			commu = make_shared<HTTPCommunication>(false,socket,shared_from_this(),useragent);
 		}
-		
-		{
-			response = make_shared<HTTPClientResponse>(commu, responsesavefile.length() == 0 ? HTTPCacheType_Mem : HTTPCacheType_File, responsesavefile);
-		}
-
-		commu->sendHeader = request->header();
-		commu->sendContent = request->content();
-		commu->recvHeader = response->header();
-		commu->recvContent = response->content();
 
 		{
 			URL url(request->url());
-			commu->sendHeader->headers["Host"] = url.getHost();
+			request->header()->headers["Host"] = url.getHost();
 		}
+		
+		commu->setSendHeaderContentAndPostSend(request->header(), request->content());
 	}
 
-	bool onRecvHeaderOk(HTTPCommunication* commu) 
+	bool onRecvHeaderOk(HTTPCommunication*) 
 	{
-		Value chunkval = commu->recvHeader->header(Transfer_Encoding);
-		if (!chunkval.empty() && strcasecmp(chunkval.readString().c_str(), CHUNKED) == 0) return false;
+		response = make_shared<HTTPClientResponse>(commu, responsesavefile.length() == 0 ? HTTPCacheType_Mem : HTTPCacheType_File, responsesavefile);
+		commu->recvContent = response->content();
+
 
 		return true;
 	}
@@ -125,9 +119,9 @@ struct HTTPClient::HTTPClientInternal
 		{
 			uint64_t nowtime = Time::getCurrentMilliSecond();
 
-			if (nowtime - starttime >= timeout) return manager->errorResponse(408, "Request Timeout");
+//			if (nowtime - starttime >= timeout) return manager->errorResponse(408, "Request Timeout");
 
-			if(manager->connecteddisconected) return manager->errorResponse(500, "Socket Disconnect");
+//			if (manager->connecteddisconected) return manager->errorResponse(500, "Socket Disconnect");
 
 			shared_ptr<HTTPCommunication> commu = manager->commu;
 			if (commu)
@@ -137,10 +131,13 @@ struct HTTPClient::HTTPClientInternal
 				if (commu->recvHeader)
 				{
 					Value chunkval = commu->recvHeader->header(Transfer_Encoding);
-					if (!chunkval.empty() && strcasecmp(chunkval.readString().c_str(), CHUNKED) == 0) break;
+				//	if (!chunkval.empty() && strcasecmp(chunkval.readString().c_str(), CHUNKED) == 0) break;
 				}
 
-				if (commu->sessionIsFinish()) break;
+				if (commu->sessionIsFinish())
+				{
+					break;
+				}
 			}
 
 			Thread::sleep(10);

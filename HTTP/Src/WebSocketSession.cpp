@@ -22,7 +22,7 @@ public:
 	}
 
 	uint32_t size() { return 0; }
-	uint32_t append(const char* buffer, uint32_t len)
+	uint32_t append(const char* buffer, uint32_t len,bool& endoffile)
 	{
 		const char* usedaddr = parseProtocol(buffer, len);
 
@@ -41,7 +41,7 @@ public:
 	std::list<std::string>			sendlist;
 
 	uint32_t size() { return 0; }
-	uint32_t append(const char* buffer, uint32_t len) { return len; }
+	uint32_t append(const char* buffer, uint32_t len, bool& endoffile) { return len; }
 	void read(String& data) 
 	{
 		Guard locker(mutex);

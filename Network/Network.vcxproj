@@ -33,6 +33,8 @@
     <ClInclude Include="Src\aio\common\_userthread.h" />
     <ClInclude Include="Src\aio\ioserver.h" />
     <ClInclude Include="Src\aio\linux\_linuxepoll.h" />
+    <ClInclude Include="Src\aio\linux\_linuxevent.h" />
+    <ClInclude Include="Src\aio\linux\_linuxsocket.h" />
     <ClInclude Include="Src\aio\win32\_winevent.h" />
     <ClInclude Include="Src\aio\win32\_winsocket.h" />
     <ClInclude Include="Src\aio\win32\_winiocp.h" />

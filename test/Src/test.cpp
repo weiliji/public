@@ -1,9 +1,9 @@
-#if 0
+#if 1
 #include "Base/Func.h"
 using namespace Public::Base;
-#include <functional>
-#include <memory>
-#include "HTTP/HTTPClient.h"
+#include "HTTP/HTTP.h"
+using namespace Public::HTTP;
+
 typedef void(*ptrtype)(int);
 
 struct Test
@@ -11,41 +11,43 @@ struct Test
 	void testfunc(int) {}
 };
 
-template <typename Function>
-struct function_traits : public function_traits < decltype(&Function::operator()) >
+void recvcallback1(const shared_ptr<HTTPServerSession>& session)
 {
+	session->response->statusCode() = 200;
+	session->response->content()->write("this recv calblack1");
+}
 
-};
-
-template <typename ClassType, typename ReturnType, typename Args, typename Args2>
-struct function_traits < ReturnType(ClassType::*)(Args, Args2) const >
+void recvcallback2(const shared_ptr<HTTPServerSession>& session)
 {
-	typedef ReturnType(*pointer)(Args, Args2);
-	typedef std::function<ReturnType(Args, Args2)> function;
-};
-#include "boost/regex.hpp"
+	session->response->statusCode() = 200;
+	session->response->content()->write("this recv calblack2");
+}
+
 int main()
 {
 	std::string url = "/api/entities/11";
 	std::string math = "^/api/entities/.+";
 
-	boost::regex  regex (math);
-
-	if (boost::regex_match(url, regex))
-	{
-		int a = 0;
-	}
-	else
-	{
-		int b = 0;
-	}
-
-	//Public::HTTP::HTTPClient client("http://192.168.0.11");
-	//shared_ptr<Public::HTTP::HTTPResponse> respse = client.request("get");
+	shared_ptr<IOWorker> worker = make_shared<IOWorker>(2);
+	
+	/*shared_ptr<HTTPClientRequest> req = make_shared<HTTPClientRequest>("get", "http://47.106.74.104:8010/");
+	Public::HTTP::HTTPClient client(worker,"user");
+	shared_ptr<Public::HTTP::HTTPClientResponse> respse = client.request(req);
 
 	int a = 0;
 
+	std::string data = respse->content()->read();*/
 
+
+	shared_ptr<HTTPServer> server = make_shared<HTTPServer>(worker,"userage");
+	server->listen("/a","get" ,recvcallback1);
+	server->defaultListen("get", recvcallback2);
+
+	server->run(8081);
+
+	getchar();
+
+	int b = 0;
 	/*ifstream infile;
 	infile.open("test.vcxproj.user", std::ofstream::in | std::ofstream::binary);
 	if (!infile.is_open()) return false;
@@ -260,7 +262,7 @@ int main()
 
 
 
-#if 1
+#if 0
 #include "Base/Base.h"
 using namespace Public::Base;
 

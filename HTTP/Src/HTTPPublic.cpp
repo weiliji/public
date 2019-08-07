@@ -17,7 +17,10 @@ struct ReadContent::ReadContentInternal
 
 	bool chunkReadCallback(const char* buffer, int size)
 	{
-		callback(buffer, size);
+		if (callback)
+			callback(buffer, size);
+		else
+			cache->write(buffer, size);
 
 		return true;
 	}
@@ -37,18 +40,25 @@ ReadContent::ReadContent(const shared_ptr<HTTPHeader>& header, WriteContenNotify
 		internal->filename = HTTPServerCacheFilePath::instance()->cachefilename();
 		internal->cache = make_shared<HTTPCacheFile>(internal->filename, true, false);
 	}
-
-	Value chunkval = header->header(Transfer_Encoding);
-	if (!chunkval.empty() && strcasecmp(chunkval.readString().c_str(), CHUNKED) == 0)
+	else
 	{
-		if (internal->cache)
-		{
-			internal->chunk->setReadCallback(ChunkData::ReadCallback(&HTTPCache::write, internal->cache));
+		internal->cache = make_shared<HTTPCacheMem>();
+	}
 
-			if (internal->notify) internal->notify->ReadReady();
+	if (header)
+	{
+		Value chunkval = header->header(Transfer_Encoding);
+		if (!chunkval.empty() && strcasecmp(chunkval.readString().c_str(), CHUNKED) == 0)
+		{
+			if (internal->cache)
+			{
+				internal->chunk = make_shared<ChunkData>();
+				internal->chunk->setReadCallback(ChunkData::ReadCallback(&ReadContentInternal::chunkReadCallback, internal));
+
+				if (internal->notify) internal->notify->ReadReady();
+			}
 		}
 	}
-	else if (type == HTTPCacheType_Mem) internal->cache = make_shared<HTTPCacheMem>();
 }
 ReadContent::~ReadContent()
 {
@@ -106,8 +116,6 @@ void ReadContent::setDataCallback(const DataCalback& callback)
 	if (internal->chunk)
 	{
 		internal->callback = callback;
-		internal->chunk->setReadCallback(ChunkData::ReadCallback(&ReadContentInternal::chunkReadCallback,internal));
-		internal->cache = NULL;
 		if (internal->notify)
 		{
 			internal->notify->ReadReady();
@@ -115,11 +123,16 @@ void ReadContent::setDataCallback(const DataCalback& callback)
 	}
 }
 
-uint32_t ReadContent::append(const char* buffer, uint32_t len)
+uint32_t ReadContent::append(const char* buffer, uint32_t len, bool & endoffile)
 {
-	if (internal->chunk) return internal->chunk->append(buffer, len);
-	else if(internal->cache)return internal->cache->write(buffer, len);
+	if (internal->chunk) return internal->chunk->append(buffer, len,endoffile);
+	else if (internal->cache)
+	{
+		endoffile = false;
+		internal->cache->write(buffer, len);
 
+		return len;
+	}
 	return len;
 }
 void ReadContent::read(String& data) {}
@@ -185,6 +198,7 @@ WriteContent::WriteContent(const shared_ptr<HTTPHeader>& header,WriteContenNotif
 {
 	internal = new WriteContentInternal;
 	internal->header = header;
+	internal->notify = NULL;
 
 	if (type == HTTPCacheType_Mem) internal->cache = make_shared<HTTPCacheMem>();
 	else
@@ -219,8 +233,9 @@ uint32_t WriteContent::size()
 {
 	return internal->cache->totalsize();
 }
-uint32_t WriteContent::append(const char* buffer, uint32_t len)
+uint32_t WriteContent::append(const char* buffer, uint32_t len, bool & endoffile)
 {
+	endoffile = false;
 	return 0;
 }
 void WriteContent::read(String& data)
@@ -244,9 +259,9 @@ void WriteContent::writeChunk(const char* buffer, uint32_t len)
 
 		internal->chunk = make_shared<ChunkData>(ChunkData::WriteCallback(&WriteContentInternal::write, internal));
 	}
-
+	bool endoffalse = false;
 	if(internal->chunk)
-		internal->chunk->append(buffer, len);
+		internal->chunk->append(buffer, len, endoffalse);
 }
 void WriteContent::writeChunkEnd()
 {

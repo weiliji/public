@@ -32,9 +32,10 @@ void ChunkData::setReadCallback(const ReadCallback& readcallback)
 	internal->readcallback = readcallback;
 }
 
-uint32_t ChunkData::append(const char* bufferptr, uint32_t len)
+uint32_t ChunkData::append(const char* bufferptr, uint32_t len, bool & endoffile)
 {
 	const char* buffer = bufferptr;
+	endoffile = false;
 
 	while (len >= (int)strlen(HTTPSEPERATOR))
 	{
@@ -55,6 +56,7 @@ uint32_t ChunkData::append(const char* bufferptr, uint32_t len)
 
 				len -= pos + (int)strlen(HTTPSEPERATOR) * 2;
 				buffer += pos + (int)strlen(HTTPSEPERATOR) * 2;
+				endoffile = true;
 
 				return buffer - bufferptr;
 			}

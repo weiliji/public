@@ -69,7 +69,7 @@ public:
 	virtual ~IContent() {}
 
 	virtual uint32_t size()= 0;
-	virtual uint32_t append(const char* buffer, uint32_t len) = 0;
+	virtual uint32_t append(const char* buffer, uint32_t len,bool & endoffile) = 0;
 	virtual void read(String& data) = 0;
 };
 
@@ -95,7 +95,7 @@ public:
 
 	void setReadCallback(const ReadCallback& readcallback);
 
-	uint32_t append(const char* buffer, uint32_t len);
+	uint32_t append(const char* buffer, uint32_t len, bool & endoffile);
 	void write(const char* buffer, uint32_t len);
 private:
 	struct ChunkDataInternal;
@@ -119,7 +119,7 @@ public:
 
 	void setDataCallback(const DataCalback& callback);
 private:
-	virtual uint32_t append(const char* buffer, uint32_t len);
+	virtual uint32_t append(const char* buffer, uint32_t len, bool & endoffile);
 	virtual void read(String& data);
 private:
 	struct ReadContentInternal;
@@ -140,7 +140,7 @@ public:
 	void writeChunkEnd();
 private:
 	virtual uint32_t size();
-	virtual uint32_t append(const char* buffer, uint32_t len);
+	virtual uint32_t append(const char* buffer, uint32_t len, bool & endoffile);
 	virtual void read(String& data);
 private:
 	struct WriteContentInternal;
