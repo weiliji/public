@@ -219,7 +219,7 @@ bool ConsoleCommand::separatePara(const char* command, int& argc, char** argv)
 {
 	if(NULL != command && 0 == argc && NULL != argv)
 	{
-		int startPos = 0;
+		size_t startPos = 0;
 		size_t cmdSize = strlen(command);
 		for (size_t i = 0; i != cmdSize; i++)
 		{

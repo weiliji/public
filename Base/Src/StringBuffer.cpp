@@ -89,7 +89,7 @@ StringBuffer& StringBuffer::append_front(const String& str)
 	BufferInfo info;
 	info.data = str;
 	info.buffer = info.data.c_str();
-	info.bufferlen = info.data.length();
+	info.bufferlen = (uint32_t)info.data.length();
 
 	internal->bufferlist.push_front(info);
 	internal->length += info.bufferlen;
@@ -125,7 +125,7 @@ StringBuffer& StringBuffer::append_back(const String& str)
 	BufferInfo info;
 	info.data = str;
 	info.buffer = info.data.c_str();
-	info.bufferlen = info.data.length();
+	info.bufferlen = (uint32_t)info.data.length();
 
 	internal->bufferlist.push_back(info);
 	internal->length += info.bufferlen;
@@ -148,7 +148,7 @@ StringBuffer& StringBuffer::append_back(const StringBuffer& buffer)
 //在前面放入数据
 StringBuffer& StringBuffer::push_front(const char* str)
 {
-	return push_front(str, strlen(str));
+	return push_front(str, (uint32_t)strlen(str));
 }
 StringBuffer& StringBuffer::push_front(const char* str, uint32_t len)
 {
@@ -170,7 +170,7 @@ StringBuffer& StringBuffer::push_front(const String& str)
 	BufferInfo info;
 	info.data = str;
 	info.buffer = info.data.c_str();
-	info.bufferlen = info.data.length();
+	info.bufferlen = (uint32_t)info.data.length();
 
 	internal->bufferlist.push_front(info);
 	internal->length += info.bufferlen;
@@ -191,7 +191,7 @@ StringBuffer& StringBuffer::push_front(const StringBuffer& buffer)
 //在后面追加数据
 StringBuffer& StringBuffer::push_back(const char* str)
 {
-	return push_back(str, strlen(str));
+	return push_back(str, (uint32_t)strlen(str));
 }
 StringBuffer& StringBuffer::push_back(const char* str, uint32_t len)
 {
@@ -213,7 +213,7 @@ StringBuffer& StringBuffer::push_back(const String& str)
 	BufferInfo info;
 	info.data = str;
 	info.buffer = info.data.c_str();
-	info.bufferlen = info.data.length();
+	info.bufferlen = (uint32_t)info.data.length();
 
 	internal->bufferlist.push_back(info);
 	internal->length += info.bufferlen;

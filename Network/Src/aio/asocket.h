@@ -126,7 +126,7 @@ public:
 		accept_addr.sin_family = AF_INET;
 		socklen_t accept_addrlen = sizeof(accept_addr);
 
-		int s_accept = ::accept(sock, (SOCKADDR *)&accept_addr, &accept_addrlen);
+		int s_accept = (int)::accept(sock, (SOCKADDR *)&accept_addr, &accept_addrlen);
 		if (s_accept <= 0)
 		{
 			return shared_ptr<Socket>();

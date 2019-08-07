@@ -1,7 +1,7 @@
+#include "IOWorker.h"
 #include "Network/Network.h"
 #include "Base/Base.h"
 #include "../version.inl"
-#include "IOWorker.h"
 //#include "boost/Include/boost/locale.hpp"
 using namespace Public::Base;
 

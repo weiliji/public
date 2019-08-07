@@ -89,7 +89,7 @@ std::string	Host::guessMyIpaddr(const std::string& destip)
 {
 	networkInitial();
 
-	int sockFd = socket(AF_INET, SOCK_DGRAM, 0);
+	int sockFd = (int)socket(AF_INET, SOCK_DGRAM, 0);
 	if (sockFd <= 0)
 	{
 		return "";

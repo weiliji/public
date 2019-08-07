@@ -194,7 +194,7 @@ struct AcceptEvent :public Event,public WinEvent
 			assert(0);
 		}
 
-		newsock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+		newsock = (int)WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 		if (newsock == INVALID_SOCKET)
 		{
 			return false;
