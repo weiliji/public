@@ -28,7 +28,7 @@ public:
 
 		return (uint32_t)(usedaddr - buffer);
 	}
-	void read(String& data) {}
+	std::string read() { return std::string(); }
 };
 
 class WebSocketSendContent :public IContent, public WebSocketProtocol
@@ -42,14 +42,16 @@ public:
 
 	uint32_t size() { return 0; }
 	uint32_t append(const char* buffer, uint32_t len, bool& endoffile) { return len; }
-	void read(String& data) 
+	std::string read() 
 	{
 		Guard locker(mutex);
 
-		if (sendlist.size()) return;
+		if (sendlist.size()) return std::string();
 
-		data = sendlist.front();
+		std::string data = sendlist.front();
 		sendlist.pop_front();
+
+		return data;
 	}
 };
 

@@ -70,6 +70,8 @@ public:
 			Guard locker(mutex);
 			sessionlist[info->commu.get()]  = info;
 		}
+
+		tcpServer->async_accept(Socket::AcceptedCallback(&HTTPServrManager::onAcceptCallback, this));
 	}
 private:
 	bool onRecvHeaderOk(HTTPCommunication* commu)

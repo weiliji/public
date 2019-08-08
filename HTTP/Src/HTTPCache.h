@@ -10,9 +10,9 @@ class HTTPCache
 public:
 	HTTPCache() {}
 	virtual ~HTTPCache() {}
-	virtual bool write(const char* buffer, int len) = 0;
-	virtual int read(char* buffer, int len) = 0;
-	virtual int totalsize() = 0;
+	virtual uint32_t write(const char* buffer, uint32_t len) = 0;
+	virtual uint32_t read(char* buffer, uint32_t len) = 0;
+	virtual uint32_t totalsize() = 0;
 };
 
 #define MAXBUFFERCACHESIZE	5*1024*1024
@@ -28,7 +28,7 @@ class HTTPCacheMem :public HTTPCache
 public:
 	HTTPCacheMem() :cachetotalsize(0) {}
 	virtual ~HTTPCacheMem() {}
-	virtual bool write(const char* buffer, int len)
+	virtual uint32_t write(const char* buffer, uint32_t len)
 	{
 		Guard locker(mutex);
 		//	if (cachetotalsize >= MAXBUFFERCACHESIZE) return false;
@@ -40,19 +40,19 @@ public:
 
 		cachetotalsize += len;
 
-		return true;
+		return len;
 	}
-	virtual int totalsize()
+	virtual uint32_t totalsize()
 	{
 		Guard locker(mutex);
 
 		return cachetotalsize;
 	}
-	virtual int read(char* buffer, int len)
+	virtual uint32_t read(char* buffer, uint32_t len)
 	{
 		Guard locker(mutex);
 
-		int havereadlen = 0;
+		uint32_t havereadlen = 0;
 		while (havereadlen < len && memcache.size() > 0)
 		{
 			BufferItem& item = memcache.front();
@@ -105,11 +105,11 @@ public:
 			}
 		}
 	}
-	virtual int totalsize()
+	virtual uint32_t totalsize()
 	{
 		return filesize;
 	}
-	virtual bool write(const char* buffer, int len)
+	virtual uint32_t write(const char* buffer, uint32_t len)
 	{
 		if (fd == NULL) return false;
 
@@ -118,14 +118,14 @@ public:
 		fflush(fd);
 		if (ret > 0) writepos += ret;
 
-		return ret == len;
+		return ret;
 	}
-	virtual int read(char* buffer, int len)
+	virtual uint32_t read(char* buffer, uint32_t len)
 	{
 		if (fd == NULL) return 0;
 
-		fseek(fd, (int)readpos, SEEK_SET);
-		int readlen = (int)fread(buffer, 1, len, fd);
+		fseek(fd, (uint32_t)readpos, SEEK_SET);
+		uint32_t readlen = (uint32_t)fread(buffer, 1, len, fd);
 		if (readlen > 0) readpos += readlen;
 
 		return readlen;

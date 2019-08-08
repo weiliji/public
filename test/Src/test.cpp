@@ -1,4 +1,4 @@
-#if 0
+#if 1
 #include "Base/Func.h"
 using namespace Public::Base;
 #include "HTTP/HTTP.h"
@@ -30,17 +30,17 @@ int main()
 
 	shared_ptr<IOWorker> worker = make_shared<IOWorker>(2);
 	
-	/*shared_ptr<HTTPClientRequest> req = make_shared<HTTPClientRequest>("get", "http://47.106.74.104:8010/");
-	Public::HTTP::HTTPClient client(worker,"user");
-	shared_ptr<Public::HTTP::HTTPClientResponse> respse = client.request(req);
+	//shared_ptr<HTTPClientRequest> req = make_shared<HTTPClientRequest>("get", "http://47.106.74.104:8010/");
+	//Public::HTTP::HTTPClient client(worker,"user");
+	//shared_ptr<Public::HTTP::HTTPClientResponse> respse = client.request(req);
 
-	int a = 0;
+	//int a = 0;
 
-	std::string data = respse->content()->read();*/
+	//std::string data = respse->content()->read();
 
 
 	shared_ptr<HTTPServer> server = make_shared<HTTPServer>(worker,"userage");
-	server->listen("/a","get" ,recvcallback1);
+	server->listen("/a$","get" ,recvcallback1);
 	server->defaultListen("get", recvcallback2);
 
 	server->run(8081);
@@ -262,7 +262,7 @@ int main()
 
 
 
-#if 1
+#if 0
 #include "Base/Base.h"
 using namespace Public::Base;
 

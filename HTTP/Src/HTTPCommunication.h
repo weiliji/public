@@ -41,6 +41,8 @@ public:
 
 	void setSendHeaderContentAndPostSend(const shared_ptr<HTTPHeader>& header, const shared_ptr<IContent>& content)
 	{
+		if (!sendContent) sendContent = content;
+
 		if (!sendHeader) 
 		{
 			sendHeader = header;
@@ -48,8 +50,7 @@ public:
 			buildSendDefaultHTTPHeader();
 
 			sendContentLen = parseHeaderContentLen(sendHeader);
-		}
-		if (!sendContent) sendContent = content;
+		}	
 
 		checkSendResultAndPostSend(false);
 	}
@@ -114,7 +115,7 @@ private:
 		}
 		else if (sendContentLen > sendTotalLen - sendHeaderLen && sendBuffer.length() == 0 && sendContent)
 		{
-			sendContent->read(sendBuffer);
+			sendBuffer = sendContent->read();
 		}
 		if (sendBuffer.length() == 0) return;
 
@@ -215,7 +216,7 @@ private:
 			if (!iswebsocket && !ischunk)
 			{
 				Value contentlenval = sendHeader->header(Content_Length);
-				if (!connectionval.empty())
+				if (connectionval.empty())
 				{
 					sendHeader->headers[Content_Length] = sendContent->size();
 				}

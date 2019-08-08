@@ -24,7 +24,7 @@ RegEx::RegEx(const std::string& pattern, RegExType type)
 
 	memset(&internal->compiled, 0, sizeof(internal->compiled));
 
-	int cflags = REG_EXTENDED;
+	int cflags = REG_NOSUB | REG_EXTENDED;
 	if (type == RegExType_InCase)
 		cflags |= REG_ICASE;
 

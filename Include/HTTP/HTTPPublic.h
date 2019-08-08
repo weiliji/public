@@ -70,7 +70,7 @@ public:
 
 	virtual uint32_t size()= 0;
 	virtual uint32_t append(const char* buffer, uint32_t len,bool & endoffile) = 0;
-	virtual void read(String& data) = 0;
+	virtual std::string read() = 0;
 };
 
 class HTTP_API WriteContenNotify
@@ -86,8 +86,8 @@ public:
 class HTTP_API ChunkData
 {
 public:
-	typedef Function2<bool, const char*, int> ReadCallback;
-	typedef Function2<bool, const char*, int> WriteCallback;
+	typedef Function2<uint32_t, const char*, uint32_t> ReadCallback;
+	typedef Function2<uint32_t, const char*, uint32_t> WriteCallback;
 
 	ChunkData();
 	ChunkData(const WriteCallback& writecallback);
@@ -113,14 +113,13 @@ public:
 	uint32_t size();
 
 	std::string cacheFileName() const;
-	int read(char* buffer, int maxlen) const;
-	std::string read() const;
+	uint32_t read(char* buffer, uint32_t maxlen) const;
+	std::string read();
 	bool readToFile(const std::string& filename) const;
 
 	void setDataCallback(const DataCalback& callback);
 private:
 	virtual uint32_t append(const char* buffer, uint32_t len, bool & endoffile);
-	virtual void read(String& data);
 private:
 	struct ReadContentInternal;
 	ReadContentInternal* internal;
@@ -132,8 +131,8 @@ public:
 	WriteContent(const shared_ptr<HTTPHeader>& header, WriteContenNotify* notify, HTTPCacheType type);
 	~WriteContent();
 
-	bool write(const char* buffer, int len);
-	bool write(const std::string& buffer);
+	uint32_t write(const char* buffer, uint32_t len);
+	uint32_t write(const std::string& buffer);
 	bool writeFromFile(const std::string& filename, bool needdeletefile = false);
 
 	void writeChunk(const char* buffer, uint32_t len);
@@ -141,7 +140,7 @@ public:
 private:
 	virtual uint32_t size();
 	virtual uint32_t append(const char* buffer, uint32_t len, bool & endoffile);
-	virtual void read(String& data);
+	virtual std::string read();
 private:
 	struct WriteContentInternal;
 	WriteContentInternal* internal;

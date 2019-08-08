@@ -17,7 +17,9 @@ HTTPServerSession::HTTPServerSession(const shared_ptr<HTTPCommunication>& commuS
 
 	response = make_shared<HTTPServerResponse>(commuSession,type);
 }
-HTTPServerSession::~HTTPServerSession() {}
+HTTPServerSession::~HTTPServerSession() 
+{
+}
 
 void HTTPServerSession::disconnected()
 {

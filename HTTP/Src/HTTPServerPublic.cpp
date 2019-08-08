@@ -94,7 +94,7 @@ HTTPServerResponse::HTTPServerResponse(const shared_ptr<HTTPCommunication>& comm
 	internal = new HTTPServerResponseInternal;
 
 	internal->header = make_shared<HTTPHeader>();
-
+	internal->commu = commu;
 	internal->content = make_shared<WriteContent>(commu->recvHeader,internal, type);
 
 	internal->header->statuscode = 200;

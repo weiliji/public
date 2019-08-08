@@ -15,14 +15,14 @@ struct ReadContent::ReadContentInternal
 	WriteContenNotify*	  notify;
 
 
-	bool chunkReadCallback(const char* buffer, int size)
+	uint32_t chunkReadCallback(const char* buffer, uint32_t size)
 	{
 		if (callback)
 			callback(buffer, size);
 		else
 			cache->write(buffer, size);
 
-		return true;
+		return size;
 	}
 };
 ReadContent::ReadContent(const shared_ptr<HTTPHeader>& header, WriteContenNotify* notify, HTTPCacheType type, const std::string& filename)
@@ -74,11 +74,11 @@ std::string ReadContent::cacheFileName() const
 {
 	return internal->filename;
 }
-int ReadContent::read(char* buffer, int maxlen) const
+uint32_t ReadContent::read(char* buffer, uint32_t maxlen) const
 {
 	return internal->cache->read(buffer, maxlen);
 }
-std::string ReadContent::read() const
+std::string ReadContent::read()
 {
 	std::string bufferstr;
 	char buffer[1024];
@@ -129,16 +129,10 @@ uint32_t ReadContent::append(const char* buffer, uint32_t len, bool & endoffile)
 	else if (internal->cache)
 	{
 		endoffile = false;
-		internal->cache->write(buffer, len);
-
-		return len;
+		return internal->cache->write(buffer, len);
 	}
 	return len;
 }
-void ReadContent::read(String& data) {}
-
-
-
 
 struct WriteContent::WriteContentInternal
 {
@@ -177,7 +171,7 @@ struct WriteContent::WriteContentInternal
 		header->headers[Content_Type] = contenttype;
 	}
 
-	bool write(const char* buffer, int len)
+	uint32_t write(const char* buffer, uint32_t len)
 	{
 		while (len > 0)
 		{
@@ -190,7 +184,7 @@ struct WriteContent::WriteContentInternal
 
 		if (notify) notify->WriteNotify();
 
-		return true;
+		return len;
 	}
 };
 
@@ -212,11 +206,11 @@ WriteContent::~WriteContent()
 	SAFE_DELETE(internal);
 }
 
-bool WriteContent::write(const char* buffer, int len)
+uint32_t WriteContent::write(const char* buffer, uint32_t len)
 {
 	return internal->write(buffer, len);
 }
-bool WriteContent::write(const std::string& buffer)
+uint32_t WriteContent::write(const std::string& buffer)
 {
 	return internal->write(buffer.c_str(), (int)buffer.length());
 }
@@ -238,8 +232,9 @@ uint32_t WriteContent::append(const char* buffer, uint32_t len, bool & endoffile
 	endoffile = false;
 	return 0;
 }
-void WriteContent::read(String& data)
+std::string WriteContent::read()
 {
+	std::string data;
 	char buffer[1024];
 
 	while (1)
@@ -249,6 +244,8 @@ void WriteContent::read(String& data)
 
 		data += string(buffer, readlen);
 	}
+
+	return data;
 }
 
 void WriteContent::writeChunk(const char* buffer, uint32_t len)
