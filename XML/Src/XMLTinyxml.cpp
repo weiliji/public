@@ -172,74 +172,6 @@ void findVersionAndEncoding(const std::string& xml,std::string& ver,XMLObject::E
 	}while(1);
 }
 
-
-int ansi2utf8(const char *inbuf,size_t inlen,char *outbuf,size_t outlen)
-{
-#ifdef WIN32
-	int len = MultiByteToWideChar(CP_ACP, 0, inbuf, inlen, NULL, 0);
-	wchar_t *wstr = new wchar_t[len + 1];
-	int tmplen  = MultiByteToWideChar(CP_ACP, 0,inbuf, inlen, wstr, len);
-	len = WideCharToMultiByte(CP_UTF8, 0, wstr, tmplen, NULL, 0, NULL, NULL);
-	if ((int)outlen < len)
-	{
-		delete []wstr;
-		return -1;
-	}
-	WideCharToMultiByte(CP_UTF8, 0, wstr, tmplen,outbuf, len, NULL, NULL);
-	delete []wstr;
-	return len;
-#else
-	iconv_t cd;
-	char **pin = (char **)&inbuf;
-	char **pout = &outbuf;
-	cd = iconv_open("utf-8","gb2312");
-	if (cd == 0) return -1;
-	size_t tmp = outlen;
-	if (iconv(cd,pin,&inlen,pout,&outlen) == (size_t)-1) 
-	{
-		iconv_close(cd);
-		return -1;
-	}
-	iconv_close(cd);
-	return (tmp - outlen);
-#endif
-}
-
-int utf82ansi(const char *inbuf,size_t inlen,char *outbuf,size_t outlen)
-{
-#ifdef WIN32
-	int len = MultiByteToWideChar(CP_UTF8, 0, inbuf, inlen, NULL, 0);
-	wchar_t *wstr = new wchar_t[len + 1];
-	
-	int lentmp = MultiByteToWideChar(CP_UTF8, 0,inbuf, inlen, wstr, len);
-	len = WideCharToMultiByte(CP_ACP, 0, wstr, lentmp, NULL, 0, NULL, NULL);
-	if ((int)outlen < len)
-	{
-		delete []wstr;
-		return -1;
-	}
-	WideCharToMultiByte(CP_ACP, 0, wstr, lentmp,outbuf, len, NULL, NULL);
-	delete []wstr;
-	return len;
-#else
-	iconv_t cd;
-	char **pin = (char **)&inbuf;
-	char **pout = &outbuf;
-	
-	cd = iconv_open("gb2312","utf-8");
-	if (cd == 0) return -1;
-	size_t tmp = outlen;
-	if (iconv(cd,pin,&inlen,pout,&outlen) == (size_t)-1) 
-	{
-		iconv_close(cd);
-		return -1;
-	}
-	iconv_close(cd);
-	return (tmp - outlen);
-#endif
-
-}
-
 std::string buildVaildXmlString(const std::string& name,const std::string& nametype,XMLObject::Encoding old,XMLObject::Encoding encode)
 {
 	if(old == XMLObject::Encoding_Unknown)
@@ -261,31 +193,11 @@ std::string buildVaildXmlString(const std::string& name,const std::string& namet
 
 	if(old == XMLObject::Encoding_UTF8)
 	{
-		int bufferlen = key.length() * 3 + 100;
-		char* buffer = new char[bufferlen];
-
-		int len = utf82ansi(key.c_str(), key.length(),buffer,bufferlen);
-		buffer[len] = 0;
-
-		std::string newstr(buffer);
-
-		delete []buffer;
-
-		return newstr;
+		return String::utf82ansi (key);
 	}
 	else
 	{
-		int bufferlen = key.length()  + 100;
-		char* buffer = new char[bufferlen];
-
-		int len = ansi2utf8(key.c_str(), key.length(),buffer,bufferlen);
-		buffer[len] = 0;
-
-		std::string newstr(buffer);
-
-		delete []buffer;
-
-		return newstr;
+		return String::ansi2utf8(key);
 	}
 }
 
