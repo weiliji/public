@@ -1,4 +1,4 @@
-#if 1
+#if 0
 #include "Base/Func.h"
 using namespace Public::Base;
 #include "HTTP/HTTP.h"
@@ -139,19 +139,27 @@ int main(int argc, const char* argv[])
 }
 #endif
 
-#if 0
+#if 1
 #include "OnvifClient/OnvifClient.h"
 using namespace Public::Onvif;
 
+void disconveryCallback(const shared_ptr<OnvifClientDefs::DiscoveryInfo>& info)
+{
+	if (info == NULL) return;
+	printf("%s %s\r\n", info->name.c_str(), info->addrs[0].c_str());
+}
 int main()
 {
 	shared_ptr<IOWorker> worker = make_shared<IOWorker>(4);
 
 	shared_ptr<OnvifClientManager> manager = make_shared<OnvifClientManager>(worker,"test");
 
-	shared_ptr<OnvifClient> client = manager->create(URL("admin:admin@192.168.13.33"));
+//	manager->disconvery(disconveryCallback);
 
-//-	shared_ptr<OnvifClientDefs::Info> info = client->getInfo();
+
+	shared_ptr<OnvifClient> client = manager->create(URL("admin:ms123456@192.168.7.104"));
+
+	shared_ptr<OnvifClientDefs::Info> info = client->getInfo();
 
 	shared_ptr<OnvifClientDefs::Capabilities> cap = client->getCapabities();	//获取设备能力集合，错误信息使用XM_GetLastError捕获
 
@@ -170,9 +178,9 @@ int main()
 //	shared_ptr<OnvifClientDefs::ConfigurationOptions> opt = client->getConfigurationOptions(); //错误信息使用XM_GetLastError捕获
 //	shared_ptr<Time> time = client->GetSystemDatetime(); //错误信息使用XM_GetLastError捕获
 
-	shared_ptr<OnvifClientDefs::StartRecvAlarm> alarminfo = client->startRecvAlarm(cap);
+//	shared_ptr<OnvifClientDefs::StartRecvAlarm> alarminfo = client->startRecvAlarm(cap);
 
-	client->recvAlarm(alarminfo);
+//	client->recvAlarm(alarminfo);
 
 	getchar();
 

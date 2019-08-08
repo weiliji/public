@@ -31,32 +31,32 @@ public:
 	{
 		network = make_shared<OnvifClientDefs::NetworkInterfaces>();
 
-		const XMLObject::Child& resp = body.getChild("tds:GetNetworkInterfacesResponse");
+		const XMLObject::Child& resp = body.getChild("GetNetworkInterfacesResponse");
 		if (!resp) return false;
 
-		const XMLObject::Child& networkinterface = resp.getChild("tds:NetworkInterfaces");
+		const XMLObject::Child& networkinterface = resp.getChild("NetworkInterfaces");
 		if (!networkinterface) return false;
 
-		network->name = networkinterface.getChild("tt:Info").getChild("tt:Name").data();
-		network->macaddr = networkinterface.getChild("tt:Info").getChild("tt:HwAddress").data();
+		network->name = networkinterface.getChild("Info").getChild("Name").data();
+		network->macaddr = networkinterface.getChild("Info").getChild("HwAddress").data();
 
-		const XMLObject::Child& manual = networkinterface.getChild("tt:IPv4").getChild("tt:Config").getChild("tt:Manual");
+		const XMLObject::Child& manual = networkinterface.getChild("IPv4").getChild("Config").getChild("Manual");
 		if (manual)
 		{
 			if (!manual.data().empty()) network->dhcp = !manual.data().readBool();
 			else
 			{
-				network->ipaddr = manual.getChild("tt:Address").data();
+				network->ipaddr = manual.getChild("Address").data();
 			}
 		}
 
-		const XMLObject::Child& dhcp = networkinterface.getChild("tt:IPv4").getChild("tt:Config").getChild("tt:DHCP");
+		const XMLObject::Child& dhcp = networkinterface.getChild("IPv4").getChild("Config").getChild("DHCP");
 		if (dhcp)
 		{
 			if (!dhcp.data().empty()) network->dhcp = dhcp.data().readBool();
 			else
 			{
-				network->ipaddr = dhcp.getChild("tt:Address").data();
+				network->ipaddr = dhcp.getChild("Address").data();
 			}
 		}
 

@@ -39,10 +39,10 @@ public:
 	{
 		streamurl = make_shared<OnvifClientDefs::StreamUrl>();
 
-		const XMLObject::Child& resp = body.getChild("trt:GetStreamUriResponse");
+		const XMLObject::Child& resp = body.getChild("GetStreamUriResponse");
 		if (!resp) return false;
 
-		streamurl->url = resp.getChild("trt:MediaUri").getChild("tt:Uri").data();
+		streamurl->url = resp.getChild("MediaUri").getChild("Uri").data();
 
 		if (streamurl->url == "") return false;
 

@@ -30,10 +30,10 @@ public:
 	{
 		profileInfo = make_shared<OnvifClientDefs::Profiles>();
 
-		XMLObject::Child resp = body.getChild("trt:GetProfilesResponse");
+		XMLObject::Child resp = body.getChild("GetProfilesResponse");
 		if (!resp) return false;
 		
-		XMLObject::Child& p_profiles = resp.firstChild("trt:Profiles");
+		XMLObject::Child& p_profiles = resp.firstChild("Profiles");
 		while (p_profiles)
 		{
 			OnvifClientDefs::ProfileInfo profile;
@@ -55,7 +55,7 @@ public:
 	{
 		OnvifClientDefs::ProfileInfo* profileInfo = &info;
 
-		const XMLObject::Child& pname = p_profiles.getChild("tt:Name");
+		const XMLObject::Child& pname = p_profiles.getChild("Name");
 		if (pname)
 		{
 			profileInfo->name = pname.data();
@@ -65,7 +65,7 @@ public:
 			return false;
 		}
 
-		const XMLObject::Child& videosrc = p_profiles.getChild("tt:VideoSourceConfiguration");
+		const XMLObject::Child& videosrc = p_profiles.getChild("VideoSourceConfiguration");
 		if (videosrc)
 		{
 			if (!parseVideoSource(videosrc,info))
@@ -74,7 +74,7 @@ public:
 			}
 		}
 
-		const XMLObject::Child& videoenc = p_profiles.getChild("tt:VideoEncoderConfiguration");
+		const XMLObject::Child& videoenc = p_profiles.getChild("VideoEncoderConfiguration");
 		if (videoenc)
 		{
 			if (!parseVideoEncoder(videoenc, info))
@@ -82,7 +82,7 @@ public:
 				profileInfo->VideoEncoder = NULL;
 			}
 		}
-		const XMLObject::Child& ptzcfg = p_profiles.getChild("tt:PTZConfiguration");
+		const XMLObject::Child& ptzcfg = p_profiles.getChild("PTZConfiguration");
 		if (ptzcfg)
 		{
 			if (!parsePTZCfg(ptzcfg, info))
@@ -99,14 +99,14 @@ private:
 		info.VideoSource = make_shared<OnvifClientDefs::_VideoSource>();
 
 		info.VideoSource->token = videosrc.attribute("token");
-		info.VideoSource->stream_name = videosrc.getChild("tt:Name").data();
-		info.VideoSource->use_count = videosrc.getChild("tt:UseCount").data().readInt();
-		info.VideoSource->source_token = videosrc.getChild("tt:SourceToken").data();
+		info.VideoSource->stream_name = videosrc.getChild("Name").data();
+		info.VideoSource->use_count = videosrc.getChild("UseCount").data().readInt();
+		info.VideoSource->source_token = videosrc.getChild("SourceToken").data();
 
 		if (info.VideoSource->stream_name == "" || info.VideoSource->source_token == "") return false;
 
 
-		const XMLObject::Child& bounds = videosrc.getChild("tt:Bounds");
+		const XMLObject::Child& bounds = videosrc.getChild("Bounds");
 		if (!bounds) return false;
 
 		info.VideoSource->height = bounds.attribute("height").readInt();
@@ -126,25 +126,25 @@ private:
 		
 		if (info.VideoEncoder->name == "" || info.VideoEncoder->token == "") return false;
 
-		info.VideoEncoder->use_count = videoenc.getChild("tt:UseCount").data().readInt();
-		info.VideoEncoder->encoding = onvif_parse_encoding(videoenc.getChild("tt:Encoding").data());
+		info.VideoEncoder->use_count = videoenc.getChild("UseCount").data().readInt();
+		info.VideoEncoder->encoding = onvif_parse_encoding(videoenc.getChild("Encoding").data());
 
-		info.VideoEncoder->width = videoenc.getChild("tt:Resolution").getChild("tt:Width").data().readInt();
-		info.VideoEncoder->height = videoenc.getChild("tt:Resolution").getChild("tt:Height").data().readInt();
-		info.VideoEncoder->quality = videoenc.getChild("tt:Quality").data().readFloat();
+		info.VideoEncoder->width = videoenc.getChild("Resolution").getChild("Width").data().readInt();
+		info.VideoEncoder->height = videoenc.getChild("Resolution").getChild("Height").data().readInt();
+		info.VideoEncoder->quality = videoenc.getChild("Quality").data().readFloat();
 		
-		info.VideoEncoder->framerate_limit = videoenc.getChild("tt:RateControl").getChild("tt:FrameRateLimit").data().readInt();
-		info.VideoEncoder->encoding_interval = videoenc.getChild("tt:RateControl").getChild("tt:EncodingInterval").data().readInt();
-		info.VideoEncoder->bitrate_limit = videoenc.getChild("tt:RateControl").getChild("tt:BitrateLimit").data().readInt();
+		info.VideoEncoder->framerate_limit = videoenc.getChild("RateControl").getChild("FrameRateLimit").data().readInt();
+		info.VideoEncoder->encoding_interval = videoenc.getChild("RateControl").getChild("EncodingInterval").data().readInt();
+		info.VideoEncoder->bitrate_limit = videoenc.getChild("RateControl").getChild("BitrateLimit").data().readInt();
 
 
 		if (info.VideoEncoder->encoding == OnvifClientDefs::VIDEO_ENCODING_H264)
 		{
-			info.VideoEncoder->gov_len = videoenc.getChild("tt:H264").getChild("tt:GovLength").data().readInt();
-			info.VideoEncoder->h264_profile = onvif_parse_h264_profile(videoenc.getChild("tt:H264").getChild("tt:H264Profile").data());
+			info.VideoEncoder->gov_len = videoenc.getChild("H264").getChild("GovLength").data().readInt();
+			info.VideoEncoder->h264_profile = onvif_parse_h264_profile(videoenc.getChild("H264").getChild("H264Profile").data());
 		}
 
-		info.VideoEncoder->session_timeout = videoenc.getChild("tt:SessionTimeout").data().readInt();
+		info.VideoEncoder->session_timeout = videoenc.getChild("SessionTimeout").data().readInt();
 
 		return true;
 	}
@@ -154,19 +154,19 @@ private:
 		info.PTZConfig = make_shared<OnvifClientDefs::PTZConfig>();
 
 		info.PTZConfig->token = ptzcfg.attribute("token");
-		info.PTZConfig->name = ptzcfg.getChild("tt:Name").data();
+		info.PTZConfig->name = ptzcfg.getChild("Name").data();
 
 		if (info.PTZConfig->token == "" || info.PTZConfig->name == "") return false;
 
-		info.PTZConfig->use_count = ptzcfg.getChild("tt:UseCount").data().readInt();
-		info.PTZConfig->nodeToken = ptzcfg.getChild("tt:NodeToken").data();
+		info.PTZConfig->use_count = ptzcfg.getChild("UseCount").data().readInt();
+		info.PTZConfig->nodeToken = ptzcfg.getChild("NodeToken").data();
 
-		info.PTZConfig->def_speed.pan_tilt_x = ptzcfg.getChild("tt:DefaultPTZSpeed").getChild("tt:PanTilt").attribute("x").readInt();
-		info.PTZConfig->def_speed.pan_tilt_y = ptzcfg.getChild("tt:DefaultPTZSpeed").getChild("tt:PanTilt").attribute("y").readInt();
+		info.PTZConfig->def_speed.pan_tilt_x = ptzcfg.getChild("DefaultPTZSpeed").getChild("PanTilt").attribute("x").readInt();
+		info.PTZConfig->def_speed.pan_tilt_y = ptzcfg.getChild("DefaultPTZSpeed").getChild("PanTilt").attribute("y").readInt();
 		
-		info.PTZConfig->def_speed.zoom = ptzcfg.getChild("tt:DefaultPTZSpeed").getChild("tt:Zoom").attribute("x").readInt();
+		info.PTZConfig->def_speed.zoom = ptzcfg.getChild("DefaultPTZSpeed").getChild("Zoom").attribute("x").readInt();
 
-		info.PTZConfig->def_timeout = ptzcfg.getChild("tt:DefaultPTZTimeout").data().readInt();
+		info.PTZConfig->def_timeout = ptzcfg.getChild("DefaultPTZTimeout").data().readInt();
 
 		return true;
 	}

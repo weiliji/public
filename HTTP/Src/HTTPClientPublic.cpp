@@ -22,7 +22,7 @@ struct  HTTPClientResponse::HTTPClientResponseInternal:public WriteContenNotify
 HTTPClientResponse::HTTPClientResponse(const shared_ptr<HTTPCommunication>& commu, HTTPCacheType type, const std::string& filename)
 {
 	internal = new HTTPClientResponseInternal;
-	internal->header = make_shared<HTTPHeader>();
+	internal->header = commu->recvHeader;
 	internal->commu = commu;
 	internal->content = make_shared<ReadContent>(commu->recvHeader,internal,type,filename);
 }
@@ -69,7 +69,9 @@ struct HTTPClientRequest::HTTPClientRequestInternal :public WriteContenNotify
 
 	uint32_t	timeout;
 
-	virtual void WriteNotify() {}
+	virtual void WriteNotify() 
+	{
+	}
 	virtual void ReadReady() {}
 	virtual void setWriteFileName(const std::string& filename)
 	{

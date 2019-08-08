@@ -138,7 +138,7 @@ std::string XMLObject::toString(Encoding encode) const
 	TiXmlDeclaration* declaration = new TiXmlDeclaration(internal->version.c_str(), internal->encode == Encoding_UTF8 ? "UTF-8" : "gb2312", "");
 	doc->LinkEndChild(declaration);
 
-	TiXmlElement* root = new TiXmlElement(buildVaildXmlString(internal->root.name(), internal->encode, encode).c_str());
+	TiXmlElement* root = new TiXmlElement(buildVaildXmlString(internal->root.name(),internal->root.nametype() ,internal->encode, encode).c_str());
 
 	buildTiXmlElementFormChild(internal->root, root, internal->encode, encode);
 	doc->LinkEndChild(root);

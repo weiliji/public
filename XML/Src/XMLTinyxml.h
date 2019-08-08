@@ -11,7 +11,7 @@ void findVersionAndEncoding(const std::string& xml,std::string& ver,XMLObject::E
 void buildTiXmlElementFormChild(XMLObject::Child& child,TiXmlElement* pElement,XMLObject::Encoding old,XMLObject::Encoding encode);
 void parseTiXmlElementAttribute(TiXmlElement* pElement,XMLObject::Child& child);
 void parseTiXmlElementAndAddChild(TiXmlNode* pElement,XMLObject::Child& child);
-std::string buildVaildXmlString(const std::string& val,XMLObject::Encoding old,XMLObject::Encoding encode);
+std::string buildVaildXmlString(const std::string& name, const std::string& nametype, XMLObject::Encoding old,XMLObject::Encoding encode);
 
 }
 }

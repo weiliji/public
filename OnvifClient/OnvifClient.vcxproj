@@ -106,8 +106,10 @@
   <ItemGroup>
     <ClInclude Include="..\Include\OnvifClient\OnvifClient.h" />
     <ClInclude Include="..\Include\OnvifClient\OnvifClientDefs.h" />
+    <ClInclude Include="Src\OnvifDiscovery.h" />
     <ClInclude Include="Src\protocol\CmdAbsoluteMove.h" />
     <ClInclude Include="Src\protocol\CmdContinuousMove.h" />
+    <ClInclude Include="Src\protocol\CmdDiscovery.h" />
     <ClInclude Include="Src\protocol\CmdGetAlarm.h" />
     <ClInclude Include="Src\protocol\CmdGetCapabilities.h" />
     <ClInclude Include="Src\protocol\CmdGetConfigurationOptions.h" />

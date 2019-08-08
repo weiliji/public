@@ -31,22 +31,22 @@ public:
 		time = make_shared<Time>();
 		time->breakTime(Time::getCurrentTime().makeTime());
 
-		const XMLObject::Child & resp = body.getChild("tds:GetSystemDateAndTimeResponse");
+		const XMLObject::Child & resp = body.getChild("GetSystemDateAndTimeResponse");
 		if (!resp) return false;
 
-		const XMLObject::Child& systemdate = resp.getChild("tds:SystemDateAndTime");
+		const XMLObject::Child& systemdate = resp.getChild("SystemDateAndTime");
 		if (!systemdate) return false;
 
-		const XMLObject::Child& utcdate = systemdate.getChild("tt:UTCDateTime");
+		const XMLObject::Child& utcdate = systemdate.getChild("UTCDateTime");
 		if (!utcdate) return false;
 		
-		time->hour = utcdate.getChild("tt:Time").getChild("tt:Hour").data().readInt();
-		time->minute = utcdate.getChild("tt:Time").getChild("tt:Minute").data().readInt();
-		time->second = utcdate.getChild("tt:Time").getChild("tt:Second").data().readInt();
+		time->hour = utcdate.getChild("Time").getChild("Hour").data().readInt();
+		time->minute = utcdate.getChild("Time").getChild("Minute").data().readInt();
+		time->second = utcdate.getChild("Time").getChild("Second").data().readInt();
 
-		time->year = utcdate.getChild("tt:Date").getChild("tt:Year").data().readInt();
-		time->month = utcdate.getChild("tt:Date").getChild("tt:Month").data().readInt();
-		time->day = utcdate.getChild("tt:Date").getChild("tt:Day").data().readInt();
+		time->year = utcdate.getChild("Date").getChild("Year").data().readInt();
+		time->month = utcdate.getChild("Date").getChild("Month").data().readInt();
+		time->day = utcdate.getChild("Date").getChild("Day").data().readInt();
 		
 		
 		return true; 

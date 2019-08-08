@@ -32,63 +32,63 @@ public:
 	{
 		ptzcfg = make_shared<OnvifClientDefs::_PTZConfig>();
 
-		XMLN * p_res = xml_node_soap_get(p_xml, "tptz:GetNodeResponse");
+		XMLN * p_res = xml_node_soap_get(p_xml, "GetNodeResponse");
 		if (NULL == p_res)
 		{
 			return false;
 		}
 
-		XMLN * PTZNode = xml_node_soap_get(p_res, "tptz:PTZNode");
+		XMLN * PTZNode = xml_node_soap_get(p_res, "PTZNode");
 		if (PTZNode)
 		{
-			XMLN * p_Space = xml_node_soap_get(PTZNode, "tt:SupportedPTZSpaces");
+			XMLN * p_Space = xml_node_soap_get(PTZNode, "SupportedPTZSpaces");
 			if (p_Space)
 			{
-				XMLN * p_AbsolutePanTiltPositionSpace = xml_node_soap_get(p_Space, "tt:AbsolutePanTiltPositionSpace");
+				XMLN * p_AbsolutePanTiltPositionSpace = xml_node_soap_get(p_Space, "AbsolutePanTiltPositionSpace");
 				if (p_AbsolutePanTiltPositionSpace)
 				{
-					XMLN * p_XRange = xml_node_soap_get(p_AbsolutePanTiltPositionSpace, "tt:XRange");
+					XMLN * p_XRange = xml_node_soap_get(p_AbsolutePanTiltPositionSpace, "XRange");
 					if (p_XRange)
 					{
-						XMLN * p_XMin = xml_node_soap_get(p_XRange, "tt:Min");
+						XMLN * p_XMin = xml_node_soap_get(p_XRange, "Min");
 						if (p_XMin)
 						{
 							ptzcfg->pantilt_x.min = (float)atof(p_XMin->data);
 						}
-						XMLN * p_XMax = xml_node_soap_get(p_XRange, "tt:Max");
+						XMLN * p_XMax = xml_node_soap_get(p_XRange, "Max");
 						if (p_XMax)
 						{
 							ptzcfg->pantilt_x.max = (float)atof(p_XMax->data);
 						}
 					}
 
-					XMLN * p_YRange = xml_node_soap_get(p_AbsolutePanTiltPositionSpace, "tt:YRange");
+					XMLN * p_YRange = xml_node_soap_get(p_AbsolutePanTiltPositionSpace, "YRange");
 					if (p_YRange)
 					{
-						XMLN * p_XMin = xml_node_soap_get(p_YRange, "tt:Min");
+						XMLN * p_XMin = xml_node_soap_get(p_YRange, "Min");
 						if (p_XMin)
 						{
 							ptzcfg->pantilt_y.min = (float)atof(p_XMin->data);
 						}
-						XMLN * p_XMax = xml_node_soap_get(p_YRange, "tt:Max");
+						XMLN * p_XMax = xml_node_soap_get(p_YRange, "Max");
 						if (p_XMax)
 						{
 							ptzcfg->pantilt_y.max = (float)atof(p_XMax->data);
 						}
 					}
 				}
-				XMLN * p_AbsoluteZoomPositionSpace = xml_node_soap_get(p_Space, "tt:AbsoluteZoomPositionSpace");
+				XMLN * p_AbsoluteZoomPositionSpace = xml_node_soap_get(p_Space, "AbsoluteZoomPositionSpace");
 				if (p_AbsoluteZoomPositionSpace)
 				{
-					XMLN * p_XRange = xml_node_soap_get(p_AbsoluteZoomPositionSpace, "tt:XRange");
+					XMLN * p_XRange = xml_node_soap_get(p_AbsoluteZoomPositionSpace, "XRange");
 					if (p_XRange)
 					{
-						XMLN * p_XMin = xml_node_soap_get(p_XRange, "tt:Min");
+						XMLN * p_XMin = xml_node_soap_get(p_XRange, "Min");
 						if (p_XMin)
 						{
 							ptzcfg->zoom.min = (float)atof(p_XMin->data);
 						}
-						XMLN * p_XMax = xml_node_soap_get(p_XRange, "tt:Max");
+						XMLN * p_XMax = xml_node_soap_get(p_XRange, "Max");
 						if (p_XMax)
 						{
 							ptzcfg->zoom.max = (float)atof(p_XMax->data);

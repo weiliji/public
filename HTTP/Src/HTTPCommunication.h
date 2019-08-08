@@ -216,7 +216,7 @@ private:
 			if (!iswebsocket && !ischunk)
 			{
 				Value contentlenval = sendHeader->header(Content_Length);
-				if (connectionval.empty())
+				if (contentlenval.empty())
 				{
 					sendHeader->headers[Content_Length] = sendContent->size();
 				}

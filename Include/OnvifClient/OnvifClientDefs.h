@@ -233,6 +233,11 @@ struct StartRecvAlarm
 	Time			terminationTime;
 };
 
+struct DiscoveryInfo
+{
+	std::string		name;
+	std::vector<std::string> addrs;
+};
 
 }
 }

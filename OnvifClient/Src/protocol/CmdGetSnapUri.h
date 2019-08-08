@@ -32,10 +32,10 @@ public:
 	{
 		snapurl = make_shared<OnvifClientDefs::SnapUrl>();
 
-		const XMLObject::Child& resp = body.getChild("trt:GetSnapshotURLResponse");
+		const XMLObject::Child& resp = body.getChild("GetSnapshotURLResponse");
 		if (!resp) return false;
 
-		snapurl->url = resp.getChild("trt:MediaURL").getChild("trt:URL").data();
+		snapurl->url = resp.getChild("MediaURL").getChild("URL").data();
 
 		if (snapurl->url == "") return false;
 

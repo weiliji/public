@@ -19,6 +19,7 @@ struct XMLObject::Child::ChildInternal
 	std::list<XMLObject::Attribute>	attributeList;
 	std::list<XMLObject::Child*>	childList;
 	std::string						name;
+	std::string						nametype;
 	std::string 					value;
 	int								getChildIndex;
 	int								getAttributeIndex;
@@ -48,10 +49,19 @@ struct XMLObject::Child::ChildInternal
 
 	Value& attribute(const std::string& key)
 	{
+		std::string name = key;
+		std::string nametype;
+		size_t pos = String::indexOf(key, ":");
+		if (pos != -1)
+		{
+			nametype = std::string(key.c_str(), pos);
+			name = std::string(key.c_str() + pos + 1);
+		}
+
 		std::list<XMLObject::Attribute>::iterator iter;
 		for (iter = attributeList.begin(); iter != attributeList.end(); iter++)
 		{
-			if (iter->name == key)
+			if (iter->name == name && iter->nametype == (nametype.length() > 0 ? nametype : iter->nametype))
 			{
 				return iter->value;
 			}
@@ -128,10 +138,10 @@ struct XMLObject::Child::ChildInternal
 		return empltyAttribute;
 	}
 };
-XMLObject::Child::Child(const std::string& name)
+XMLObject::Child::Child(const std::string& _name)
 {
 	internal = new ChildInternal;
-	internal->name = name;
+	name(_name);
 }
 XMLObject::Child::Child(const Child& child)
 {
@@ -152,13 +162,28 @@ XMLObject::Child::~Child()
 	delete internal;
 }
 
+void XMLObject::Child::nametype(const std::string& type)
+{
+	internal->nametype = type;
+}
 void XMLObject::Child::name(const std::string& _name)
 {
 	internal->name = _name;
+
+	size_t pos = String::indexOf(_name, ":");
+	if (pos != -1)
+	{
+		internal->nametype = std::string(_name.c_str(), pos);
+		internal->name = std::string(_name.c_str() + pos + 1);
+	}
 }
 std::string XMLObject::Child::name() const
 {
 	return internal->name;
+}
+std::string XMLObject::Child::nametype() const
+{
+	return internal->nametype;
 }
 void XMLObject::Child::data(const Value& value)
 {
@@ -220,10 +245,19 @@ int XMLObject::Child::attributeCount() const
 
 void XMLObject::Child::attribute(const std::string& key,const Value& val)
 {
+	std::string name = key;
+	std::string nametype;
+	size_t pos = String::indexOf(key, ":");
+	if (pos != -1)
+	{
+		nametype = std::string(key.c_str(), pos);
+		name = std::string(key.c_str() + pos + 1);
+	}
+
 	std::list<XMLObject::Attribute>::iterator iter;
 	for(iter = internal->attributeList.begin();iter != internal->attributeList.end();iter ++)
 	{
-		if(iter->name == key)
+		if(iter->name == name && iter->nametype == (nametype.length() > 0 ? nametype : iter->nametype))
 		{
 			iter->value = val;
 			return;
@@ -232,6 +266,7 @@ void XMLObject::Child::attribute(const std::string& key,const Value& val)
 
 	XMLObject::Attribute attri;
 	attri.name = key;
+	attri.nametype = nametype;
 	attri.value = val;
 
 	internal->attributeList.push_back(attri);
@@ -247,10 +282,19 @@ const Value& XMLObject::Child::attribute(const std::string& key)const
 
 void XMLObject::Child::removeAttribute(const std::string& key)
 {
+	std::string name = key;
+	std::string nametype;
+	size_t pos = String::indexOf(key, ":");
+	if (pos != -1)
+	{
+		nametype = std::string(key.c_str(), pos);
+		name = std::string(key.c_str() + pos + 1);
+	}
+
 	std::list<XMLObject::Attribute>::iterator iter;
 	for(iter = internal->attributeList.begin();iter != internal->attributeList.end();iter ++)
 	{
-		if(iter->name == key)
+		if (iter->name == name && iter->nametype == (nametype.length() > 0 ? nametype : iter->nametype))
 		{
 			internal->attributeList.erase(iter);
 			break;

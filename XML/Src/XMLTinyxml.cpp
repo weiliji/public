@@ -78,7 +78,7 @@ void buildTiXmlElementFormChild(XMLObject::Child& child,TiXmlElement* pElement,X
 	XMLObject::Attribute atti = child.firstAttribute();
 	while(!atti.isEmpty())
 	{
-		pElement->SetAttribute(buildVaildXmlString(atti.name,old,encode).c_str(),buildVaildXmlString(atti.value.readString(),old,encode).c_str());
+		pElement->SetAttribute(buildVaildXmlString(atti.name,atti.nametype,old,encode).c_str(),buildVaildXmlString(atti.value.readString(),"",old,encode).c_str());
 
 		atti = child.nextAttribute();
 	}
@@ -86,7 +86,7 @@ void buildTiXmlElementFormChild(XMLObject::Child& child,TiXmlElement* pElement,X
 	XMLObject::Child subchild = child.firstChild();
 	while(!subchild.isEmpty())
 	{
-		TiXmlElement* childElement = new TiXmlElement(buildVaildXmlString(subchild.name(),old,encode).c_str());
+		TiXmlElement* childElement = new TiXmlElement(buildVaildXmlString(subchild.name(),subchild.nametype(),old,encode).c_str());
 		if(childElement == NULL)
 		{
 			return;
@@ -240,7 +240,7 @@ int utf82ansi(const char *inbuf,size_t inlen,char *outbuf,size_t outlen)
 
 }
 
-std::string buildVaildXmlString(const std::string& val,XMLObject::Encoding old,XMLObject::Encoding encode)
+std::string buildVaildXmlString(const std::string& name,const std::string& nametype,XMLObject::Encoding old,XMLObject::Encoding encode)
 {
 	if(old == XMLObject::Encoding_Unknown)
 	{
@@ -251,17 +251,20 @@ std::string buildVaildXmlString(const std::string& val,XMLObject::Encoding old,X
 		encode = old;
 	}
 
+	std::string key = name;
+	if (nametype.length() > 0) key = nametype + ":" + name;
+
 	if(old == encode)
 	{
-		return val;
+		return key;
 	}
 
 	if(old == XMLObject::Encoding_UTF8)
 	{
-		int bufferlen = val.length() * 3 + 100;
+		int bufferlen = key.length() * 3 + 100;
 		char* buffer = new char[bufferlen];
 
-		int len = utf82ansi(val.c_str(),val.length(),buffer,bufferlen);
+		int len = utf82ansi(key.c_str(), key.length(),buffer,bufferlen);
 		buffer[len] = 0;
 
 		std::string newstr(buffer);
@@ -272,10 +275,10 @@ std::string buildVaildXmlString(const std::string& val,XMLObject::Encoding old,X
 	}
 	else
 	{
-		int bufferlen = val.length()  + 100;
+		int bufferlen = key.length()  + 100;
 		char* buffer = new char[bufferlen];
 
-		int len = ansi2utf8(val.c_str(),val.length(),buffer,bufferlen);
+		int len = ansi2utf8(key.c_str(), key.length(),buffer,bufferlen);
 		buffer[len] = 0;
 
 		std::string newstr(buffer);

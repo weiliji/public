@@ -52,11 +52,13 @@ private:
 	OnvifClientInternal* internal;
 };
 
-
 //OnvifClient管理器
 class ONVIFCLIENT_API OnvifClientManager
 {
 	friend OnvifClient;
+public:
+	//当返回一个OnvifClientDefs::DiscoveryInfo空的包，表示搜索结束
+	typedef Function1<void, const shared_ptr<OnvifClientDefs::DiscoveryInfo>&> DisconveryCallback;
 public:
 	//userContent 用户描述信息,threadNum 线程数，根据RTSP的用户量决定
 	OnvifClientManager(const shared_ptr<IOWorker>& worker,const std::string& userContent);
@@ -65,6 +67,9 @@ public:
 	//根据onvif设备地址创建一个设备,url 为设备地址，包括IP，端口，用户名，密码等信息,onvif默认请求路径为 "/onvif/device_service"
 	//如:admin:admin@192.168.13.33
 	shared_ptr<OnvifClient> create(const URL& url);
+
+	//搜索设备，超时后自动停止搜索
+	bool disconvery(const DisconveryCallback& callback, uint32_t timeout = 10000);
 private:
 	struct OnvifClientManagerInternal;
 	OnvifClientManagerInternal* internal;

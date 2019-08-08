@@ -43,19 +43,19 @@ public:
 	{
 		capabilities = make_shared<OnvifClientDefs::Capabilities>();
 
-		const XMLObject::Child& resp = p_xml.getChild("tds:GetCapabilitiesResponse");
+		const XMLObject::Child& resp = p_xml.getChild("GetCapabilitiesResponse");
 		if (!resp) return false;
 
-		const XMLObject::Child& cap = resp.getChild("tds:Capabilities");
+		const XMLObject::Child& cap = resp.getChild("Capabilities");
 		if (!cap) return false;
 
-		const XMLObject::Child& media = cap.getChild("tt:Media");
+		const XMLObject::Child& media = cap.getChild("Media");
 		if(media) capabilities->Media.Support = parseMedia(media);
 		
-		const XMLObject::Child& ptz = cap.getChild("tt:PTZ");
+		const XMLObject::Child& ptz = cap.getChild("PTZ");
 		if(ptz) capabilities->PTZ.Support = parsePtz(ptz);
 		
-		const XMLObject::Child& events = cap.getChild("tt:Events");
+		const XMLObject::Child& events = cap.getChild("Events");
 		if (events) capabilities->Events.Support = parseEvents(events);
 
 		return true;
@@ -63,7 +63,7 @@ public:
 private:
 	virtual bool parseMedia(const XMLObject::Child& body)
 	{
-		const XMLObject::Child& xaddr = body.getChild("tt:XAddr");
+		const XMLObject::Child& xaddr = body.getChild("XAddr");
 		if (xaddr)
 		{
 			capabilities->Media.xaddr = xaddr.data();
@@ -73,20 +73,20 @@ private:
 			return FALSE;
 		}
 
-		const XMLObject::Child& cap = body.getChild("tt:StreamingCapabilities");
+		const XMLObject::Child& cap = body.getChild("StreamingCapabilities");
 		if (!cap) return FALSE;
 		
-		const XMLObject::Child& rtpmult = cap.getChild("tt:RTPMulticast");
+		const XMLObject::Child& rtpmult = cap.getChild("RTPMulticast");
 		if (rtpmult)
 		{
 			capabilities->Media.RTPMulticast = rtpmult.data().readBool();
 		}
-		const XMLObject::Child& rtptcp = cap.getChild("tt:RTP_TCP");
+		const XMLObject::Child& rtptcp = cap.getChild("RTP_TCP");
 		if (rtptcp)
 		{
 			capabilities->Media.RTP_TCP = rtptcp.data().readBool();
 		}
-		const XMLObject::Child& rtsp = cap.getChild("tt:RTP_RTSP_TCP");
+		const XMLObject::Child& rtsp = cap.getChild("RTP_RTSP_TCP");
 		if (rtsp)
 		{
 			capabilities->Media.RTP_RTSP_TCP = rtsp.data().readBool();
@@ -98,7 +98,7 @@ private:
 
 	bool parsePtz(const XMLObject::Child& ptz)
 	{
-		const XMLObject::Child& xaddr = ptz.getChild("tt:XAddr");
+		const XMLObject::Child& xaddr = ptz.getChild("XAddr");
 		if (!xaddr) return false;
 
 		capabilities->PTZ.xaddr = xaddr.data();
@@ -108,7 +108,7 @@ private:
 
 	bool parseEvents(const XMLObject::Child& p_events)
 	{
-		const XMLObject::Child& xaddr = p_events.getChild("tt:XAddr");
+		const XMLObject::Child& xaddr = p_events.getChild("XAddr");
 		if (!xaddr) return false;
 
 		capabilities->Events.xaddr = xaddr.data();

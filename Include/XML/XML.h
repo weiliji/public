@@ -18,6 +18,7 @@ public:
 		Attribute(const Attribute& attri);
 		~Attribute();
 
+		std::string		nametype;
 		std::string		name;
 		Value			value;
 
@@ -34,8 +35,10 @@ public:
 		Child(const Child& child);
 		~Child();
 
+		void nametype(const std::string& type);
 		void name(const std::string& name);
 		std::string name() const;
+		std::string nametype() const;
 
 		void data(const Value& value);
 		Value data() const;
