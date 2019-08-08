@@ -28,6 +28,7 @@
     <ClInclude Include="Src\HTTPCache.h" />
     <ClInclude Include="Src\HTTPDefine.h" />
     <ClInclude Include="Src\HTTPCommunication.h" />
+    <ClInclude Include="Src\HTTPErroCode.h" />
     <ClInclude Include="Src\WebSocketProtocol.h" />
   </ItemGroup>
   <ItemGroup>

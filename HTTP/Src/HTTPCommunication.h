@@ -1,6 +1,7 @@
 #pragma once
 #include "HTTP/HTTPPublic.h"
 #include "HTTP/HTTPParse.h"
+#include "HTTPErroCode.h"
 namespace Public {
 namespace HTTP {
 
@@ -110,6 +111,8 @@ private:
 		{
 			if (!sendHeader) return;
 			
+			if (sendHeader->statusmsg.length() == 0) sendHeader->statusmsg = HTTPErrorCode::getErrorMsg(sendHeader->statuscode);
+
 			sendBuffer = HTTPBuild::build(!isServer, *sendHeader.get());
 			sendHeaderLen = sendBuffer.length();
 		}
