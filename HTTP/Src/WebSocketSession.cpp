@@ -26,7 +26,7 @@ public:
 	{
 		const char* usedaddr = parseProtocol(buffer, len);
 
-		return usedaddr - buffer;
+		return (uint32_t)(usedaddr - buffer);
 	}
 	void read(String& data) {}
 };
@@ -177,7 +177,7 @@ uint32_t WebSocketServerSession::sendListSize()
 	Guard locker(internal->sendcontent->mutex);
 	for (std::list<std::string>::iterator iter = internal->sendcontent->sendlist.begin(); iter != internal->sendcontent->sendlist.end(); iter++)
 	{
-		cachesize += (*iter).length();
+		cachesize += (uint32_t)(*iter).length();
 	}
 
 	return cachesize;

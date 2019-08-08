@@ -119,9 +119,9 @@ struct HTTPClient::HTTPClientInternal
 		{
 			uint64_t nowtime = Time::getCurrentMilliSecond();
 
-//			if (nowtime - starttime >= timeout) return manager->errorResponse(408, "Request Timeout");
+			if (nowtime - starttime >= timeout) return manager->errorResponse(408, "Request Timeout");
 
-//			if (manager->connecteddisconected) return manager->errorResponse(500, "Socket Disconnect");
+			if (manager->connecteddisconected) return manager->errorResponse(500, "Socket Disconnect");
 
 			shared_ptr<HTTPCommunication> commu = manager->commu;
 			if (commu)
@@ -131,7 +131,6 @@ struct HTTPClient::HTTPClientInternal
 				if (commu->recvHeader)
 				{
 					Value chunkval = commu->recvHeader->header(Transfer_Encoding);
-				//	if (!chunkval.empty() && strcasecmp(chunkval.readString().c_str(), CHUNKED) == 0) break;
 				}
 
 				if (commu->sessionIsFinish())

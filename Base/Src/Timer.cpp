@@ -109,7 +109,7 @@ public:
 			Guard locker(mutex);
 			SAFE_DELETE(quitsem);
 			started = false;
-			if (called && calledId != 0 && calledId != Thread::getCurrentThreadID())
+			if (called /*&& calledId != 0 && calledId != Thread::getCurrentThreadID()*/)
 			{
 				quitsem = new Semaphore();
 			}
@@ -174,7 +174,7 @@ bool Timer::stop(bool bCallNow /* = false */)
 
 	return true;
 }
-
+ 
 bool Timer::stopAndWait()
 {
 	internal->stopandwait();

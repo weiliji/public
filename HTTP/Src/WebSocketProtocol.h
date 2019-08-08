@@ -151,7 +151,7 @@ public:
 			{
 				for (uint32_t i = 0; i < 4; i++)
 				{
-					maskkey[i] = (((long)this) >> (i * 8))&0xff;
+					maskkey[i] = (((size_t)this) >> (i * 8))&0xff;
 					while (maskkey[i] == 0) 
 					{
 						maskkey[i] = ((char)Time::getCurrentMilliSecond())&0xff;
@@ -196,7 +196,7 @@ public:
 				const char* tmp = parseWebSocketHeard(buffer, len, frame);
 				if (tmp == NULL) break;
 
-				len = buffer + len - tmp;
+				len = (int)(buffer + len - tmp);
 				buffer = tmp;
 			}
 
@@ -215,7 +215,7 @@ public:
 					if (frame->mask)
 					{
 						char* buffertmp = (char*)frame->data.c_str();
-						uint32_t datalen = frame->data.length();
+						uint32_t datalen = (uint32_t)(frame->data.length());
 						for (uint32_t i = 0; i < datalen; i++)
 						{
 							uint32_t j = i % 4;

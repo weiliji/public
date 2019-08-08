@@ -59,9 +59,12 @@ public:
 		{
 			TimerRunInfo info;
 			info.starttime = curTime + pTimer->delay;
+			info.timerobj = pTimer;
 
 			runtimeList.push_back(info);
 			runtimeList.sort();
+
+			timerList.insert(pTimer);
 		}
 
 		return true;
@@ -91,7 +94,7 @@ public:
 		}
 	}
 private:
-	bool resetTimer(TimerObject * pTimer, uint64_t usedTime)
+	bool resetTimer(TimerObject * pTimer)
 	{
 		Guard locker(timerMutex);
 
@@ -107,6 +110,7 @@ private:
 
 			TimerRunInfo info;
 			info.starttime = curTime + (*iter)->period;
+			info.timerobj = pTimer;
 
 			runtimeList.push_back(info);
 			runtimeList.sort();
@@ -148,10 +152,20 @@ private:
 
 					if (curTime < info.starttime) break;
 
-					if (!dispatch(ThreadPool::Proc(&TimerManager::timerRunProc, this), info.timerobj))
+					do 
 					{
-						assert(0);
-					}
+						std::set<TimerObject*>::iterator titer = timerList.find(info.timerobj);
+						if (titer == timerList.end()) break;
+
+						if (!info.timerobj->checkIsNeedRun()) break;
+
+						if (!dispatch(ThreadPool::Proc(&TimerManager::timerRunProc, this), info.timerobj))
+						{
+							assert(0);
+							break;
+						}
+
+					} while (0);					
 
 					runtimeList.pop_front();
 				}
@@ -163,12 +177,9 @@ private:
 		TimerObject * runtimer = (TimerObject *)param;
 		if (runtimer != NULL)
 		{
-			if (!runtimer->checkIsNeedRun()) return;
-
-			uint64_t startTime = Time::getCurrentMilliSecond();
 			runtimer->runFunc();
-			uint64_t stopTime = Time::getCurrentMilliSecond();
-			resetTimer(runtimer, stopTime >= startTime ? stopTime - startTime : 0);
+
+			resetTimer(runtimer);
 		}
 	}
 private:

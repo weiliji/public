@@ -62,8 +62,8 @@ public:
 		Guard locker(mutex);
 
 		//接收到头数据，且content数据满，有发送头数据，且发送数据已满content和header长度 
-		return (recvHeader && recvContentLen != -1 && recvContentLen == recvContentTotalLen) && 
-			(sendHeaderLen > 0 && sendContentLen != -1 && sendContentLen == sendTotalLen - sendHeaderLen);
+		return (recvHeader && recvContentLen != (uint64_t)-1 && recvContentLen == recvContentTotalLen) && 
+			(sendHeaderLen > 0 && sendContentLen != (uint64_t)-1 && sendContentLen == sendTotalLen - sendHeaderLen);
 	}
 	bool isTimeout()
 	{
@@ -119,7 +119,7 @@ private:
 		if (sendBuffer.length() == 0) return;
 
 		shared_ptr<Socket> socktmp = socket;
-		if (socktmp) socktmp->async_send(sendBuffer.c_str(), sendBuffer.length(), Socket::SendedCallback(&HTTPCommunication::onSocketSendCallback, this));
+		if (socktmp) socktmp->async_send(sendBuffer.c_str(), (uint32_t)sendBuffer.length(), Socket::SendedCallback(&HTTPCommunication::onSocketSendCallback, this));
 	}
 	void onSocketRecvCallback(const weak_ptr<Socket>& sock, const char* buffer, int len)
 	{
@@ -134,7 +134,7 @@ private:
 				recvBuffer.resize(recvBuffer.length() + len);
 
 			const char* buffertmp = recvbufferaddr;
-			uint32_t buffertmplen = recvBuffer.length();
+			uint32_t buffertmplen = (uint32_t)recvBuffer.length();
 
 			while (buffertmplen > 0)
 			{
@@ -159,10 +159,10 @@ private:
 						}
 					}
 				}
-				else if(recvHeader && (recvContentLen == -1 || recvContentLen > recvContentTotalLen))
+				else if(recvHeader && (recvContentLen == (uint64_t)-1 || recvContentLen > recvContentTotalLen))
 				{
 					uint32_t needsize = buffertmplen;
-					if (recvContentLen != -1) needsize = min((uint32_t)(recvContentLen - recvContentTotalLen), buffertmplen);
+					if (recvContentLen != (uint64_t)-1) needsize = min((uint32_t)(recvContentLen - recvContentTotalLen), buffertmplen);
 
 					bool endoffile = false;
 					uint32_t appendlen = recvContent->append(buffertmp, needsize, endoffile);
@@ -171,9 +171,9 @@ private:
 					buffertmplen -= appendlen;
 					buffertmp += appendlen;
 
-					if (recvContentLen == -1 && endoffile) recvContentLen = recvContentTotalLen;
+					if (recvContentLen == (uint64_t)-1 && endoffile) recvContentLen = recvContentTotalLen;
 				}
-				if (recvHeader && recvContentLen != -1 && recvContentLen == recvContentTotalLen)
+				if (recvHeader && recvContentLen != (uint64_t)-1 && recvContentLen == recvContentTotalLen)
 				{
 					shared_ptr<HTTPCommunicationHandler> handlerobj = handler.lock();
 					if (handlerobj)
@@ -192,7 +192,7 @@ private:
 		}
 		
 		shared_ptr<Socket> socktmp = socket;
-		if(socktmp && headerresultok) socktmp->async_recv(recvbufferaddr + recvBuffer.length(), MAXHTTPCACHELEN - recvBuffer.length(), Socket::ReceivedCallback(&HTTPCommunication::onSocketRecvCallback, this));
+		if(socktmp && headerresultok) socktmp->async_recv(recvbufferaddr + (uint32_t)recvBuffer.length(), MAXHTTPCACHELEN - (uint32_t)recvBuffer.length(), Socket::ReceivedCallback(&HTTPCommunication::onSocketRecvCallback, this));
 	}
 
 	void buildSendDefaultHTTPHeader()

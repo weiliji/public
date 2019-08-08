@@ -218,7 +218,7 @@ bool WriteContent::write(const char* buffer, int len)
 }
 bool WriteContent::write(const std::string& buffer)
 {
-	return internal->write(buffer.c_str(), buffer.length());
+	return internal->write(buffer.c_str(), (int)buffer.length());
 }
 bool WriteContent::writeFromFile(const std::string& filename, bool needdeletefile)
 {

@@ -22,7 +22,7 @@ struct RTPAnalyzer::RTPAnalyzerInternal
 
 		if (strcasecmp(transportinfo->streaminfo.szMediaName.c_str(), "video") == 0)
 		{
-			if (String::indexOfByCase(transportinfo->streaminfo.szCodec, "h264") != -1)
+			if (String::indexOfByCase(transportinfo->streaminfo.szCodec, "h264") != (size_t)-1)
 			{
 				int nWidth = 0;
 				int nHeight = 0;
@@ -36,7 +36,7 @@ struct RTPAnalyzer::RTPAnalyzerInternal
 
 				analyze = make_shared<RtpH264Analyzer>(framcallback, spsbuffer, ppsbuffer);
 			}
-			else if (String::indexOfByCase(transportinfo->streaminfo.szCodec, "h265") != -1)
+			else if (String::indexOfByCase(transportinfo->streaminfo.szCodec, "h265") != (size_t)-1)
 			{
 				analyze = make_shared<RtpH265Analyzer>(framcallback);
 			}

@@ -43,22 +43,22 @@ uint32_t ChunkData::append(const char* bufferptr, uint32_t len, bool & endoffile
 		if (internal->chunkbodysize == 0)
 		{
 			int pos = (int)String::indexOf(buffer, len, HTTPSEPERATOR);
-			if (pos == -1) return buffer - bufferptr;
+			if (pos == -1) return (uint32_t)(buffer - bufferptr);
 
 			std::string chunksizestr = std::string(buffer, pos);
 			sscanf(String::tolower(chunksizestr).c_str(), "%x", &internal->chunkbodysize);
 			//chuned eof
 			if (internal->chunkbodysize == 0)
 			{
-				if (len < (int)(pos + strlen(HTTPSEPERATOR) * 2)) return buffer - bufferptr;
+				if (len < (int)(pos + strlen(HTTPSEPERATOR) * 2)) return (uint32_t)(buffer - bufferptr);
 				//是否结束标识 2个HTTPHREADERLINEEND 
-				if (memcmp(buffer + pos, HTTPSEPERATOR HTTPSEPERATOR, strlen(HTTPSEPERATOR) * 2) != 0) return buffer - bufferptr;
+				if (memcmp(buffer + pos, HTTPSEPERATOR HTTPSEPERATOR, strlen(HTTPSEPERATOR) * 2) != 0) return (uint32_t)(buffer - bufferptr);
 
 				len -= pos + (int)strlen(HTTPSEPERATOR) * 2;
 				buffer += pos + (int)strlen(HTTPSEPERATOR) * 2;
 				endoffile = true;
 
-				return buffer - bufferptr;
+				return (uint32_t)(buffer - bufferptr);
 			}
 			buffer += pos + (int)strlen(HTTPSEPERATOR);
 			len -= pos + (int)strlen(HTTPSEPERATOR);
@@ -83,7 +83,7 @@ uint32_t ChunkData::append(const char* bufferptr, uint32_t len, bool & endoffile
 		}
 	}
 
-	return buffer - bufferptr;
+	return (uint32_t)(buffer - bufferptr);
 }
 void ChunkData::write(const char* buffer, uint32_t len)
 {
@@ -92,13 +92,13 @@ void ChunkData::write(const char* buffer, uint32_t len)
 		char buffer[32] = { 0 };
 		sprintf(buffer, "%x" HTTPSEPERATOR, len);
 
-		internal->writecallback(buffer, strlen(buffer));
+		internal->writecallback(buffer, (int)strlen(buffer));
 	}
-	internal->writecallback(buffer, len);
+	internal->writecallback(buffer, (int)len);
 
 	//write chunk end
 	{
-		internal->writecallback(HTTPSEPERATOR, strlen(HTTPSEPERATOR));
+		internal->writecallback(HTTPSEPERATOR, (int)strlen(HTTPSEPERATOR));
 	}
 }
 

@@ -955,19 +955,19 @@ static boolean group_in_compile_stack(compile_stack_type compile_stack, regnum_t
 /* Store a jump with opcode OP at LOC to location TO.  We store a
    relative address offset by the three bytes the jump itself occupies.  */
 #define STORE_JUMP(op, loc, to) \
-  store_op1 (op, loc, (to) - (loc) - 3)
+  store_op1 (op, loc, (int)((to) - (loc) - 3))
 
 /* Likewise, for a two-argument jump.  */
 #define STORE_JUMP2(op, loc, to, arg) \
-  store_op2 (op, loc, (to) - (loc) - 3, arg)
+  store_op2 (op, loc, (int)((to) - (loc) - 3), arg)
 
 /* Like `STORE_JUMP', but for inserting.  Assume `b' is the buffer end.  */
 #define INSERT_JUMP(op, loc, to) \
-  insert_op1 (op, loc, (to) - (loc) - 3, b)
+  insert_op1 (op, loc,(int)((to) - (loc) - 3), b)
 
 /* Like `STORE_JUMP2', but for inserting.  Assume `b' is the buffer end.  */
 #define INSERT_JUMP2(op, loc, to, arg) \
-  insert_op2 (op, loc, (to) - (loc) - 3, arg, b)
+  insert_op2 (op, loc, (int)((to) - (loc) - 3), arg, b)
 
 
 /* This is not an arbitrary limit: the arguments which represent offsets
@@ -1602,10 +1602,10 @@ regex_compile (const char * pattern, int size, reg_syntax_t syntax, struct re_pa
                  group.  They are all relative offsets, so that if the
                  whole pattern moves because of realloc, they will still
                  be valid.  */
-              COMPILE_STACK_TOP.begalt_offset = begalt - bufp->buffer;
+              COMPILE_STACK_TOP.begalt_offset = (pattern_offset_t)(begalt - bufp->buffer);
               COMPILE_STACK_TOP.fixup_alt_jump 
-                = fixup_alt_jump ? fixup_alt_jump - bufp->buffer + 1 : 0;
-              COMPILE_STACK_TOP.laststart_offset = b - bufp->buffer;
+                = fixup_alt_jump ? ((pattern_offset_t)(fixup_alt_jump - bufp->buffer + 1)) : 0;
+              COMPILE_STACK_TOP.laststart_offset = (pattern_offset_t)(b - bufp->buffer);
               COMPILE_STACK_TOP.regnum = regnum;
 
               /* We will eventually replace the 0 with the number of
@@ -1614,7 +1614,7 @@ regex_compile (const char * pattern, int size, reg_syntax_t syntax, struct re_pa
                  represent in the compiled pattern.  */
               if (regnum <= MAX_REGNUM)
                 {
-                  COMPILE_STACK_TOP.inner_group_offset = b - bufp->buffer + 2;
+                  COMPILE_STACK_TOP.inner_group_offset = (pattern_offset_t)(b - bufp->buffer + 2);
                   BUF_PUSH_3 (start_memory, regnum, 0);
                 }
                 
@@ -1884,8 +1884,8 @@ regex_compile (const char * pattern, int size, reg_syntax_t syntax, struct re_pa
                             We insert this at the beginning of the loop
                             so that if we fail during matching, we'll
                             reinitialize the bounds.  */
-                         insert_op2 (set_number_at, laststart, b - laststart,
-                                     upper_bound - 1, b);
+                         insert_op2 (set_number_at, laststart, (int)(b - laststart),
+                                     (int)(upper_bound - 1), b);
                          b += 5;
                        }
                    }
@@ -2052,7 +2052,7 @@ regex_compile (const char * pattern, int size, reg_syntax_t syntax, struct re_pa
   free (compile_stack.stack);
 
   /* We have succeeded; set the length of the buffer.  */
-  bufp->used = b - bufp->buffer;
+  bufp->used = (unsigned long)(b - bufp->buffer);
 
 #ifdef DEBUG
   if (debug)
@@ -3016,7 +3016,7 @@ static boolean common_op_match_null_string_p(unsigned char **p, unsigned char * 
 /* This converts PTR, a pointer into one of the search strings `string1'
    and `string2' into an offset from the beginning of that string.  */
 #define POINTER_TO_OFFSET(ptr)						\
-  (FIRST_STRING_P (ptr) ? (ptr) - string1 : (ptr) - string2 + size1)
+  (FIRST_STRING_P (ptr) ? ((regoff_t)((ptr) - string1)) : ((regoff_t)((ptr) - string2 + size1)))
 
 /* Registers are set to a sentinel when they haven't yet matched.  */
 #define REG_UNSET_VALUE ((char *) -1)
@@ -3163,7 +3163,7 @@ re_match_2 (struct re_pattern_buffer * bufp, const char * string1,int size1, con
   /* We fill all the registers internally, independent of what we
      return, for use in backreferences.  The number here includes
      an element for register zero.  */
-  unsigned num_regs = bufp->re_nsub + 1;
+  unsigned num_regs = (unsigned)(bufp->re_nsub + 1);
   
   /* The currently active registers.  */
   unsigned lowest_active_reg = NO_LOWEST_ACTIVE_REG;
@@ -3429,8 +3429,8 @@ re_match_2 (struct re_pattern_buffer * bufp, const char * string1,int size1, con
               if (regs->num_regs > 0)
                 {
                   regs->start[0] = pos;
-                  regs->end[0] = (MATCHING_IN_FIRST_STRING ? d - string1
-			          : d - string2 + size1);
+                  regs->end[0] = (MATCHING_IN_FIRST_STRING ? (regoff_t)(d - string1)
+			          : (regoff_t)(d - string2 + size1));
                 }
               
               /* Go through the first `min (num_regs, regs->num_regs)'
@@ -3462,7 +3462,7 @@ re_match_2 (struct re_pattern_buffer * bufp, const char * string1,int size1, con
           DEBUG_PRINT2 ("%u registers pushed.\n", num_regs_pushed);
 
           mcnt = d - pos - (MATCHING_IN_FIRST_STRING 
-			    ? string1 
+			    ? string1
 			    : string2 - size1);
 
           DEBUG_PRINT2 ("Returning %d from re_match_2.\n", mcnt);
@@ -3720,7 +3720,7 @@ re_match_2 (struct re_pattern_buffer * bufp, const char * string1,int size1, con
                           regstart[r] = old_regstart[r];
 
                           /* xx why this test?  */
-                          if ((int) old_regend[r] >= (int) regstart[r])
+                          if (old_regend[r] >= regstart[r])
                             regend[r] = old_regend[r];
                         }     
                     }
@@ -3780,12 +3780,12 @@ re_match_2 (struct re_pattern_buffer * bufp, const char * string1,int size1, con
 		PREFETCH ();
 
 		/* How many characters left in this segment to match.  */
-		mcnt = dend - d;
+		mcnt = int(dend - d);
                 
 		/* Want how many consecutive characters we can match in
                    one shot, so, if necessary, adjust the count.  */
                 if (mcnt > dend2 - d2)
-		  mcnt = dend2 - d2;
+		  mcnt = int(dend2 - d2);
                   
 		/* Compare that many; failure if mismatch, else move
                    past them.  */

@@ -1,4 +1,4 @@
-#if 1
+#if 0
 #include "Base/Func.h"
 using namespace Public::Base;
 #include "HTTP/HTTP.h"
@@ -262,7 +262,7 @@ int main()
 
 
 
-#if 0
+#if 1
 #include "Base/Base.h"
 using namespace Public::Base;
 
