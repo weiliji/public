@@ -45,6 +45,9 @@
     <ClInclude Include="Src\WebSocketProtocol.h">
       <Filter>源文件</Filter>
     </ClInclude>
+    <ClInclude Include="Src\HTTPErroCode.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Version.rc">

@@ -24,15 +24,25 @@ struct XMLObject::Child::ChildInternal
 	int								getChildIndex;
 	int								getAttributeIndex;
 	std::string						searchChildName;
+	std::string						searchChildNameType;
 
 
-	XMLObject::Child& getChild(const std::string& name, int index)
+	XMLObject::Child& getChild(const std::string& key, int index)
 	{
+		std::string name = key;
+		std::string nametype;
+		size_t pos = String::indexOf(key, ":");
+		if (pos != -1)
+		{
+			nametype = std::string(key.c_str(), pos);
+			name = std::string(key.c_str() + pos + 1);
+		}
+
 		int getIndex = 0;
 		std::list<XMLObject::Child*>::iterator iter;
 		for (iter = childList.begin(); iter != childList.end(); iter++)
 		{
-			if ((*iter)->internal->name == name)
+			if ((*iter)->name() == name && (*iter)->nametype() == (nametype.length() > 0 ? nametype : (*iter)->nametype()))
 			{
 				if (getIndex == index)
 				{
@@ -82,10 +92,20 @@ struct XMLObject::Child::ChildInternal
 		}
 
 		getChildIndex = 0;
+		searchChildNameType = "";
 		searchChildName = childname;
+		size_t pos = String::indexOf(childname, ":");
+		if (pos != -1)
+		{
+			searchChildNameType = std::string(childname.c_str(), pos);
+			searchChildName = std::string(childname.c_str() + pos + 1);
+		}
+
 		for (std::list<XMLObject::Child*>::const_iterator iter = childList.begin(); iter != childList.end(); iter++, getChildIndex++)
 		{
-			if (searchChildName == "" || searchChildName == (*iter)->name()) return **iter;
+			if (searchChildName == "" || 
+				(searchChildName == (*iter)->name() && 
+				(*iter)->nametype() == (searchChildNameType.length() > 0 ? searchChildNameType : (*iter)->nametype()))) return **iter;
 		}
 
 		return emptyChild;
@@ -101,7 +121,9 @@ struct XMLObject::Child::ChildInternal
 			if(getIndex <= getChildIndex) continue;
 			getChildIndex++;
 
-			if (searchChildName == "" || searchChildName == (*iter)->name()) return **iter;
+			if (searchChildName == "" ||
+				(searchChildName == (*iter)->name() && 
+				(*iter)->nametype() == (searchChildNameType.length() > 0 ? searchChildNameType : (*iter)->nametype()))) return **iter;
 
 		} 
 
@@ -147,6 +169,7 @@ XMLObject::Child::Child(const Child& child)
 {
 	internal = new ChildInternal;
 	internal->name = child.internal->name;
+	internal->nametype = child.internal->nametype;
 	internal->attributeList = child.internal->attributeList;
 	internal->value = child.internal->value;
 	
@@ -215,13 +238,22 @@ const XMLObject::Child& XMLObject::Child::getChild(const std::string& name, int 
 	return internal->getChild(name, index);
 }
 
-void XMLObject::Child::removeChild(const std::string& name,int index)
+void XMLObject::Child::removeChild(const std::string& key,int index)
 {
+	std::string name = key;
+	std::string nametype;
+	size_t pos = String::indexOf(key, ":");
+	if (pos != -1)
+	{
+		nametype = std::string(key.c_str(), pos);
+		name = std::string(key.c_str() + pos + 1);
+	}
+
 	int getIndex = 0;
 	std::list<XMLObject::Child*>::iterator iter;
 	for(iter = internal->childList.begin();iter != internal->childList.end();iter ++)
 	{
-		if((*iter)->internal->name == name)
+		if((*iter)->internal->name == name && (*iter)->internal->nametype == (nametype.length() > 0 ? nametype : (*iter)->internal->nametype))
 		{
 			if(getIndex == index)
 			{

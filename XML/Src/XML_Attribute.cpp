@@ -8,6 +8,7 @@ XMLObject::Attribute::Attribute(){}
 XMLObject::Attribute::Attribute(const Attribute& attri)
 {
 	name = attri.name;
+	nametype = attri.nametype;
 	value = attri.value;
 }
 XMLObject::Attribute::~Attribute(){}
