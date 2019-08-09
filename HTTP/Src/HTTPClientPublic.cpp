@@ -22,9 +22,14 @@ struct  HTTPClientResponse::HTTPClientResponseInternal:public WriteContenNotify
 HTTPClientResponse::HTTPClientResponse(const shared_ptr<HTTPCommunication>& commu, HTTPCacheType type, const std::string& filename)
 {
 	internal = new HTTPClientResponseInternal;
-	internal->header = commu->recvHeader;
+	
+	if(commu)
+		internal->header = commu->recvHeader;
+	if (internal->header == NULL)
+		internal->header = make_shared<HTTPHeader>();
+	
 	internal->commu = commu;
-	internal->content = make_shared<ReadContent>(commu->recvHeader,internal,type,filename);
+	internal->content = make_shared<ReadContent>(internal->header,internal,type,filename);
 }
 HTTPClientResponse::~HTTPClientResponse()
 {

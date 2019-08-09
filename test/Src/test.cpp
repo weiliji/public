@@ -156,58 +156,88 @@ int main()
 
 //	manager->disconvery(disconveryCallback);
 
+	std::string addr = "admin:ms123456@192.168.7.104";
+//	std::string addr = "admin:support2019@192.168.9.205";
+//	std::string addr = "admin:ms123456@192.168.10.230";
+//	std::string addr = "admin:ms123456@192.168.4.105";
+//	std::string addr = "admin:ms123456@192.168.4.150";
 
-	shared_ptr<OnvifClient> client = manager->create(URL("admin:ms123456@192.168.2.172"));
+	shared_ptr<OnvifClient> client = manager->create(URL(addr));
 
 	shared_ptr<OnvifClientDefs::Info> info = client->getInfo();
+	assert(info);
 
 	shared_ptr<OnvifClientDefs::Capabilities> cap = client->getCapabities();	//获取设备能力集合，错误信息使用XM_GetLastError捕获
-
-//	shared_ptr<OnvifClientDefs::Scopes> scopes = client->getScopes(); //获取描述信息，错误信息使用XM_GetLastError捕获
-
+	assert(cap);
 
 	shared_ptr<OnvifClientDefs::Profiles> profile = client->getProfiles(); //获取配置信息，错误信息使用XM_GetLastError捕获
-
+	assert(profile);
 
 	shared_ptr<OnvifClientDefs::StreamUrl> streamurl = client->getStreamUrl(profile->infos[0]); //获取六信息,错误信息使用XM_GetLastError捕获
+	assert(streamurl);
+
 	shared_ptr<OnvifClientDefs::SnapUrl> snapurl = client->getSnapUrl(profile->infos[0]);
-
-//	std::string getStreamUrl(const std::string& streamtoken, int timeoutms = 10000); //获取六信息,错误信息使用XM_GetLastError捕获
-//	std::string getSnapUrl(const std::string& snaptoken, int timeoutms = 10000);	//获取截图信息，错误信息使用XM_GetLastError捕获
-
+	assert(snapurl);
+	
 	shared_ptr<OnvifClientDefs::NetworkInterfaces> network = client->getNetworkInterfaces();//网络信息，错误信息使用XM_GetLastError捕获
-//	shared_ptr<OnvifClientDefs::VideoEncoderConfigurations> enc = client->getVideoEncoderConfigurations(); //获取视频编码信息，错误信息使用XM_GetLastError捕获
+	assert(network );
 
 	OnvifClientDefs::PTZCtrl ptz;
 	ptz.ctrlType = OnvifClientDefs::PTZCtrl::PTZ_CTRL_PAN;
 	ptz.panTiltX = 0.5;
 
-//	bool ret1 = client->continuousMove(profile->infos[0], ptz);
-//	bool ret2 = client->stopPTZ(profile->infos[0], ptz);
+	bool ret1 = client->continuousMove(profile->infos[0], ptz);
+	assert(ret1);
+
+	bool ret2 = client->stopPTZ(profile->infos[0], ptz);
+	assert(ret2 );
 
 
-	bool ret3 = client->setPreset(profile->infos[0], "4", 10000);
+	bool ret3 = client->setPreset(profile->infos[0], Value(Time::getCurrentMilliSecond()).readString(), 10000);
+	assert(ret3 );
+
 	//bool ret8 = client->setPreset(profile->infos[0], "5", 10000);
 
 	shared_ptr<OnvifClientDefs::PresetInfos> infos = client->getPreset(profile->infos[0], 10000);
+	assert(infos );
 
 	bool ret4 = client->gotoPreset(profile->infos[0],infos->infos[0]);
+	assert(ret4 );
 
 	bool ret5 = client->removePreset(profile->infos[0], infos->infos[0]);
+	assert(ret5 );
 
-	infos = client->getPreset(profile->infos[0], 10000);
+	//infos = client->getPreset(profile->infos[0], 10000);
 
-//	shared_ptr<OnvifClientDefs::ContinuousMove> move = client->getContinuousMove(profile->infos[0]); //错误信息使用XM_GetLastError捕获
-//	shared_ptr<OnvifClientDefs::AbsoluteMove> abs = client->getAbsoluteMove(profile->infos[0]); //错误信息使用XM_GetLastError捕获
-	shared_ptr<OnvifClientDefs::PTZConfig> config = client->getConfigurations(); //错误信息使用XM_GetLastError捕获
-	shared_ptr<OnvifClientDefs::ConfigurationOptions> opt = client->getConfigurationOptions(config); //错误信息使用XM_GetLastError捕获
-	shared_ptr<Time> time = client->GetSystemDatetime(); //错误信息使用XM_GetLastError捕获
+
+	shared_ptr<OnvifClientDefs::StartRecvAlarm> startrecv = client->startRecvAlarm(cap, 10000);
+	assert(startrecv);
+
+	/*for (uint32_t i = 0; i < 2; i++)
+	{
+		shared_ptr < OnvifClientDefs::RecvAlarmInfo> alarm = client->recvAlarm(startrecv);
+		if (alarm == NULL)
+		{
+			int a = 0;
+		}
+	}*/
+	client->stopRecvAlarm();
+
+	//shared_ptr<OnvifClientDefs::PTZConfig> config = client->getConfigurations(); //错误信息使用XM_GetLastError捕获
+	//assert(config );
+	//
+	//
+	//shared_ptr<OnvifClientDefs::ConfigurationOptions> opt = client->getConfigurationOptions(config); //错误信息使用XM_GetLastError捕获
+	//assert(opt );
+	
+	shared_ptr<Time> time = client->getSystemDatetime(); //错误信息使用XM_GetLastError捕获
+	assert(time );
 
 //	shared_ptr<OnvifClientDefs::StartRecvAlarm> alarminfo = client->startRecvAlarm(cap);
 
 //	client->recvAlarm(alarminfo);
 
-	getchar();
+	//getchar();
 
 	return 0;
 }

@@ -225,6 +225,20 @@ struct StartRecvAlarm
 	Time			terminationTime;
 };
 
+struct AlarmInfo
+{
+	Time			arrivalTime;
+	std::string		topic;
+	std::string		operation;
+	std::map<std::string, std::string> sources;
+	std::map<std::string, std::string> datas;
+};
+
+struct RecvAlarmInfo
+{
+	std::vector<AlarmInfo> alarminfos;
+};
+
 struct DiscoveryInfo
 {
 	std::string		name;

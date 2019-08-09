@@ -21,17 +21,33 @@ using namespace Public::XML;
 "</s:Header>"
 
 #define onvif_xml_headerCreate "<s:Header>"\
+"<a:Action s:mustUnderstand=\"1\">http://www.onvif.org/ver10/events/wsdl/EventPortType/CreatePullPointSubscriptionRequest</a:Action>"\
+"<a:MessageID>urn:uuid:%s</a:MessageID>"\
+"<a:ReplyTo>"\
+"<a:Address>http://www.w3.org/2005/08/addressing/anonymous</a:Address>"\
+"</a:ReplyTo>"\
+"<Security s:mustUnderstand=\"1\" xmlns=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\">"\
+"<UsernameToken>"\
+"<Username>%s</Username>"\
+"<Password Type=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordDigest\">%s</Password>"\
+"<Nonce EncodingType=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary\">%s</Nonce>"\
+"<Created xmlns=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd\">%s</Created>"\
+"</UsernameToken></Security>"\
+"<a:To s:mustUnderstand=\"1\">http://%s%s</a:To>"\
+"</s:Header>"
+
+#define onvif_xml_headerPull "<s:Header>"\
 "<a:Action s:mustUnderstand=\"1\">http://www.onvif.org/ver10/events/wsdl/PullPointSubscription/PullMessagesRequest</a:Action>"\
 "<a:MessageID>urn:uuid:%s</a:MessageID>"\
 "<a:ReplyTo>"\
 "<a:Address>http://www.w3.org/2005/08/addressing/anonymous</a:Address>"\
 "</a:ReplyTo>"\
-"<Security s:mustUnderstand=\"1\" xmlns=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecURLty-secext-1.0.xsd\">"\
+"<Security s:mustUnderstand=\"1\" xmlns=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\">"\
 "<UsernameToken>"\
 "<Username>%s</Username>"\
 "<Password Type=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordDigest\">%s</Password>"\
 "<Nonce EncodingType=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary\">%s</Nonce>"\
-"<Created xmlns=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecURLty-utility-1.0.xsd\">%s</Created>"\
+"<Created xmlns=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd\">%s</Created>"\
 "</UsernameToken></Security>"\
 "<a:To s:mustUnderstand=\"1\">http://%s%s</a:To>"\
 "</s:Header>"
@@ -40,15 +56,17 @@ using namespace Public::XML;
 #define DEFAULTONVIFRDEVICEURL	"/onvif/device_service"
 #define MEDIAREQUESTURL	"/onvif/media"
 #define PTZREQUESTURL	"/onvif/PTZ"
+#define EVENTSREQUESTURL	"/onvif/Events"
+
+#define MAXOVIFHEADERLEN	2048
 
 class CmdObject
 {
 public:
-	const char*  recvbuffer;
 	std::string  action;
 	std::string requesturl;
 public:
-	CmdObject() :recvbuffer(NULL) { requesturl = DEFAULTONVIFRDEVICEURL; }
+	CmdObject(){ requesturl = DEFAULTONVIFRDEVICEURL; }
 	virtual ~CmdObject() {}
 
 	virtual std::string build(const URL& URL) = 0;
@@ -60,14 +78,14 @@ protected:
 
 		buildUserAuthenInfo(noneBase64, passwdBase64, createTime, URL.authen.Password);
 
-		char buffer[1024] = { 0 };
+		char buffer[MAXOVIFHEADERLEN] = { 0 };
 
-		snprintf_x(buffer, 1023, onvif_xml_header, URL.authen.Username.c_str(), passwdBase64.c_str(), noneBase64.c_str(), createTime.c_str());
+		snprintf_x(buffer, MAXOVIFHEADERLEN -1 , onvif_xml_header, URL.authen.Username.c_str(), passwdBase64.c_str(), noneBase64.c_str(), createTime.c_str());
 
 		return buffer;
 	}
 
-	std::string buildCreateHeader(const URL& URL)
+	std::string buildAlarmHeader(const URL& URL,bool create)
 	{
 		std::string noneBase64, passwdBase64, createTime;
 
@@ -75,9 +93,9 @@ protected:
 
 		std::string guidstr = Guid::createGuid().getStringStream();
 
-		char buffer[1024] = { 0 };
+		char buffer[MAXOVIFHEADERLEN] = { 0 };
 
-		snprintf_x(buffer, 1023, onvif_xml_headerCreate,
+		snprintf_x(buffer, MAXOVIFHEADERLEN - 1, create ? onvif_xml_headerCreate : onvif_xml_headerPull,
 			guidstr.c_str(), URL.authen.Username.c_str(), passwdBase64.c_str(), noneBase64.c_str(), createTime.c_str(), URL.getHost().c_str(), URL.getPath().c_str());
 
 		return buffer;

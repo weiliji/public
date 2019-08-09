@@ -183,7 +183,7 @@ struct HTTPAsyncClient::HTTPAsyncClientInternal
 		}
 
 		uint64_t nowtime = Time::getCurrentMilliSecond();
-		for (std::map<HTTPClientManager*, shared_ptr< HTTPClientManager> >::iterator iter = clientlisttmp.begin(); iter != clientlisttmp.end(); iter++)
+		for (std::map<HTTPClientManager*, shared_ptr< HTTPClientManager> >::iterator iter = clientlisttmp.begin(); iter != clientlisttmp.end(); )
 		{
 			shared_ptr< HTTPClientManager> client = iter->second;
 
@@ -195,7 +195,7 @@ struct HTTPAsyncClient::HTTPAsyncClientInternal
 				client->asynccallback(client->request, client->response);
 
 				Guard locker(mutex);
-				clientlisttmp.erase(iter->first);
+				clientlisttmp.erase(iter++);
 
 				continue;
 			}
@@ -205,7 +205,7 @@ struct HTTPAsyncClient::HTTPAsyncClientInternal
 				client->asynccallback(client->request, client->errorResponse(408, "Request Timeout"));
 
 				Guard locker(mutex);
-				clientlisttmp.erase(iter->first);
+				clientlisttmp.erase(iter++);
 
 				continue;
 			}
@@ -215,10 +215,12 @@ struct HTTPAsyncClient::HTTPAsyncClientInternal
 				client->asynccallback(client->request, client->errorResponse(500, "Socket Disconnect"));
 
 				Guard locker(mutex);
-				clientlisttmp.erase(iter->first);
+				clientlisttmp.erase(iter++);
 
 				continue;
 			}
+
+			iter++;
 		}
 	}
 };
@@ -253,9 +255,12 @@ bool HTTPAsyncClient::request(const shared_ptr<HTTPClientRequest>& req, const HT
 	client->asynccallback = callback;
 
 	{
+		req->headers()["User-Agent"] = internal->useragent;
+
+
 		Guard locker(internal->mutex);
 
-		internal->clientlist[client.get()] = client;
+		internal->clientlist[client.get()] = client;		
 	}
 
 	return client->start(req, saveasfile);

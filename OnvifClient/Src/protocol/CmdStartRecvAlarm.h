@@ -9,6 +9,7 @@ public:
 	CMDStartRecvAlarm()
 	{
 		action = "http://www.onvif.org/ver10/events/wsdl/EventPortType/CreatePullPointSubscriptionRequest";
+		requesturl = EVENTSREQUESTURL;
 	}
 	virtual ~CMDStartRecvAlarm() {}
 
@@ -17,10 +18,10 @@ public:
 		stringstream stream;
 
 		stream << "<s:Envelope xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:a=\"http://www.w3.org/2005/08/addressing\">"
-			<< buildHeader(URL)
+			<< buildAlarmHeader(URL,true)
 			<< "<s:Body xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">"
 			<< "<CreatePullPointSubscription xmlns=\"http://www.onvif.org/ver10/events/wsdl\">"
-			<< "<InitialTerminationTime>PT60S</InitialTerminationTime>"
+			<< "<InitialTerminationTime>PT600S</InitialTerminationTime>"
 			<< "</CreatePullPointSubscription>"
 			<< "</s:Body></s:Envelope>";
 
@@ -32,12 +33,12 @@ public:
 	{
 		startrecvalarm = make_shared<OnvifClientDefs::StartRecvAlarm>();
 
-		const XMLObject::Child& resp = body.getChild("tev:CreatePullPointSubscriptionResponse");
+		const XMLObject::Child& resp = body.getChild("CreatePullPointSubscriptionResponse");
 		if (!resp) return false;
 
-		startrecvalarm->xaddr = resp.getChild("tev:SubscriptionReference").getChild("wsa:Address").data();
-		startrecvalarm->currentTime = onvif_parse_datetime(resp.getChild("wsnt:CurrentTime").data());
-		startrecvalarm->terminationTime = onvif_parse_datetime(resp.getChild("wsnt:TerminationTime").data());
+		startrecvalarm->xaddr = resp.getChild("SubscriptionReference").getChild("Address").data();
+		startrecvalarm->currentTime = onvif_parse_datetime(resp.getChild("CurrentTime").data());
+		startrecvalarm->terminationTime = onvif_parse_datetime(resp.getChild("TerminationTime").data());
 
 		return true;
 	}
