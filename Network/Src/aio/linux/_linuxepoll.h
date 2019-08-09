@@ -22,11 +22,16 @@ class _SystemPoll :public _Pool,public Thread,public enable_shared_from_this<_Sy
 	struct _EPollResource:public _PoolResource
 	{
 		int		event;
-		void*	readeventid;
-		void*	writeeventid;
+		shared_ptr<Event>	readevent;
+		shared_ptr<Event>	writeevent;
 
 		_EPollResource(int socketfd, const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& userthread, const shared_ptr<_Pool>& pool)
-			:_PoolResource(socketfd,sock,userthread,pool),event(EVENT_INIT),readeventid(NULL),writeeventid(NULL){}
+			:_PoolResource(socketfd,sock,userthread,pool),event(EVENT_INIT){}
+	};
+
+	struct _DoThreadPoolInfo
+	{
+		shared_ptr<Event>	event;
 	};
 	
 	int 										epoll;
@@ -81,7 +86,7 @@ public:
 		return true; 
 	}
 
-	virtual bool postEvent(const shared_ptr<_PoolResource>& res, const shared_ptr<Event>& event, void* eventid)
+	virtual bool postEvent(const shared_ptr<_PoolResource>& res, const shared_ptr<Event>& event)
 	{
 		_EPollResource* epollres = (_EPollResource*)res.get();
 		if (res == NULL || epollres == NULL)
@@ -92,15 +97,14 @@ public:
 		{
 			return false;
 		}
-
 		if (event->type() == EventType_Read)
 		{
-			epollres->readeventid = eventid;
+			epollres->readevent = event;
 			epollres->event |= EVENT_READ;
 		}
 		else if (event->type() == EventType_Write)
 		{
-			epollres->writeeventid = eventid;
+			epollres->writeevent = event;
 			epollres->event |= EVENT_WRITE;
 		}
 
@@ -156,29 +160,43 @@ public:
 
 				shared_ptr< _EPollResource> eventinfo = getEventInfo(sockfd);
 				if (eventinfo == NULL)	continue;
-				void* eventid = NULL;
-
+				
 				if (EVENTISERROR(workEpoolEvent[i].events))
 				{
-					eventid = eventinfo->readeventid;
+					_DoThreadPoolInfo* info = new _DoThreadPoolInfo;
+					info->event = eventinfo->readevent;
+					eventinfo->readevent = NULL;
 					clean(sockfd, EventType_Read, eventinfo);
 
-					ThreadPool::dispatch(ThreadPool::Proc(&_SystemPoll::eventThreadProc, shared_from_this()), eventid);
+					if (!ThreadPool::dispatch(ThreadPool::Proc(&_SystemPoll::eventThreadProc, shared_from_this()), info))
+					{
+						assert(0);
+					}
 				}
 				if (EVENTISREAD(workEpoolEvent[i].events))
 				{
-					eventid = eventinfo->readeventid;
+					_DoThreadPoolInfo* info = new _DoThreadPoolInfo;
+					info->event = eventinfo->readeventid;
+					eventinfo->readeventid = NULL;
 					clean(sockfd, EventType_Read, eventinfo);
 
-					ThreadPool::dispatch(ThreadPool::Proc(&_SystemPoll::eventThreadProc, shared_from_this()), eventid);
+					if (!ThreadPool::dispatch(ThreadPool::Proc(&_SystemPoll::eventThreadProc, shared_from_this()), info))
+					{
+						assert(0);
+					}
 				}
 
 				if (EVENTISWRITE(workEpoolEvent[i].events))
 				{
-					eventid = eventinfo->writeeventid;
+					_DoThreadPoolInfo* info = new _DoThreadPoolInfo;
+					info->event = eventinfo->writeeventid;
+					eventinfo->writeeventid = NULL;
 					clean(sockfd, EventType_Write, eventinfo);
 
-					ThreadPool::dispatch(ThreadPool::Proc(&_SystemPoll::eventThreadProc, shared_from_this()), eventid);
+					if (!ThreadPool::dispatch(ThreadPool::Proc(&_SystemPoll::eventThreadProc, shared_from_this()), info))
+					{
+						assert(0);
+					}
 				}
 			}
 		}
@@ -195,10 +213,13 @@ private:
 	}	
 	void eventThreadProc(void* param)
 	{
-		shared_ptr<Event> event = _eventlist->popEvent(param);
-		if (event == NULL) return;
+		_DoThreadPoolInfo* info = (_DoThreadPoolInfo*)param;
+		if (info == NULL) return;
 
-		event->doEvent(0, 0);
+		if(info->event)
+			info->event->doEvent1(0, 0);
+
+		SAFE_DELETE(info);
 	}
 };
 

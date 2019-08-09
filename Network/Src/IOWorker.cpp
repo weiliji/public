@@ -29,7 +29,9 @@ shared_ptr<IOWorker> IOWorker::defaultWorker()
 
 	return defaultworker;
 }
-
-
+bool IOWorker::postEvent(const EventCallback& callback, void* param)
+{
+	return internal->ioserver->postExtExentFunction(callback, param);
+}
 }
 }

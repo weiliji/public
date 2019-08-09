@@ -6,6 +6,11 @@
 
 class _SystemSocket :public ASocket
 {
+	SendEvent		sendevent;
+	RecvEvent		recvevent;
+	AcceptEvent		acceptevent;
+	ConnectEvent	connectevent;
+
 public:
 	_SystemSocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, NetType _type)
 	:ASocket(_ioworker,_ioserver,_sockptr,_type){}
@@ -54,7 +59,8 @@ public:
 	}
 	virtual bool async_accept(const AcceptedCallback& accepted)
 	{
-		if (!accepted || sock <= 0)
+		shared_ptr< _PoolResource> res = resourece;
+		if (!accepted || sock <= 0 || res == NULL)
 		{
 			return false;
 		}
@@ -71,8 +77,8 @@ public:
 		}
 
 		//AcceptEvent(const shared_ptr<IOWorker>& _ioworker,const shared_ptr<Socket>& sock, LPFN_ACCEPTEX	acceptExFunc, LPFN_GETACCEPTEXSOCKADDRS _getAcceptAddExFunc,const Socket::AcceptedCallback& _acceptcallback) :WinEvent(sock)
-		shared_ptr<AcceptEvent> event = make_shared<AcceptEvent>(ioworker, accepted);
-		if(!resourece->postEvent(&event->overlped, event))
+		acceptevent.init(accepted);
+		if(!res->postEvent(&acceptevent))
 		{
 			return false;
 		}
@@ -82,7 +88,8 @@ public:
 		return false; }
 	virtual bool async_connect(const NetAddr& addr, const ConnectedCallback& connected)
 	{
-		if (sock == -1 || type == NetType_TcpConnection || status == NetStatus_connected || addr.getPort() == 0 || !connected)
+		shared_ptr< _PoolResource> res = resourece;
+		if (sock == -1 || type == NetType_TcpConnection || status == NetStatus_connected || addr.getPort() == 0 || !connected || res == NULL)
 		{
 			return false;
 		}
@@ -95,9 +102,9 @@ public:
 		otheraddr = addr;
 
 		//ConnectEvent(const NetAddr& toaddr , LPFN_CONNECTEX _connectExFunc,const Socket::ConnectedCallback& _connectcallback)
-		shared_ptr<ConnectEvent> event = make_shared<ConnectEvent>(addr, connected);
+		connectevent.init(addr, connected);
 
-		if (!resourece->postEvent(&event->overlped, event))
+		if (!res->postEvent(&connectevent))
 		{
 			return false;
 		}
@@ -106,15 +113,16 @@ public:
 	}
 	virtual bool async_recv(char *buf, uint32_t len, const ReceivedCallback& received) 
 	{
-		if (sock == -1 || status != NetStatus_connected || buf == NULL || len <= 0 || !received)
+		shared_ptr< _PoolResource> res = resourece;
+		if (sock == -1 || status != NetStatus_connected || buf == NULL || len <= 0 || !received || res == NULL)
 		{
 			return false;
 		}
 
 		//RecvEvent(char* buffer, uint32_t len, const Socket::ReceivedCallback& _recvcallback, const Socket::RecvFromCallback& _recvfromcallback)
-		shared_ptr<RecvEvent> event = make_shared<RecvEvent>(buf, len, received, Socket::RecvFromCallback());
+		recvevent.init(buf, len, received, Socket::RecvFromCallback());
 
-		if (!resourece->postEvent(&event->overlped, event))
+		if (!res->postEvent(&recvevent))
 		{
 			return false;
 		}
@@ -123,15 +131,16 @@ public:
 	}
 	virtual bool async_recv(const ReceivedCallback& received, int maxlen = 1024) 
 	{
-		if (sock == -1 || status != NetStatus_connected || maxlen <= 0 || !received)
+		shared_ptr< _PoolResource> res = resourece;
+		if (sock == -1 || status != NetStatus_connected || maxlen <= 0 || !received || res == NULL)
 		{
 			return false;
 		}
 
 		//(char* buffer, uint32_t len, const Socket::ReceivedCallback& _recvcallback, const Socket::RecvFromCallback& _recvfromcallback)
-		shared_ptr<RecvEvent> event = make_shared<RecvEvent>((char*)NULL, maxlen, received, Socket::RecvFromCallback());
+		recvevent.init((char*)NULL, maxlen, received, Socket::RecvFromCallback());
 
-		if (!resourece->postEvent(&event->overlped, event))
+		if (!res->postEvent(&recvevent))
 		{
 			return false;
 		}
@@ -140,15 +149,16 @@ public:
 	}
 	virtual bool async_send(const char * buf, uint32_t len, const SendedCallback& sended) 
 	{
-		if (sock == -1 || status != NetStatus_connected || buf == NULL || len <= 0 || !sended)
+		shared_ptr< _PoolResource> res = resourece;
+		if (sock == -1 || status != NetStatus_connected || buf == NULL || len <= 0 || !sended || res == NULL)
 		{
 			return false;
 		}
 
 		//SendEvent(const char* buffer, uint32_t len, const Socket::SendedCallback& _callback, const NetAddr& toaddr)
-		shared_ptr<SendEvent> event = make_shared<SendEvent>(buf, len, sended, NetAddr());
+		sendevent.init(buf, len, sended, NetAddr());
 
-		if (!resourece->postEvent(&event->overlped, event))
+		if (!res->postEvent( &sendevent))
 		{
 			return false;
 		}
@@ -157,15 +167,16 @@ public:
 	}
 	virtual bool async_recvfrom(char *buf, uint32_t len, const RecvFromCallback& received) 
 	{
-		if (sock == -1 ||  buf == NULL || len <= 0 || !received)
+		shared_ptr< _PoolResource> res = resourece;
+		if (sock == -1 ||  buf == NULL || len <= 0 || !received || res == NULL)
 		{
 			return false;
 		}
 
 		//RecvEvent(char* buffer, uint32_t len, const Socket::ReceivedCallback& _recvcallback, const Socket::RecvFromCallback& _recvfromcallback)
-		shared_ptr<RecvEvent> event = make_shared<RecvEvent>(buf, len, Socket::ReceivedCallback(), received);
+		recvevent.init(buf, len, Socket::ReceivedCallback(), received);
 
-		if (!resourece->postEvent(&event->overlped, event))
+		if (!res->postEvent(&recvevent))
 		{
 			return false;
 		}
@@ -174,15 +185,16 @@ public:
 	}
 	virtual bool async_recvfrom(const RecvFromCallback& received, int maxlen = 1024) 
 	{
-		if (sock == -1 || maxlen <= 0 || !received)
+		shared_ptr< _PoolResource> res = resourece;
+		if (sock == -1 || maxlen <= 0 || !received || res == NULL)
 		{
 			return false;
 		}
 
 		//RecvEvent(char* buffer, uint32_t len, const Socket::ReceivedCallback& _recvcallback, const Socket::RecvFromCallback& _recvfromcallback)
-		shared_ptr<RecvEvent> event = make_shared<RecvEvent>((char*)NULL, maxlen, Socket::ReceivedCallback(), received);
+		recvevent.init((char*)NULL, maxlen, Socket::ReceivedCallback(), received);
 		
-		if (!resourece->postEvent(&event->overlped, event))
+		if (!res->postEvent(&recvevent))
 		{
 			return false;
 		}
@@ -191,15 +203,16 @@ public:
 	}
 	virtual bool async_sendto(const char * buf, uint32_t len, const NetAddr& other, const SendedCallback& sended) 
 	{
-		if (sock == -1 || buf == NULL || len <= 0 || !sended)
+		shared_ptr< _PoolResource> res = resourece;
+		if (sock == -1 || buf == NULL || len <= 0 || !sended ||res == NULL)
 		{
 			return false;
 		}
 
 		//SendEvent(const char* buffer, uint32_t len, const Socket::SendedCallback& _callback, const NetAddr& toaddr)
-		shared_ptr<SendEvent> event = make_shared<SendEvent>(buf, len, sended, other);
+		sendevent.init(buf, len, sended, other);
 		
-		if (!resourece->postEvent(&event->overlped, event))
+		if (!res->postEvent(&sendevent))
 		{
 			return false;
 		}

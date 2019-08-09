@@ -15,7 +15,7 @@ struct TCPClient::TCPClientInternalPointer
 
 shared_ptr<Socket> TCPClient::create(const shared_ptr<IOWorker>& _worker, void* socketptr)
 {
-	shared_ptr<TCPClient> sock = shared_ptr<TCPClient>(new TCPClient());
+	shared_ptr<TCPClient> sock = shared_ptr<TCPClient>(new TCPClient(_worker));
 	NewSocketInfo* newsocketinfo = (NewSocketInfo*)socketptr;
 	if (newsocketinfo == NULL)
 	{
@@ -31,7 +31,7 @@ shared_ptr<Socket> TCPClient::create(const shared_ptr<IOWorker>& _worker, void* 
 
 	return sock;
 }
-TCPClient::TCPClient()
+TCPClient::TCPClient(const shared_ptr<IOWorker>& worker):Socket(worker)
 {
 	internal = new TCPClientInternalPointer();
 }
@@ -136,8 +136,6 @@ void TCPClient::socketReady()
 }
 void TCPClient::socketError(const std::string &errmsg)
 {
-	internal->asocket->disconnect();
-
 	internal->disconnectcallback(internal->sockobj.lock(), "disconnected");
 }
 

@@ -11,12 +11,12 @@ struct UDP::UDPInternalPointer
 };
 shared_ptr<Socket> UDP::create(const shared_ptr<IOWorker>& worker)
 {
-	shared_ptr<UDP> sock = shared_ptr<UDP>(new UDP());
+	shared_ptr<UDP> sock = shared_ptr<UDP>(new UDP(worker));
 	sock->internal->asocket = ASocket::create(worker, worker->internal->ioserver, sock, NetType_Udp);
 
 	return sock;
 }
-UDP::UDP()
+UDP::UDP(const shared_ptr<IOWorker>& worker):Socket(worker)
 {
 	internal = new UDPInternalPointer();
 }

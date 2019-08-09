@@ -16,7 +16,7 @@ namespace Network{
 class NETWORK_API TCPServer:public Socket
 {
 	struct TCPServerInternalPointer;
-	TCPServer();
+	TCPServer(const shared_ptr<IOWorker>& worker);
 public:
 	static shared_ptr<Socket> create(const shared_ptr<IOWorker>& worker,const NetAddr& addr = NetAddr());
 

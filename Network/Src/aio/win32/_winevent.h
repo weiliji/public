@@ -9,7 +9,7 @@ typedef int socklen_t;
 #include "../common/_pool.h"
 #define SWAPBUFFERLEN			100
 
-struct WinEvent
+struct WinEvent:public Event
 {
 	OVERLAPPED		overlped;
 	WSABUF			wbuf;
@@ -19,7 +19,7 @@ struct WinEvent
 	DWORD			dwFlags;
 	int				newsock;
 
-	WinEvent()
+	WinEvent(EventType _pooltype):Event(_pooltype)
 	{
 		memset(&overlped, 0, sizeof(overlped));
 		memset(&wbuf, 0, sizeof(wbuf));
@@ -31,13 +31,17 @@ struct WinEvent
 		addrlen = sizeof(SOCKADDR);
 	}
 	virtual ~WinEvent() {}
+
+	virtual void doEvent(const shared_ptr<Socket>& sock, int bytes, bool status) {}
 };
 
-struct SendEvent :public Event,public WinEvent
+struct SendEvent :public WinEvent
 {
 	Socket::SendedCallback sendcallback;
 
-	SendEvent(const char* buffer, uint32_t len, const Socket::SendedCallback& _callback, const NetAddr& toaddr):Event(EventType_Write)
+	SendEvent():WinEvent(EventType_Write){}
+
+	void init(const char* buffer, uint32_t len, const Socket::SendedCallback& _callback, const NetAddr& toaddr)
 	{
 		addr = *(SOCKADDR*)toaddr.getAddr();
 		addrlen = toaddr.getAddrLen();
@@ -66,6 +70,11 @@ struct SendEvent :public Event,public WinEvent
 			int errorno = GetLastError();
 			if (errorno != WSA_IO_PENDING)
 			{
+				//10054 是socket 被他人断开
+				if (errorno == 10054)
+				{
+					sock->socketError("disconnected");
+				}
 				return false;
 			}
 		}
@@ -78,14 +87,21 @@ struct SendEvent :public Event,public WinEvent
 	}
 };
 
-struct RecvEvent :public Event,public WinEvent
+struct RecvEvent :public WinEvent
 {
 	Socket::ReceivedCallback recvcallback;
 	Socket::RecvFromCallback recvfromcallback;
 
+	RecvEvent():WinEvent(EventType_Read){}
+
 	bool needFreeBuffer = false;
-	RecvEvent(char* buffer, uint32_t len, const Socket::ReceivedCallback& _recvcallback, const Socket::RecvFromCallback& _recvfromcallback):Event(EventType_Read)
+	void init(char* buffer, uint32_t len, const Socket::ReceivedCallback& _recvcallback, const Socket::RecvFromCallback& _recvfromcallback)
 	{
+		if (needFreeBuffer && wbuf.buf != NULL)
+		{
+			delete[](char*)wbuf.buf;
+		}
+		needFreeBuffer = false;
 		if (buffer == NULL)
 		{
 			needFreeBuffer = true;
@@ -152,15 +168,14 @@ struct RecvEvent :public Event,public WinEvent
 	}
 };
 
-struct AcceptEvent :public Event,public WinEvent
+struct AcceptEvent :public WinEvent
 {
-	weak_ptr<IOWorker>		 ioworker;
 	Socket::AcceptedCallback acceptcallback;
 	char						swapBuffer[SWAPBUFFERLEN];
 
-	AcceptEvent(const shared_ptr<IOWorker>& _ioworker, const Socket::AcceptedCallback& _acceptcallback) :Event(EventType_Read)
+	AcceptEvent() :WinEvent(EventType_Read) {}
+	void init(const Socket::AcceptedCallback& _acceptcallback)
 	{		
-		ioworker = _ioworker;
 		acceptcallback = _acceptcallback;
 		wbuf.buf = swapBuffer;
 		wbuf.len = SWAPBUFFERLEN;
@@ -200,9 +215,6 @@ struct AcceptEvent :public Event,public WinEvent
 	}
 	void doEvent(const shared_ptr<Socket>& sock, int bytes, bool status)
 	{
-		shared_ptr<IOWorker> worker = ioworker.lock();
-		if (worker == NULL) return;
-
 		if (!status)
 		{
 			closesocket(newsock);
@@ -231,19 +243,20 @@ struct AcceptEvent :public Event,public WinEvent
 			newsocketinfo->newsocket = newsock;
 			newsocketinfo->otheraddr = NetAddr(*(SockAddr*)clientAddr);
 
-			shared_ptr<Socket> newsock = TCPClient::create(worker, newsocketinfo);
+			shared_ptr<Socket> newsock = TCPClient::create(sock->ioWorker(), newsocketinfo);
 			acceptcallback(sock, newsock);
 		}
 	}
 };
 
-struct ConnectEvent :public Event,public WinEvent
+struct ConnectEvent :public WinEvent
 {
 	char						swapBuffer[SWAPBUFFERLEN];
 	Socket::ConnectedCallback connectcallback;
 	
+	ConnectEvent() :WinEvent(EventType_Write) {}
 	
-	ConnectEvent(const NetAddr& toaddr, const Socket::ConnectedCallback& _connectcallback) :Event(EventType_Write)
+	void init(const NetAddr& toaddr, const Socket::ConnectedCallback& _connectcallback)
 	{
 		wbuf.buf = swapBuffer;
 		wbuf.len = SWAPBUFFERLEN;

@@ -25,13 +25,7 @@ namespace Network{
 class NETWORK_API IOWorker
 {
 public:
-	class NETWORK_API EventInfo
-	{
-	public:
-		EventInfo() {}
-		virtual ~EventInfo() {}
-	};
-	typedef Function1<void, const shared_ptr< EventInfo>& > EventCallback;
+	typedef Function1<void, void*> EventCallback;
 public:
 	class NETWORK_API ThreadNum
 	{
@@ -57,7 +51,7 @@ public:
 	IOWorker(const ThreadNum& num);
 	~IOWorker();
 
-	void postEvent(const EventCallback& callback,const shared_ptr<EventInfo>& info);
+	bool postEvent(const EventCallback& callback,void* param);
 
 	static shared_ptr<IOWorker> defaultWorker();
 public:
@@ -108,7 +102,7 @@ public:
 	///回调定义参考：void recvfromCallbackFunc(Socket* sock,const char* recvBuffer, int recvlen ,const NetAddr& otheraddr);
 	typedef Function4<void, const weak_ptr<Socket>& /*sock*/,const char*, int,const NetAddr&> RecvFromCallback;
 public:
-	Socket(){}
+	Socket(const shared_ptr<IOWorker>& _worker):worker(_worker){}
 	virtual ~Socket(){}
 
 	///断开socket连接，停止socket内部工作，关闭socket句柄等
@@ -317,6 +311,10 @@ public:
 
 	//socket发生错误
 	virtual void socketError(const std::string &errmsg) {}
+
+	const shared_ptr<IOWorker>& ioWorker()const { return worker; }
+protected:
+	shared_ptr<IOWorker>	worker;
 };
 
 };

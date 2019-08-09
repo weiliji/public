@@ -67,7 +67,7 @@ public:
 
 		//AcceptEvent(const shared_ptr<IOWorker>& _ioworker,const shared_ptr<Socket>& sock, LPFN_ACCEPTEX	acceptExFunc, LPFN_GETACCEPTEXSOCKADDRS _getAcceptAddExFunc,const Socket::AcceptedCallback& _acceptcallback) :WinEvent(sock)
 		shared_ptr<AcceptEvent> event = make_shared<AcceptEvent>(ioworker, accepted);
-		if(!resourece->postEvent(&event->overlped, event))
+		if(!resourece->postEvent(event))
 		{
 			return false;
 		}
@@ -87,7 +87,7 @@ public:
 		//ConnectEvent(const NetAddr& toaddr , LPFN_CONNECTEX _connectExFunc,const Socket::ConnectedCallback& _connectcallback)
 		shared_ptr<ConnectEvent> event = make_shared<ConnectEvent>(addr, connected);
 
-		if (!resourece->postEvent(&event->overlped, event))
+		if (!resourece->postEvent(event))
 		{
 			return false;
 		}
@@ -104,7 +104,7 @@ public:
 		//RecvEvent(char* buffer, uint32_t len, const Socket::ReceivedCallback& _recvcallback, const Socket::RecvFromCallback& _recvfromcallback)
 		shared_ptr<RecvEvent> event = make_shared<RecvEvent>(buf, len, received, Socket::RecvFromCallback());
 
-		if (!resourece->postEvent(&event->overlped, event))
+		if (!resourece->postEvent(event))
 		{
 			return false;
 		}
@@ -121,7 +121,7 @@ public:
 		//(char* buffer, uint32_t len, const Socket::ReceivedCallback& _recvcallback, const Socket::RecvFromCallback& _recvfromcallback)
 		shared_ptr<RecvEvent> event = make_shared<RecvEvent>((char*)NULL, maxlen, received, Socket::RecvFromCallback());
 
-		if (!resourece->postEvent(&event->overlped, event))
+		if (!resourece->postEvent(event))
 		{
 			return false;
 		}
@@ -138,7 +138,7 @@ public:
 		//SendEvent(const char* buffer, uint32_t len, const Socket::SendedCallback& _callback, const NetAddr& toaddr)
 		shared_ptr<SendEvent> event = make_shared<SendEvent>(buf, len, sended, NetAddr());
 
-		if (!resourece->postEvent(&event->overlped, event))
+		if (!resourece->postEvent(event))
 		{
 			return false;
 		}
@@ -155,7 +155,7 @@ public:
 		//RecvEvent(char* buffer, uint32_t len, const Socket::ReceivedCallback& _recvcallback, const Socket::RecvFromCallback& _recvfromcallback)
 		shared_ptr<RecvEvent> event = make_shared<RecvEvent>(buf, len, Socket::ReceivedCallback(), received);
 
-		if (!resourece->postEvent(&event->overlped, event))
+		if (!resourece->postEvent(event))
 		{
 			return false;
 		}
@@ -172,7 +172,7 @@ public:
 		//RecvEvent(char* buffer, uint32_t len, const Socket::ReceivedCallback& _recvcallback, const Socket::RecvFromCallback& _recvfromcallback)
 		shared_ptr<RecvEvent> event = make_shared<RecvEvent>((char*)NULL, maxlen, Socket::ReceivedCallback(), received);
 		
-		if (!resourece->postEvent(&event->overlped, event))
+		if (!resourece->postEvent(event))
 		{
 			return false;
 		}
@@ -189,7 +189,7 @@ public:
 		//SendEvent(const char* buffer, uint32_t len, const Socket::SendedCallback& _callback, const NetAddr& toaddr)
 		shared_ptr<SendEvent> event = make_shared<SendEvent>(buf, len, sended, other);
 		
-		if (!resourece->postEvent(&event->overlped, event))
+		if (!resourece->postEvent(event))
 		{
 			return false;
 		}

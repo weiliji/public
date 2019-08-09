@@ -1,6 +1,6 @@
 #include "Network/Network.h"
 using namespace Public::Network;
-#if 0
+#if 1
 
 class NetworkServerInfo
 {
@@ -9,9 +9,17 @@ public:
 	std::list<String>	sendlist;
 	shared_ptr<Socket>	sock;
 
+	~NetworkServerInfo()
+	{
+		if (sock) sock->disconnect();
+	}
+
 	void inputData(const String& data)
 	{
 		Guard locker(mutex);
+
+		if (sendlist.size() > 100) return;
+
 		sendlist.push_back(data);
 
 		if (sendlist.size() == 1)
@@ -149,14 +157,20 @@ void _socketConnectCallback(const weak_ptr<Socket>& sock,bool,const std::string&
 
 void runClient(const shared_ptr<IOWorker>& worker,uint32_t size)
 {
-	for (uint32_t i = 0; i < size; i++)
+	while(1)
 	{
+		if (clientlist.size() > size)
+		{
+		//	shared_ptr<Socket> sock = clientlist.begin()->second;
+			clientlist.erase(clientlist.begin());
+		//	sock->disconnect();
+		}
 		shared_ptr<Socket> sock = TCPClient::create(worker);
 		clientlist[sock.get()] = sock;
 
-		sock->async_connect(NetAddr("192.168.2.46", 4444), _socketConnectCallback);
+		sock->async_connect(NetAddr("127.0.0.1", 4444), _socketConnectCallback);
 
-		Thread::sleep(100);
+		Thread::sleep(500);
 	}
 }
 
@@ -171,7 +185,7 @@ int main(int args,const char* argv[])
 	}
 	else
 	{
-		runClient(worker, 100);
+		runClient(worker, 10);
 	}
 
 

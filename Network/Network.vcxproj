@@ -28,7 +28,7 @@
     <ClInclude Include="..\Include\Network\TcpServer.h" />
     <ClInclude Include="..\Include\Network\Udp.h" />
     <ClInclude Include="Src\aio\asocket.h" />
-    <ClInclude Include="Src\aio\common\_eventlist.h" />
+    <ClInclude Include="Src\aio\common\_event.h" />
     <ClInclude Include="Src\aio\common\_pool.h" />
     <ClInclude Include="Src\aio\common\_userthread.h" />
     <ClInclude Include="Src\aio\ioserver.h" />

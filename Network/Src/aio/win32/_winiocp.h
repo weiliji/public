@@ -1,7 +1,10 @@
 #pragma  once
-#include "../common/_pool.h"
 
 #ifdef WIN32
+
+#include "_winevent.h"
+#include "../common/_pool.h"
+
 //这里是处理事件的线程池
 
 struct _WinIOCP:public _PoolResource
@@ -18,11 +21,11 @@ public:
 
 		
 	}
-	virtual bool postEvent(void* eventid, const shared_ptr<Event>& event)
+	virtual bool postEvent(Event* event)
 	{
 		StartThreadpoolIo(tpio);
 
-		if (!_PoolResource::postEvent(eventid, event))
+		if (!_PoolResource::postEvent(event))
 		{
 			CancelThreadpoolIo(tpio);
 
@@ -55,13 +58,6 @@ public:
 		shared_ptr< _WinIOCP> iocp = shared_ptr<_WinIOCP>(new _WinIOCP(socketfd, _sock,_userthread,shared_from_this(), _SystemPoll::IoCompletionCallback,this, (TP_CALLBACK_ENVIRON*)threadpoolHandle()));
 		return iocp;
 	}
-
-	virtual bool delResource(int socketfd, _PoolResource* res) { return true; }
-
-	virtual bool postEvent(const shared_ptr<_PoolResource>& res, const shared_ptr<Event>& event, void* eventid)
-	{
-		return true;
-	}
 	/*
 	typedef VOID (WINAPI *PTP_WIN32_IO_CALLBACK)(
 	__inout     PTP_CALLBACK_INSTANCE Instance,
@@ -79,12 +75,13 @@ public:
 		if (pool == NULL) return;
 		
 
-		shared_ptr<Event> event = pool->_eventlist->popEvent(Overlapped);
+		WinEvent* winevent = CONTAINING_RECORD(Overlapped, WinEvent, overlped);
 
-		if (event)
-		{
-			event->doEvent((DWORD)NumberOfBytesTransferred, IoResult == ERROR_SUCCESS);
-		}
+		if (winevent == NULL || Overlapped == NULL) return;
+
+		winevent->doEvent1((DWORD)NumberOfBytesTransferred, IoResult == ERROR_SUCCESS);
+
+		printf("IoCompletionCallback %x %d %d\r\n",winevent,NumberOfBytesTransferred,IoResult);
 	}
 };
 

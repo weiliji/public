@@ -12,7 +12,7 @@ struct TCPServer::TCPServerInternalPointer
 };
 shared_ptr<Socket> TCPServer::create(const shared_ptr<IOWorker>& _worker,const NetAddr& addr)
 {
-	shared_ptr<TCPServer> sock = shared_ptr<TCPServer>(new TCPServer());
+	shared_ptr<TCPServer> sock = shared_ptr<TCPServer>(new TCPServer(_worker));
 
 	sock->internal->asocket = ASocket::create(_worker, _worker->internal->ioserver, sock, NetType_TcpServer);
 	if(sock->internal->asocket->getHandle() <= 0) return shared_ptr<Socket>();
@@ -22,7 +22,7 @@ shared_ptr<Socket> TCPServer::create(const shared_ptr<IOWorker>& _worker,const N
 
 	return sock;
 }
-TCPServer::TCPServer()
+TCPServer::TCPServer(const shared_ptr<IOWorker>& worker):Socket(worker)
 {
 	internal = new TCPServerInternalPointer;
 }

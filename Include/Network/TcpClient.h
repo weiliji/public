@@ -19,7 +19,7 @@ class NETWORK_API TCPClient:public Socket
 	friend class ASIOSocketAcceptor;
 
 	struct TCPClientInternalPointer;
-	TCPClient();
+	TCPClient(const shared_ptr<IOWorker>& worker);
 public:
 	static shared_ptr<Socket> create(const shared_ptr<IOWorker>& worker, void* socketptr = NULL);
 	virtual ~TCPClient();

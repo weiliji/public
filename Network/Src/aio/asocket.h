@@ -6,12 +6,12 @@ class ASocket:public Socket
 {
 protected:
 	ASocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, NetType _type)
-		:ioworker(_ioworker), ioserver(_ioserver), socketptr(_sockptr), status(NetStatus_disconnected),  type(_type), ishavelisten(false)
+		:Socket(_ioworker), ioserver(_ioserver), socketptr(_sockptr), status(NetStatus_disconnected),  type(_type), ishavelisten(false)
 	{
 		userthread = make_shared<_UserThread>();
 	}
 	ASocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, const NewSocketInfo& newsock)
-		:ioworker(_ioworker), ioserver(_ioserver), socketptr(_sockptr), status(NetStatus_connected),  type(NetType_TcpConnection), ishavelisten(false)
+		:Socket(_ioworker), ioserver(_ioserver), socketptr(_sockptr), status(NetStatus_connected),  type(NetType_TcpConnection), ishavelisten(false)
 	{
 		userthread = make_shared<_UserThread>();
 		sock = newsock.newsocket;
@@ -29,7 +29,7 @@ public:
 		userthread->quit();
 		userthread->waitAllOtherCallbackThreadUsedEnd();
 		resourece = NULL;
-
+		
 		return true;
 	}
 	
@@ -132,7 +132,7 @@ public:
 		newsocketinfo->newsocket = s_accept;
 		newsocketinfo->otheraddr = NetAddr(*(SockAddrIPv4*)&accept_addr);
 
-		shared_ptr<Socket> newsock = TCPClient::create(ioworker, newsocketinfo);
+		shared_ptr<Socket> newsock = TCPClient::create(worker, newsocketinfo);
 
 		return newsock;
 	}
@@ -255,7 +255,6 @@ public:
 private:
 	virtual bool creatSocket(NetType type) = 0;
 protected:
-	shared_ptr<IOWorker>	ioworker;
 	shared_ptr<IOServer>	ioserver;
 	weak_ptr<Socket>		socketptr;
 
