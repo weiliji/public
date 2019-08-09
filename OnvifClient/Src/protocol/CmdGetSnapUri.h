@@ -9,6 +9,8 @@ public:
 	CmdGetSnapURL(const std::string& _token) :token(_token)
 	{
 		action = "http://www.onvif.org/ver10/media/wsdl/GetSnapshotURL";
+
+		requesturl = MEDIAREQUESTURL;
 	}
 	virtual ~CmdGetSnapURL() {}
 
@@ -16,13 +18,12 @@ public:
 	{
 		stringstream stream;
 
-		stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			<< "<s:Envelope " << onvif_xml_ns << ">"
+		stream << "<s:Envelope " << onvif_xml_ns << ">"
 			<< buildHeader(URL)
 			<< "<s:Body xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">"
-			<< "<GetSnapshotURL xmlns=\"http://www.onvif.org/ver10/media/wsdl\">"
-			<< "<trt:ProfileToken>" << token << "</trt:ProfileToken>"
-			<< "</GetSnapshotURL>"
+			<< "<GetSnapshotUri xmlns=\"http://www.onvif.org/ver10/media/wsdl\">"
+			<< "<ProfileToken>" << token << "</ProfileToken>"
+			<< "</GetSnapshotUri>"
 			<< "</s:Body></s:Envelope>";
 
 		return stream.str();
@@ -32,10 +33,10 @@ public:
 	{
 		snapurl = make_shared<OnvifClientDefs::SnapUrl>();
 
-		const XMLObject::Child& resp = body.getChild("GetSnapshotURLResponse");
+		const XMLObject::Child& resp = body.getChild("GetSnapshotUriResponse");
 		if (!resp) return false;
 
-		snapurl->url = resp.getChild("MediaURL").getChild("URL").data();
+		snapurl->url = resp.getChild("MediaUri").getChild("Uri").data();
 
 		if (snapurl->url == "") return false;
 

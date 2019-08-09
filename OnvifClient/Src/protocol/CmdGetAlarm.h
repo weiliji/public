@@ -16,8 +16,7 @@ public:
 	{
 		stringstream stream;
 
-		stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			<< "<s:Envelope xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:a=\"http://www.w3.org/2005/08/addressing\">"
+		stream << "<s:Envelope xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:a=\"http://www.w3.org/2005/08/addressing\">"
 			<< buildCreateHeader(URL)
 			<< "<s:Body xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">"
 			<< "<PullMessages xmlns=\"http://www.onvif.org/ver10/events/wsdl\">"

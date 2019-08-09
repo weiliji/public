@@ -72,9 +72,6 @@
     <ClInclude Include="Src\protocol\CmdAbsoluteMove.h">
       <Filter>源文件\protocol</Filter>
     </ClInclude>
-    <ClInclude Include="Src\protocol\CmdStop.h">
-      <Filter>源文件\protocol</Filter>
-    </ClInclude>
     <ClInclude Include="Src\protocol\CmdGetConfigurations.h">
       <Filter>源文件\protocol</Filter>
     </ClInclude>
@@ -109,6 +106,12 @@
       <Filter>源文件</Filter>
     </ClInclude>
     <ClInclude Include="Src\protocol\CmdDiscovery.h">
+      <Filter>源文件\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\protocol\CmdStopPTZ.h">
+      <Filter>源文件\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\protocol\CmdRemovePreset.h">
       <Filter>源文件\protocol</Filter>
     </ClInclude>
   </ItemGroup>

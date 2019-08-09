@@ -89,7 +89,7 @@ struct XMLObject::Child::ChildInternal
 		}
 
 		return emptyChild;
-	}
+	} 
 	XMLObject::Child& nextChild()
 	{
 		static Child emptyChild;
@@ -98,12 +98,12 @@ struct XMLObject::Child::ChildInternal
 		std::list<XMLObject::Child*>::iterator iter;
 		for (iter = childList.begin(); iter != childList.end(); iter++, getIndex++)
 		{
-			if(getIndex < getChildIndex) continue;
+			if(getIndex <= getChildIndex) continue;
 			getChildIndex++;
 
 			if (searchChildName == "" || searchChildName == (*iter)->name()) return **iter;
 
-		}
+		} 
 
 		return emptyChild;
 	}

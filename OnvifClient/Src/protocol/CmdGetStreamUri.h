@@ -9,6 +9,8 @@ public:
 	CmdGetStreamURL(const std::string& _token) :token(_token)
 	{
 		action = "http://www.onvif.org/ver10/media/wsdl/GetStreamURL";
+
+		requesturl = MEDIAREQUESTURL;
 	}
 	virtual ~CmdGetStreamURL() {}
 
@@ -16,19 +18,18 @@ public:
 	{
 		stringstream stream;
 
-		stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			<< "<s:Envelope " << onvif_xml_ns << ">"
+		stream << "<s:Envelope " << onvif_xml_ns << ">"
 			<< buildHeader(URL)
-			<< "<s:Body>"
-			<< "<trt:GetStreamUri>"
-			<< "<trt:StreamSetup>"
-			<< "<tt:Stream>RTP-Unicast</tt:Stream>"
-			<< "<tt:Transport>"
-			<< "<tt:Protocol>RTSP</tt:Protocol>"
-			<< "</tt:Transport>"
-			<< "</trt:StreamSetup>"
-			<< "<trt:ProfileToken>" << token << "</trt:ProfileToken>"
-			<< "</trt:GetStreamUri>"
+			<< "<s:Body xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">"
+			<< "<GetStreamUri xmlns=\"http://www.onvif.org/ver10/media/wsdl\">"
+			<< "<StreamSetup>"
+			<< "<Stream xmlns=\"http://www.onvif.org/ver10/schema\">RTP-Unicast</Stream>"
+			<< "<Transport xmlns=\"http://www.onvif.org/ver10/schema\">"
+			<< "<Protocol>RTSP</Protocol>"
+			<< "</Transport>"
+			<< "</StreamSetup>"
+			<< "<ProfileToken>" << token << "</ProfileToken>"
+			<< "</GetStreamUri>"
 			<<"</s:Body></s:Envelope>";
 
 		return stream.str();

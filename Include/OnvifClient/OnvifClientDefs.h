@@ -193,14 +193,6 @@ typedef struct {
 
 }VideoEncoderConfigurations;
 
-typedef struct {
-
-}ContinuousMove;
-
-typedef struct{
-
-}AbsoluteMove;
-
 struct PTZCtrl
 {
 	enum {
@@ -237,6 +229,17 @@ struct DiscoveryInfo
 {
 	std::string		name;
 	std::vector<std::string> addrs;
+};
+
+struct PresetInfo
+{
+	std::string token;
+	std::string name;
+};
+
+struct PresetInfos
+{
+	std::vector<PresetInfo> infos;
 };
 
 }

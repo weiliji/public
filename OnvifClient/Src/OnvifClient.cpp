@@ -7,7 +7,6 @@ using namespace Public::HTTP;
 namespace Public {
 namespace Onvif {
 
-#define DEFAULTONVIFRDEVICEURL	"/onvif/device_service"
 
 #define ONVIFECONENTTYPE		"application/soap+xml"
 
@@ -26,7 +25,7 @@ public:
 		if (requrl.getHostname() == "") requrl = url;
 		if (requrl.getPath() == "" || requrl.getPath() == "/")
 		{
-			requrl.setPath(DEFAULTONVIFRDEVICEURL);
+			requrl.setPath(cmd->requesturl);
 		}
 
 		requrl.setAuthen(url.getAuhen());
@@ -62,9 +61,9 @@ public:
 		XMLObject xml;
 		if (!xml.parseBuffer(httpbody)) return false;
 
-		if (xml.getRoot().name() != "s:Envelope") return false;
+		if (xml.getRoot().name() != "Envelope") return false;
 
-		const XMLObject::Child& body = xml.getRoot().getChild("s:Body");
+		const XMLObject::Child& body = xml.getRoot().getChild("Body");
 		if (body.isEmpty()) return false;
 
 		cmd->recvbuffer = httpbody.c_str();
@@ -153,21 +152,61 @@ shared_ptr<OnvifClientDefs::NetworkInterfaces> OnvifClient::getNetworkInterfaces
 //
 //	return cmd->encoder;
 //}
-shared_ptr<OnvifClientDefs::ContinuousMove> OnvifClient::getContinuousMove(const OnvifClientDefs::ProfileInfo& info, int timeoutms)
+bool OnvifClient::continuousMove(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PTZCtrl& ptzctrl, int timeoutms)
 {
-	shared_ptr<CmdContinuousMove> cmd;// =  = make_shared<CmdContinuousMove>();
+	shared_ptr<CmdContinuousMove> cmd = make_shared<CmdContinuousMove>(ptzctrl,info.token);
 
-	if (!internal->sendOvifRequest(cmd.get(), timeoutms)) return shared_ptr<OnvifClientDefs::ContinuousMove>();
+	if (!internal->sendOvifRequest(cmd.get(), timeoutms)) return false;
 
-	return cmd->move;
+	return true;
 }
-shared_ptr<OnvifClientDefs::AbsoluteMove> OnvifClient::getAbsoluteMove(const OnvifClientDefs::ProfileInfo& info, int timeoutms)
+bool OnvifClient::absoluteMove(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PTZCtrl& ptzctrl, int timeoutms)
 {
 	shared_ptr<CmdAbsoluteMove> cmd;// = make_shared<CmdAbsoluteMove>();
 
-	if (!internal->sendOvifRequest(cmd.get(), timeoutms)) return shared_ptr<OnvifClientDefs::AbsoluteMove>();
+	if (!internal->sendOvifRequest(cmd.get(), timeoutms)) return false;
 
-	return cmd->move;
+	return true;
+}
+bool OnvifClient::stopPTZ(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PTZCtrl& ptzctrl, int timeoutms)
+{
+	shared_ptr<CmdStopPTZ> cmd = make_shared<CmdStopPTZ>(ptzctrl, info.token);
+
+	if (!internal->sendOvifRequest(cmd.get(), timeoutms)) return false;
+
+	return true;
+}
+bool OnvifClient::setPreset(const OnvifClientDefs::ProfileInfo& info, const std::string& presetname, int timeoutms)
+{
+	shared_ptr<CmdSetPreset> cmd = make_shared<CmdSetPreset>(presetname, info.token);
+
+	if (!internal->sendOvifRequest(cmd.get(), timeoutms)) return false;
+
+	return true;
+}
+shared_ptr<OnvifClientDefs::PresetInfos> OnvifClient::getPreset(const OnvifClientDefs::ProfileInfo& info, int timeoutms)
+{
+	shared_ptr<CmdGetPresets> cmd = make_shared<CmdGetPresets>(info.token);
+
+	if (!internal->sendOvifRequest(cmd.get(), timeoutms)) return shared_ptr<OnvifClientDefs::PresetInfos>();
+
+	return cmd->preset;
+}
+bool  OnvifClient::gotoPreset(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PresetInfo& presetinfo, int timeoutms)
+{
+	shared_ptr<CmdGotoPreset> cmd = make_shared<CmdGotoPreset>(presetinfo, info.token);
+
+	if (!internal->sendOvifRequest(cmd.get(), timeoutms)) return false;
+
+	return true;
+}
+bool  OnvifClient::removePreset(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PresetInfo& presetinfo, int timeoutms)
+{
+	shared_ptr<CmdRemovePreset> cmd = make_shared<CmdRemovePreset>(presetinfo, info.token);
+
+	if (!internal->sendOvifRequest(cmd.get(), timeoutms)) return false;
+
+	return true;
 }
 shared_ptr<OnvifClientDefs::PTZConfig> OnvifClient::getConfigurations(int timeoutms)
 {

@@ -36,13 +36,19 @@ using namespace Public::XML;
 "<a:To s:mustUnderstand=\"1\">http://%s%s</a:To>"\
 "</s:Header>"
 
+
+#define DEFAULTONVIFRDEVICEURL	"/onvif/device_service"
+#define MEDIAREQUESTURL	"/onvif/media"
+#define PTZREQUESTURL	"/onvif/PTZ"
+
 class CmdObject
 {
 public:
 	const char*  recvbuffer;
 	std::string  action;
+	std::string requesturl;
 public:
-	CmdObject():recvbuffer(NULL){}
+	CmdObject() :recvbuffer(NULL) { requesturl = DEFAULTONVIFRDEVICEURL; }
 	virtual ~CmdObject() {}
 
 	virtual std::string build(const URL& URL) = 0;
@@ -174,20 +180,7 @@ public:
 
 
 #define  onvif_xml_ns \
-"xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\" "\
-"xmlns:enc=\"http://www.w3.org/2003/05/soap-encoding\" "\
-"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "\
-"xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" "\
-"xmlns:wsa5=\"http://www.w3.org/2005/08/addressing\" "\
-"xmlns:wsu=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecURLty-utility-1.0.xsd\" "\
-"xmlns:xenc=\"http://www.w3.org/2001/04/xmlenc#\" "\
-"xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" "\
-"xmlns:wsse=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecURLty-secext-1.0.xsd\" "\
-"xmlns:xmime=\"http://tempURL.org/xmime.xsd\" "\
-"xmlns:tt=\"http://www.onvif.org/ver10/schema\" "\
-"xmlns:tds=\"http://www.onvif.org/ver10/device/wsdl\" "\
-"xmlns:trt=\"http://www.onvif.org/ver10/media/wsdl\" "\
-"xmlns:ter=\"http://www.onvif.org/ver10/error\""
+"xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\" "
 
 
 #endif //__ONVIFPROTOCOL_H__

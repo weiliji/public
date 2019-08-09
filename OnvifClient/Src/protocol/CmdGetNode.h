@@ -16,8 +16,7 @@ public:
 	{
 		stringstream stream;
 
-		stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			<< "<s:Envelope " << onvif_xml_ns << ">"
+		stream << "<s:Envelope " << onvif_xml_ns << ">"
 			<< buildHeader(URL)
 			<< "<s:Body xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">"
 			<< "<GetNode xmlns=\"http://www.onvif.org/ver20/ptz/wsdl\">"

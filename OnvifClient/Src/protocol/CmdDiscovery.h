@@ -16,8 +16,7 @@ public:
 	{
 		stringstream stream;
 
-		stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			<< "<s:Envelope xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:a=\"http://www.w3.org/2005/08/addressing\">"
+		stream << "<s:Envelope xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:a=\"http://www.w3.org/2005/08/addressing\">"
 			<< "<s:Header>"
 			<< "<a:Action s:mustUnderstand=\"1\">http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe</a:Action>"
 			<< "<a:MessageID>uuid:" << Guid::createGuid().getStringStream() << "</a:MessageID>"

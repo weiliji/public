@@ -127,11 +127,12 @@
     <ClInclude Include="Src\protocol\CmdGotoHomePosition.h" />
     <ClInclude Include="Src\protocol\CmdGotoPreset.h" />
     <ClInclude Include="Src\protocol\CmdObject.h" />
+    <ClInclude Include="Src\protocol\CmdRemovePreset.h" />
     <ClInclude Include="Src\protocol\CmdSetHomePosition.h" />
     <ClInclude Include="Src\protocol\CmdSetPreset.h" />
     <ClInclude Include="Src\protocol\CmdSetSystemDateAndTime.h" />
     <ClInclude Include="Src\protocol\CmdStartRecvAlarm.h" />
-    <ClInclude Include="Src\protocol\CmdStop.h" />
+    <ClInclude Include="Src\protocol\CmdStopPTZ.h" />
     <ClInclude Include="Src\protocol\CmdStopRecvAlarm.h" />
     <ClInclude Include="Src\protocol\CmdSystemReboot.h" />
     <ClInclude Include="Src\protocol\OnvifProtocol.h" />

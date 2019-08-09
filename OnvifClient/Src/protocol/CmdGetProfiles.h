@@ -9,18 +9,21 @@ public:
 	CMDGetProfiles()
 	{
 		action = "http://www.onvif.org/ver10/media/wsdl/GetProfiles";
+
+		requesturl = MEDIAREQUESTURL;
 	}
 	virtual ~CMDGetProfiles() {}
 
+	std::string token;
 	virtual std::string build(const URL& URL)
 	{
 		stringstream stream;
 
-		stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			<< "<s:Envelope " << onvif_xml_ns << ">"
+		stream << "<s:Envelope " << onvif_xml_ns << ">"
 			<< buildHeader(URL)
-			<< "<s:Body>"
-			<< "<trt:GetProfiles></trt:GetProfiles>"
+			<< "<s:Body "
+			<< "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">"
+			<< "<GetProfiles xmlns=\"http://www.onvif.org/ver10/media/wsdl\"/>"
 			<< "</s:Body></s:Envelope>";
 
 		return stream.str();

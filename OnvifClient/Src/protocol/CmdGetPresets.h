@@ -6,26 +6,54 @@
 class CmdGetPresets :public CmdObject
 {
 public:
-	CmdGetPresets()
+	CmdGetPresets(const std::string& _token):token(_token)
 	{
 		action = "http://www.onvif.org/ver20/ptz/wsdl/GetPresets";
+
+		requesturl = PTZREQUESTURL;
 	}
 	virtual ~CmdGetPresets() {}
+
+	std::string token;
 
 	virtual std::string build(const URL& URL)
 	{
 		stringstream stream;
 
-		stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			<< "<s:Envelope " << onvif_xml_ns << ">"
+		stream << "<s:Envelope " << onvif_xml_ns << ">"
 			<< buildHeader(URL)
-			<< "<s:Body>"
-			<< "<GetPresets xmlns=\"http://www.onvif.org/ver20/ptz/wsdl\" />"
+			<< "<s:Body xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">"
+			<< "<GetPresets xmlns=\"http://www.onvif.org/ver20/ptz/wsdl\">"
+			<< "<ProfileToken>" << token << "</ProfileToken>"
+			<< "</GetPresets>"
 			<< "</s:Body></s:Envelope>";
 
 		return stream.str();
 	}
-	virtual bool parse(const std::string& data) = 0;
+
+	shared_ptr<OnvifClientDefs::PresetInfos> preset;
+
+	virtual bool parse(const XMLObject::Child& body)
+	{
+		preset = make_shared<OnvifClientDefs::PresetInfos>();
+
+		XMLObject::Child respchild = body.getChild("GetPresetsResponse");
+		if (respchild.isEmpty()) return false;
+
+		XMLObject::Child& presetchild = respchild.firstChild("Preset");
+		while (!presetchild.isEmpty())
+		{
+			OnvifClientDefs::PresetInfo info;
+			info.token = presetchild.attribute("token");
+			info.name = presetchild.getChild("Name").data();
+
+			preset->infos.push_back(info);
+
+			presetchild = respchild.nextChild();
+		}
+
+		return true;
+	}
 };
 
 

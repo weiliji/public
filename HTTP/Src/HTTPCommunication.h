@@ -223,19 +223,20 @@ private:
 				contentlenval = sendHeader->header(Content_Length);
 				if (!contentlenval.empty()) sendContentLen = contentlenval.readUint64();
 
-				sendHeader->headers[CONNECTION] = CONNECTION_KeepAlive;
+				Value connectval = sendHeader->header(CONNECTION);
+				if(connectval.empty()) sendHeader->headers[CONNECTION] = CONNECTION_KeepAlive;
 			}
 
 			if (!isServer)
 			{
-				Value accaptval = sendHeader->header("Accept");
-				if (accaptval.empty()) sendHeader->headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3";
+			//	Value accaptval = sendHeader->header("Accept");
+			//	if (accaptval.empty()) sendHeader->headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3";
 
 			//	Value accapenctval = sendHeader->header("Accept-Encoding");
 			//	if (accapenctval.empty()) sendHeader->headers["Accept-Encoding"] = "gzip, deflate";
 
-				Value accaplangtval = sendHeader->header("Accept-Language");
-				if (accaplangtval.empty()) sendHeader->headers["Accept-Language"] = "zh-CN,zh;q=0.9";
+			//	Value accaplangtval = sendHeader->header("Accept-Language");
+			//	if (accaplangtval.empty()) sendHeader->headers["Accept-Language"] = "zh-CN,zh;q=0.9";
 			}
 		}
 		if (useragent != "")
