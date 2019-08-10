@@ -195,6 +195,9 @@
     <ClInclude Include="..\Include\Base\Variant.h">
       <Filter>头文件\Base</Filter>
     </ClInclude>
+    <ClInclude Include="..\Include\Base\CPU.h">
+      <Filter>头文件\Base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base.cpp">
@@ -345,6 +348,9 @@
       <Filter>源文件\regex</Filter>
     </ClCompile>
     <ClCompile Include="Src\StringBuffer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\CPU.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

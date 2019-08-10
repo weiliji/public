@@ -226,7 +226,7 @@ struct RANGE_INFO
 
 
 //RTSP√¸¡Ó–≈œ¢
-struct RTSP_API RTSPCommandInfo:public HTTPHeader
+struct RTSPCommandInfo:public HTTPHeader
 {
 	std::string body;
 

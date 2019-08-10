@@ -17,6 +17,7 @@
 #include "Base/BaseTemplate.h"
 #include "Base/ByteOrder.h"
 #include "Base/Crc.h"
+#include "Base/CPU.h"
 #include "Base/DynamicLib.h"
 #include "Base/DynamicMemPool.h"
 #include "Base/File.h"

@@ -27,6 +27,7 @@
     <ClInclude Include="..\Include\Base\CircleBuffer.h" />
     <ClInclude Include="..\Include\Base\ConsoleCommand.h" />
     <ClInclude Include="..\Include\Base\CoreDump.h" />
+    <ClInclude Include="..\Include\Base\CPU.h" />
     <ClInclude Include="..\Include\Base\Crc.h" />
     <ClInclude Include="..\Include\Base\Defs.h" />
     <ClInclude Include="..\Include\Base\DynamicLib.h" />
@@ -83,6 +84,7 @@
     <ClCompile Include="Src\CircleBuffer.cpp" />
     <ClCompile Include="Src\ConsoleCommand.cpp" />
     <ClCompile Include="Src\CoreDump.cpp" />
+    <ClCompile Include="Src\CPU.cpp" />
     <ClCompile Include="Src\Crc.cpp" />
     <ClCompile Include="Src\DynamicLib.cpp" />
     <ClCompile Include="Src\DynamicMemPool.cpp" />
@@ -282,7 +284,7 @@
       <Command>
       </Command>
     </PostBuildEvent>
-  </ItemDefinitionGroup>  
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
@@ -342,8 +344,6 @@
       </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
-
-
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(ProjectDir)packages-depend.targets" />
   <ImportGroup Label="ExtensionTargets">
