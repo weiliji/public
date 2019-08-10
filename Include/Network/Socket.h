@@ -116,44 +116,44 @@ public:
 
 	///断开socket连接，停止socket内部工作，关闭socket句柄等
 	///UDP/TCP都可使用该接口释放资源，关闭socket
-	virtual bool disconnect(){return false;}
+	virtual bool disconnect() = 0;
 
 	///绑定串口信息
 	///param[in]		addr		需要绑定的端口
 	///param[in]		reusedAddr	端口是否允许需要重复绑定
 	///return		true 成功、false 失败 
 	///注：不不建议使用该函数来判断串口是否被占用，端口判断推进使用host::checkPortIsNotUsed接口
-	virtual bool bind(const NetAddr& addr,bool reusedAddr = true){return false;}
+	virtual bool bind(const NetAddr& addr,bool reusedAddr = true) = 0;
 	
 	///获取socket缓冲区大小
 	///param[in]		readSize		读的缓冲区大小
 	///param[in]		sendSize		发送缓冲区大小
 	///retun		 true 成功、false 失败 
-	virtual bool getSocketBuffer(uint32_t& recvSize,uint32_t& sendSize) const{return false;}
+	virtual bool getSocketBuffer(uint32_t& recvSize,uint32_t& sendSize) const = 0;
 	
 	///设置socket缓冲区大小
 	///param[in]		readSize		读的缓冲区大小
 	///param[in]		sendSize		发送缓冲区大小
 	///retun		 true 成功、false 失败 
-	virtual bool setSocketBuffer(uint32_t recvSize,uint32_t sendSize){return false;}
+	virtual bool setSocketBuffer(uint32_t recvSize,uint32_t sendSize) = 0;
 
 	///获取socket发送接受超时时间
 	///param[in]		recvTimeout		接收超时 单位：毫秒
 	///param[in]		sendTimeout		发送超时 单位：毫秒
 	///retun		 true 成功、false 失败 
-	virtual bool getSocketTimeout(uint32_t& recvTimeout,uint32_t& sendTimeout) const{return false;}
+	virtual bool getSocketTimeout(uint32_t& recvTimeout,uint32_t& sendTimeout) const = 0;
 
 	///设置socket发送接受超时时间
 	///param[in]		recvTimeout		接收超时 单位：毫秒
 	///param[in]		sendTimeout		发送超时 单位：毫秒
 	///retun		 true 成功、false 失败 
-	virtual bool setSocketTimeout(uint32_t recvTimeout,uint32_t sendTimeout) {return false;}
+	virtual bool setSocketTimeout(uint32_t recvTimeout,uint32_t sendTimeout) = 0;
 
 
 	///设置socket堵塞、非堵塞模式
 	///param[in]		nonblock		true 堵塞模式  false 非赌赛模式
 	///return		true 成功、false 失败 
-	virtual bool nonBlocking(bool nonblock){return false;}
+	virtual bool nonBlocking(bool nonblock) = 0;
 
 
 	///【异步】启动监听服务
@@ -163,7 +163,7 @@ public:
 	/// 1:只有tcpserver才支持
 	///	2:异步accept，accept产生的结果通过callback返回
 	/// 3:与accept函数不能同时使用
-	virtual bool async_accept(const AcceptedCallback& callback){return false;}
+	virtual bool async_accept(const AcceptedCallback& callback) = 0;
 
 
 	///【同步】同步accept产生socket
@@ -173,7 +173,7 @@ public:
 	/// 1:只有tcpserver才支持
 	///	2:与startListen不能同时使用
 	///	3:该接口的调用时间跟setSocketTimeout/nonBlocking两个函数决定
-	virtual shared_ptr<Socket> accept(){return NULL;}
+	virtual shared_ptr<Socket> accept() = 0;
 
 
 	///【异步】启动TCP连接
@@ -182,14 +182,14 @@ public:
 	///retun		 true 成功、false 失败  返回值为异步投递消息结果
 	///注：
 	/// 1:只有tcpclient才支持
-	virtual bool async_connect(const NetAddr& addr,const ConnectedCallback& callback){return false;}
+	virtual bool async_connect(const NetAddr& addr,const ConnectedCallback& callback) = 0;
 
 	///【同步】TCP连接
 	///param[in]		addr			第三方的地址
 	///retun		 true 成功、false 失败  返回值为连接的结果
 	///注：
 	/// 1:只有tcpclient才支持
-	virtual bool connect(const NetAddr& addr){return false;}
+	virtual bool connect(const NetAddr& addr) = 0;
 
 	///设置TCP断开回调通知
 	///param[in]		disconnected	断开回调通知
@@ -197,7 +197,7 @@ public:
 	///注：
 	/// 1:只有TCP才支持
 	///注：仅异步IO支持
-	virtual bool setDisconnectCallback(const DisconnectedCallback& disconnected){return false;}
+	virtual bool setDisconnectCallback(const DisconnectedCallback& disconnected) = 0;
 
 	///【异步】投递TCP接收数据事件
 	///param[in]		buf				接收到的数据存储地址
@@ -207,8 +207,8 @@ public:
 	///注：
 	///	1:只有连接成功后的TCP才支持
 	///注：仅异步IO支持
-	virtual bool async_recv(char *buf , uint32_t len,const ReceivedCallback& received){return false;}
-	virtual bool async_recv(const ReceivedCallback& received,int maxlen = 1024) { return false; }
+	virtual bool async_recv(char *buf , uint32_t len,const ReceivedCallback& received) = 0;
+	virtual bool async_recv(const ReceivedCallback& received,int maxlen = 1024) = 0;
 
 	///【同步】TCP接收
 	///param[in]		buf				接收到的数据存储地址
@@ -217,7 +217,7 @@ public:
 	///注：
 	///	1:只有连接成功后的TCP才支持
 	/// 2:该接口的调用时间跟setSocketTimeout/nonBlocking两个函数决定
-	virtual int recv(char *buf , uint32_t len){return false;}
+	virtual int recv(char *buf , uint32_t len) = 0;
 
 	///【异步】投递TCP数据发送事件
 	///param[in]		buf				发送数据缓冲地址，该地址空间内容发送过程中不能被修改删除，直到sended调用后才能操作
@@ -227,7 +227,7 @@ public:
 	///注：
 	///  1:只有连接成功后的TCP才支持
 	///注：仅异步IO支持
-	virtual bool async_send(const char * buf, uint32_t len,const SendedCallback& sended){return false;}
+	virtual bool async_send(const char * buf, uint32_t len,const SendedCallback& sended) = 0;
 
 	///【异步】投递TCP数据发送事件
 	///param[in]		buf				发送数据缓冲地址，该地址空间内容发送过程中不能被修改删除，直到sended调用后才能操作
@@ -237,7 +237,7 @@ public:
 	///注：
 	///  1:只有连接成功后的TCP才支持
 	///注：仅异步IO支持
-	virtual bool async_send(const std::deque<SBuf>& sendbuf, const SendedCallback& sended) { return false; }
+	virtual bool async_send(const std::deque<SBuf>& sendbuf, const SendedCallback& sended) = 0;
 
 	///【同步】TCP发送
 	///param[in]		buf				发送数据缓冲地址
@@ -246,7 +246,7 @@ public:
 	///注：
 	///  1:只有连接成功后的TCP才支持
 	///  2:该接口的调用时间跟setSocketTimeout/nonBlocking两个函数决定
-	virtual int send(const char * buf, uint32_t len){return -1;}
+	virtual int send(const char * buf, uint32_t len) = 0;
 
 
 	///【异步】投递UDP数据接收事件 
@@ -258,8 +258,8 @@ public:
 	///	1:只有UDP，并且Bind后才支持/
 	///	2:received不能为空
 	///注：仅异步IO支持
-	virtual bool async_recvfrom(char *buf , uint32_t len,const RecvFromCallback& received){return false;}
-	virtual bool async_recvfrom(const RecvFromCallback& received, int maxlen = 1024) { return false; }
+	virtual bool async_recvfrom(char *buf , uint32_t len,const RecvFromCallback& received) = 0;
+	virtual bool async_recvfrom(const RecvFromCallback& received, int maxlen = 1024) = 0;
 
 	///【同步】UDP接收
 	///param[in]		buf				接收到的数据存储地址
@@ -270,7 +270,7 @@ public:
 	///	1:只有UDP，并且Bind后才支持/
 	///	2:received不能为空
 	/// 3:该接口的调用时间跟setSocketTimeout/nonBlocking两个函数决定
-	virtual int recvfrom(char *buf , uint32_t len,NetAddr& other){return false;}
+	virtual int recvfrom(char *buf , uint32_t len,NetAddr& other) = 0;
 
 	///【异步】投递UDP数据发送事件
 	///param[in]		buf				发送数据缓冲地址，该地址空间内容发送过程中不能被修改删除，直到sended调用后才能操作
@@ -281,7 +281,7 @@ public:
 	///注：
 	///  1:只有UDP才支持
 	///注：仅异步IO支持
-	virtual bool async_sendto(const char * buf, uint32_t len,const NetAddr& other,const SendedCallback& sended){return false;}
+	virtual bool async_sendto(const char * buf, uint32_t len,const NetAddr& other,const SendedCallback& sended) = 0;
 
 	///【同步】UDP发送
 	///param[in]		buf				发送数据缓冲地址
@@ -291,45 +291,45 @@ public:
 	///注：
 	/// 1:只有UDP才支持
 	///	2:该接口的调用时间跟setSocketTimeout/nonBlocking两个函数决定
-	virtual int sendto(const char * buf, uint32_t len,const NetAddr& other){return -1;}
+	virtual int sendto(const char * buf, uint32_t len,const NetAddr& other) = 0;
 
 	
 	///获取Socket句柄
 	///return 句柄	、当socket创建失败 -1
-	virtual SOCKET getHandle() const {return INVALIDHANDLE;}
+	virtual SOCKET getHandle() const = 0;
 
 	///获取Socket连接状态
 	///param in		
 	///return 连接状态、TCPServer默认NetStatus_notconnected、UDP默认NetStatus_connected
-	virtual NetStatus getStatus() const{return NetStatus_error;}
+	virtual NetStatus getStatus() const = 0;
 
 	///获取Socket网络类型
 	///param in		
 	///return 网络类型
-	virtual NetType getNetType() const{return NetType_Udp;}
+	virtual NetType getNetType() const = 0;
 
 	///获取Socket自身的地址
 	///param in		
 	///return 自身bind的地址、未bind为空
-	virtual NetAddr getMyAddr() const{return NetAddr();}
+	virtual NetAddr getMyAddr() const = 0;
 	
 	///获取Socket对方的地址
 	///param in		
 	///return TCPConnection使用
-	virtual NetAddr getOtherAddr() const{return NetAddr();}
+	virtual NetAddr getOtherAddr() const = 0;
 
 
 	//设置socket属性
-	virtual bool setSocketOpt(int level, int optname, const void *optval, int optlen) { return false; }
+	virtual bool setSocketOpt(int level, int optname, const void *optval, int optlen) = 0;
 
 	//获取属性
-	virtual bool getSocketOpt(int level, int optname, void *optval, int *optlen)const { return false; }
+	virtual bool getSocketOpt(int level, int optname, void *optval, int *optlen)const = 0;
 
 	//socket准备就绪
-	virtual void socketReady() {}
+	virtual void socketReady() = 0;
 
 	//socket发生错误
-	virtual void socketError(const std::string &errmsg) {}
+	virtual void socketError(const std::string &errmsg) = 0;
 
 	const shared_ptr<IOWorker>& ioWorker()const { return worker; }
 protected:

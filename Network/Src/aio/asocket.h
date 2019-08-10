@@ -5,21 +5,21 @@ using namespace Public::Base;
 class ASocket:public Socket
 {
 protected:
-	ASocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, NetType _type)
-		:Socket(_ioworker), ioserver(_ioserver), socketptr(_sockptr), status(NetStatus_disconnected),  type(_type), ishavelisten(false)
+	ASocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, NetType _type)
+		:Socket(_ioworker), ioserver(_ioserver),sock(INVALIDHANDLE), status(NetStatus_disconnected),  type(_type), ishavelisten(false)
 	{
 		userthread = make_shared<_UserThread>();
 	}
-	ASocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, const NewSocketInfo& newsock)
-		:Socket(_ioworker), ioserver(_ioserver), socketptr(_sockptr), status(NetStatus_connected),  type(NetType_TcpConnection), ishavelisten(false)
+	ASocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const TCPClient::NewSocketInfo& newsock)
+		:Socket(_ioworker), ioserver(_ioserver), sock(INVALIDHANDLE), status(NetStatus_connected),  type(NetType_TcpConnection), ishavelisten(false)
 	{
 		userthread = make_shared<_UserThread>();
 		sock = newsock.newsocket;
 		otheraddr = newsock.otheraddr;
 	}
 public:
-	static shared_ptr<ASocket> create(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, NetType _type);
-	static shared_ptr<ASocket> create(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, const NewSocketInfo& newsock);
+	static shared_ptr<ASocket> create(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, NetType _type);
+	static shared_ptr<ASocket> create(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const TCPClient::NewSocketInfo& newsock);
 	
 	virtual ~ASocket()
 	{
@@ -128,9 +128,9 @@ public:
 			return shared_ptr<Socket>();
 		}
 
-		NewSocketInfo* newsocketinfo = new NewSocketInfo;
-		newsocketinfo->newsocket = s_accept;
-		newsocketinfo->otheraddr = NetAddr(*(SockAddrIPv4*)&accept_addr);
+		TCPClient::NewSocketInfo newsocketinfo;
+		newsocketinfo.newsocket = s_accept;
+		newsocketinfo.otheraddr = NetAddr(*(SockAddrIPv4*)&accept_addr);
 
 		shared_ptr<Socket> newsock = TCPClient::create(worker, newsocketinfo);
 
@@ -242,6 +242,28 @@ public:
 		return ::getsockopt(sock, level, optname, (char*)optval, (socklen_t*)optlen) >= 0;
 	}
 
+	bool setDisconnectCallback(const Socket::DisconnectedCallback& disconnected)
+	{
+		disconnectcallback = disconnected;
+
+		return true;
+	}
+
+	void socketError(const std::string &errmsg)
+	{
+		status = NetStatus_disconnected;
+		disconnectcallback(socketptr.lock(), "disconnected");
+	}
+
+	virtual bool async_send(const char*buf,uint32_t len, const SendedCallback& sended)
+	{
+		if (buf == NULL || len <= 0 || !sended || status != NetStatus_connected)
+		{
+			return false;
+		}
+
+		return async_send({ SBuf(buf,len)}, sended);
+	}
 
 	virtual bool async_accept(const AcceptedCallback& callback) { return false; }
 	virtual bool async_connect(const NetAddr& addr, const ConnectedCallback& callback) { return false; }
@@ -255,20 +277,22 @@ public:
 private:
 	virtual bool creatSocket(NetType type) = 0;
 protected:
-	shared_ptr<IOServer>	ioserver;
-	weak_ptr<Socket>		socketptr;
+	shared_ptr<IOServer>			ioserver;
+	weak_ptr<Socket>				socketptr;
 
-	shared_ptr<_PoolResource> resourece;
+	shared_ptr<_PoolResource>		resourece;
 
-	int						sock;
+	int								sock;
 
-	shared_ptr<_UserThread> userthread;
+	shared_ptr<_UserThread>			userthread;
 
-	NetStatus			 status;
-	NetType				 type;
+	NetStatus						status;
+	NetType							type;
 
-	NetAddr				 myaddr;
-	NetAddr				 otheraddr;
+	NetAddr							myaddr;
+	NetAddr							otheraddr;
 
-	bool				ishavelisten;
+	bool							ishavelisten;
+
+	Socket::DisconnectedCallback	disconnectcallback;
 };

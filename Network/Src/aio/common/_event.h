@@ -6,7 +6,7 @@
 using namespace Public::Base;
 using namespace Public::Network;
 
-struct NewSocketInfo
+struct TCPClient::NewSocketInfo
 {
 	int		newsocket;
 	NetAddr	otheraddr;

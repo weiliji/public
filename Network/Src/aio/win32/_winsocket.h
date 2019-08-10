@@ -12,11 +12,11 @@ class _SystemSocket :public ASocket
 	ConnectEvent	connectevent;
 
 public:
-	_SystemSocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, NetType _type)
-	:ASocket(_ioworker,_ioserver,_sockptr,_type){}
+	_SystemSocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver,  NetType _type)
+	:ASocket(_ioworker,_ioserver,_type){}
 
-	_SystemSocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const shared_ptr<Socket>& _sockptr, const NewSocketInfo& newsock)
-	:ASocket(_ioworker,_ioserver,_sockptr ,newsock)
+	_SystemSocket(const shared_ptr<IOWorker>& _ioworker, const shared_ptr<IOServer>& _ioserver, const TCPClient::NewSocketInfo& newsock)
+	:ASocket(_ioworker,_ioserver ,newsock)
 	{
 		int flag = 1;
 		setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (const char*)&flag, sizeof(flag));

@@ -1,31 +1,33 @@
 #include "Network/Network.h"
 using namespace Public::Network;
-#if 0
 
+#if 1
 class NetworkServerInfo
 {
 public:
-	Mutex				mutex;
-	std::list<String>	sendlist;
 	shared_ptr<Socket>	sock;
 
+	String data;
+
+	AtomicCount		sendcount;
+
+
+	NetworkServerInfo()
+	{
+		data.alloc(10240);
+		data.resize(10240);
+	}
 	~NetworkServerInfo()
 	{
 		if (sock) sock->disconnect();
 	}
 
-	void inputData(const String& data)
+	void inputData()
 	{
-		Guard locker(mutex);
-
-		if (sendlist.size() > 100) return;
-
-		sendlist.push_back(data);
-
-		if (sendlist.size() == 1)
+		if (++sendcount == 1)
 		{
-			const char* buffer = sendlist.front().c_str();
-			uint32_t bufferlen = sendlist.front().length();
+			const char* buffer = data.c_str();
+			uint32_t bufferlen = data.length();
 
 			shared_ptr<Socket> tmp = sock;
 			if (tmp) tmp->async_send(buffer, bufferlen, Socket::SendedCallback(&NetworkServerInfo::_sendcallback, this));
@@ -34,15 +36,12 @@ public:
 
 	void _sendcallback(const weak_ptr<Socket>&, const char* buffer, int len)
 	{
-		Guard locker(mutex);
-		if (sendlist.size() <= 0)return;
-
-		sendlist.pop_front();
-
-		if (sendlist.size() > 0)
+//		printf("_sendcallback %d\r\n", len);
+		if (--sendcount > 0)
 		{
-			const char* buffer = sendlist.front().c_str();
-			uint32_t bufferlen = sendlist.front().length();
+
+			const char* buffer = data.c_str();
+			uint32_t bufferlen = data.length();
 
 			shared_ptr<Socket> tmp = sock;
 			if (tmp) tmp->async_send(buffer, bufferlen, Socket::SendedCallback(&NetworkServerInfo::_sendcallback, this));
@@ -54,7 +53,6 @@ Mutex servermutex;
 std::map<Socket*, shared_ptr<NetworkServerInfo> > serverlist;
 shared_ptr<Thread>	serverthreadex;
 shared_ptr<Socket>	tcpserver;
-std::list< shared_ptr<NetworkServerInfo>> freelist;
 
 void _socketRecv(const weak_ptr<Socket>& sock, const char* buffer, int len)
 {
@@ -71,7 +69,6 @@ void _socketDisconnect(const weak_ptr<Socket>& sock, const std::string& err)
 		std::map<Socket*, shared_ptr<NetworkServerInfo> >::iterator iter = serverlist.find(socktmp.get());
 		if (iter != serverlist.end())
 		{
-			freelist.push_back(iter->second);
 			serverlist.erase(iter);
 		}
 	}
@@ -106,24 +103,17 @@ void runServerThread(Thread* ex, void* param)
 		Thread::sleep(5);
 
 
-		std::list< shared_ptr<NetworkServerInfo>> freelisttmp;
-		std::map<Socket*, shared_ptr<NetworkServerInfo> > serverlisttmp;
 		{
 			Guard lock(servermutex);
-			serverlisttmp = serverlist;
 
-			freelisttmp = freelist;
-			freelist.clear();
+			for (std::map<Socket*, shared_ptr<NetworkServerInfo> >::iterator iter = serverlist.begin(); iter != serverlist.end(); iter++)
+			{
+				shared_ptr<NetworkServerInfo> serverinfo = iter->second;
+				if (serverinfo == NULL) continue;;
+
+				serverinfo->inputData();
+			}
 		}
-
-		for (std::map<Socket*, shared_ptr<NetworkServerInfo> >::iterator iter = serverlisttmp.begin(); iter != serverlisttmp.end(); iter++)
-		{
-			shared_ptr<NetworkServerInfo> serverinfo = iter->second;
-			if (serverinfo == NULL) continue;;
-
-			serverinfo->inputData(data);
-		}
-
 	}
 }
 
@@ -141,6 +131,8 @@ std::map<Socket*, shared_ptr<Socket> > clientlist;
 
 void _socketRecvcallback(const weak_ptr<Socket>& sock, const char* buf, int len)
 {
+//	printf("_socketRecvcallback %d\r\n", len);
+
 	shared_ptr<Socket> socktmp = sock.lock();
 	if (socktmp == NULL) return;
 

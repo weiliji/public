@@ -271,9 +271,9 @@ struct AcceptEvent :public WinEvent
 
 			getAcceptAddExFunc(wbuf.buf, 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, (LPSOCKADDR*)&localAddr, &locallen, (LPSOCKADDR*)&clientAddr, &clientlen);
 
-			NewSocketInfo* newsocketinfo = new NewSocketInfo;
-			newsocketinfo->newsocket = newsock;
-			newsocketinfo->otheraddr = NetAddr(*(SockAddr*)clientAddr);
+			TCPClient::NewSocketInfo newsocketinfo;
+			newsocketinfo.newsocket = newsock;
+			newsocketinfo.otheraddr = NetAddr(*(SockAddr*)clientAddr);
 
 			shared_ptr<Socket> newsock = TCPClient::create(sock->ioWorker(), newsocketinfo);
 			acceptcallback(sock, newsock);
