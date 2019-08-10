@@ -163,7 +163,7 @@ const shared_ptr<HTTPClientResponse> HTTPClient::request(const shared_ptr<HTTPCl
 	return internal->depend(req->timeout());
 }
 
-struct HTTPAsyncClient::HTTPAsyncClientInternal
+struct HTTPAsyncClient::HTTPAsyncClientInternal:public Thread
 {
 	shared_ptr<IOWorker>	worker;
 	std::string				useragent;
@@ -171,56 +171,68 @@ struct HTTPAsyncClient::HTTPAsyncClientInternal
 	Mutex					mutex;
 	std::map<HTTPClientManager*,shared_ptr< HTTPClientManager> > clientlist;
 
-	shared_ptr<Timer>			timer;
-
-	void onPoolTimerProc(unsigned long)
+	HTTPAsyncClientInternal() :Thread("HTTPAsyncClientInternal")
 	{
-		std::map<HTTPClientManager*, shared_ptr< HTTPClientManager> > clientlisttmp;
-
+		createThread();
+	}
+	~HTTPAsyncClientInternal()
+	{
+		destroyThread();
+	}
+	void threadProc()
+	{
+		while (looping())
 		{
-			Guard locker(mutex);
-			clientlisttmp = clientlist;
-		}
 
-		uint64_t nowtime = Time::getCurrentMilliSecond();
-		for (std::map<HTTPClientManager*, shared_ptr< HTTPClientManager> >::iterator iter = clientlisttmp.begin(); iter != clientlisttmp.end(); )
-		{
-			shared_ptr< HTTPClientManager> client = iter->second;
+			std::map<HTTPClientManager*, shared_ptr< HTTPClientManager> > clientlisttmp;
 
-			if (client->commu)
-				client->commu->onPoolTimerProc();
-
-			if (client->commu && client->commu->sessionIsFinish())
 			{
-				client->asynccallback(client->request, client->response);
-
 				Guard locker(mutex);
-				clientlisttmp.erase(iter++);
-
-				continue;
+				clientlisttmp = clientlist;
 			}
 
-			if (nowtime > client->startconnecttime && nowtime - client->startconnecttime > client->request->timeout())
+			uint64_t nowtime = Time::getCurrentMilliSecond();
+			for (std::map<HTTPClientManager*, shared_ptr< HTTPClientManager> >::iterator iter = clientlisttmp.begin(); iter != clientlisttmp.end(); )
 			{
-				client->asynccallback(client->request, client->errorResponse(408, "Request Timeout"));
+				shared_ptr< HTTPClientManager> client = iter->second;
 
-				Guard locker(mutex);
-				clientlisttmp.erase(iter++);
+				if (client->commu)
+					client->commu->onPoolTimerProc();
 
-				continue;
+				if (client->commu && client->commu->sessionIsFinish())
+				{
+					client->asynccallback(client->request, client->response);
+
+					Guard locker(mutex);
+					clientlisttmp.erase(iter++);
+
+					continue;
+				}
+
+				if (nowtime > client->startconnecttime && nowtime - client->startconnecttime > client->request->timeout())
+				{
+					client->asynccallback(client->request, client->errorResponse(408, "Request Timeout"));
+
+					Guard locker(mutex);
+					clientlisttmp.erase(iter++);
+
+					continue;
+				}
+
+				if (client->connecteddisconected)
+				{
+					client->asynccallback(client->request, client->errorResponse(500, "Socket Disconnect"));
+
+					Guard locker(mutex);
+					clientlisttmp.erase(iter++);
+
+					continue;
+				}
+
+				iter++;
 			}
 
-			if (client->connecteddisconected)
-			{
-				client->asynccallback(client->request, client->errorResponse(500, "Socket Disconnect"));
-
-				Guard locker(mutex);
-				clientlisttmp.erase(iter++);
-
-				continue;
-			}
-
-			iter++;
+			Thread::sleep(10);
 		}
 	}
 };
@@ -232,14 +244,9 @@ HTTPAsyncClient::HTTPAsyncClient(const shared_ptr<IOWorker>& worker, const std::
 	internal->useragent = useragent;
 
 	if (internal->worker == NULL) internal->worker = IOWorker::defaultWorker();
-
-	internal->timer = make_shared<Timer>("HTTPAsyncClient");
-	internal->timer->start(Timer::Proc(&HTTPAsyncClientInternal::onPoolTimerProc, internal), 0, 1000);
 }
 HTTPAsyncClient::~HTTPAsyncClient()
 {
-	internal->timer = NULL;
-
 	{
 		Guard locker(internal->mutex);
 		internal->clientlist.clear();

@@ -139,7 +139,7 @@ int main(int argc, const char* argv[])
 }
 #endif
 
-#if 0
+#if 1
 #include "OnvifClient/OnvifClient.h"
 using namespace Public::Onvif;
 
@@ -325,7 +325,7 @@ int main()
 
 
 
-#if 1
+#if 0
 #include "Base/Base.h"
 using namespace Public::Base;
 
