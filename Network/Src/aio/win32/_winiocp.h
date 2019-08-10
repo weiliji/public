@@ -80,8 +80,6 @@ public:
 		if (winevent == NULL || Overlapped == NULL) return;
 
 		winevent->doEvent1((DWORD)NumberOfBytesTransferred, IoResult == ERROR_SUCCESS);
-
-		printf("IoCompletionCallback %x %d %d\r\n",winevent,NumberOfBytesTransferred,IoResult);
 	}
 };
 

@@ -38,10 +38,10 @@ public:
 
 	virtual shared_ptr<_PoolResource> addResource(int socketfd, const shared_ptr<Socket>& _sock, const shared_ptr<_UserThread>& _userthread) = 0;
 
-	virtual bool delResource(int socketfd, _PoolResource* res) { return false; }
+	virtual bool delResource(int socketfd, _PoolResource* res) { return true; }
 
-	virtual bool postEvent(const shared_ptr<_PoolResource>& res, Event* event) { return false; }
-	virtual bool postEvent(const shared_ptr<_PoolResource>& res, const shared_ptr<Event>& event) { return false; }
+	virtual bool postEvent(const shared_ptr<_PoolResource>& res, Event* event) { return true; }
+	virtual bool postEvent(const shared_ptr<_PoolResource>& res, const shared_ptr<Event>& event) { return true; }
 
 	virtual bool postExtExentFunction(const IOWorker::EventCallback& _callback, void* param) 
 	{

@@ -127,12 +127,12 @@ public:
 		if (type == EventType_Read)
 		{
 			eventinfo->event &= ~ EVENT_READ;
-			eventinfo->readeventid = NULL;
+			eventinfo->readevent = NULL;
 		}
 		else
 		{
 			eventinfo->event &= ~ EVENT_WRITE;
-			eventinfo->writeeventid = NULL;
+			eventinfo->writeevent = NULL;
 		}
 
 		epoll_event pevent;
@@ -176,8 +176,8 @@ public:
 				if (EVENTISREAD(workEpoolEvent[i].events))
 				{
 					_DoThreadPoolInfo* info = new _DoThreadPoolInfo;
-					info->event = eventinfo->readeventid;
-					eventinfo->readeventid = NULL;
+					info->event = eventinfo->readevent;
+					eventinfo->readevent = NULL;
 					clean(sockfd, EventType_Read, eventinfo);
 
 					if (!ThreadPool::dispatch(ThreadPool::Proc(&_SystemPoll::eventThreadProc, shared_from_this()), info))
@@ -189,8 +189,8 @@ public:
 				if (EVENTISWRITE(workEpoolEvent[i].events))
 				{
 					_DoThreadPoolInfo* info = new _DoThreadPoolInfo;
-					info->event = eventinfo->writeeventid;
-					eventinfo->writeeventid = NULL;
+					info->event = eventinfo->writeevent;
+					eventinfo->writeevent = NULL;
 					clean(sockfd, EventType_Write, eventinfo);
 
 					if (!ThreadPool::dispatch(ThreadPool::Proc(&_SystemPoll::eventThreadProc, shared_from_this()), info))

@@ -1,6 +1,6 @@
 #include "Network/Network.h"
 using namespace Public::Network;
-#if 1
+#if 0
 
 class NetworkServerInfo
 {
@@ -157,7 +157,7 @@ void _socketConnectCallback(const weak_ptr<Socket>& sock,bool,const std::string&
 
 void runClient(const shared_ptr<IOWorker>& worker,uint32_t size)
 {
-	while(1)
+	//while(1)
 	{
 		if (clientlist.size() > size)
 		{

@@ -21,6 +21,14 @@ struct WinEvent:public Event
 
 	WinEvent(EventType _pooltype):Event(_pooltype)
 	{
+		reset();
+	}
+	virtual ~WinEvent() {}
+
+	virtual void doEvent(const shared_ptr<Socket>& sock, int bytes, bool status) {}
+
+	void reset()
+	{
 		memset(&overlped, 0, sizeof(overlped));
 		memset(&wbuf, 0, sizeof(wbuf));
 		memset(&addr, 0, sizeof(addr));
@@ -30,9 +38,6 @@ struct WinEvent:public Event
 		addr.sa_family = AF_INET;
 		addrlen = sizeof(SOCKADDR);
 	}
-	virtual ~WinEvent() {}
-
-	virtual void doEvent(const shared_ptr<Socket>& sock, int bytes, bool status) {}
 };
 
 struct SendEvent :public WinEvent
@@ -43,6 +48,7 @@ struct SendEvent :public WinEvent
 
 	void init(const char* buffer, uint32_t len, const Socket::SendedCallback& _callback, const NetAddr& toaddr)
 	{
+		reset();
 		addr = *(SOCKADDR*)toaddr.getAddr();
 		addrlen = toaddr.getAddrLen();
 		sendcallback = _callback;
@@ -102,6 +108,7 @@ struct RecvEvent :public WinEvent
 			delete[](char*)wbuf.buf;
 		}
 		needFreeBuffer = false;
+		reset();
 		if (buffer == NULL)
 		{
 			needFreeBuffer = true;
@@ -176,6 +183,7 @@ struct AcceptEvent :public WinEvent
 	AcceptEvent() :WinEvent(EventType_Read) {}
 	void init(const Socket::AcceptedCallback& _acceptcallback)
 	{		
+		reset();
 		acceptcallback = _acceptcallback;
 		wbuf.buf = swapBuffer;
 		wbuf.len = SWAPBUFFERLEN;
@@ -258,6 +266,7 @@ struct ConnectEvent :public WinEvent
 	
 	void init(const NetAddr& toaddr, const Socket::ConnectedCallback& _connectcallback)
 	{
+		reset();
 		wbuf.buf = swapBuffer;
 		wbuf.len = SWAPBUFFERLEN;
 		connectcallback = _connectcallback;
