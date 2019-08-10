@@ -164,9 +164,9 @@ struct RTSPServerSession::RTSPServerSessionInternal:public RTSPSession
 	{
 		handler->onContorlPackageCallback(transinfo, buffer, len);
 	}
-	void onMediaDataCallback(const shared_ptr<STREAM_TRANS_INFO>& transinfo, const RTPHEADER& rtpheader, const StringBuffer& buffer)
+	void onMediaDataCallback(const shared_ptr<STREAM_TRANS_INFO>& transinfo, const RTPPackage& rtppackage)
 	{
-		handler->onMediaPackageCallback(transinfo, rtpheader, buffer);
+		handler->onMediaPackageCallback(transinfo, rtppackage);
 	}
 	void socketDisconnectCallback()
 	{
@@ -255,13 +255,13 @@ void RTSPServerSession::sendErrorResponse(const shared_ptr<RTSPCommandInfo>& cmd
 {
 	internal->sendErrorResponse(cmdinfo, errcode, errmsg);
 }
-bool RTSPServerSession::sendMediaPackage(const shared_ptr<STREAM_TRANS_INFO> mediainfo, uint32_t timestmap, const StringBuffer& buffer, bool mark)
+bool RTSPServerSession::sendMediaPackage(const shared_ptr<STREAM_TRANS_INFO> mediainfo, const RTPPackage& rtppackage)
 {
 	shared_ptr<RTPSession> rtpsession = mediainfo->rtpsession;
 
-	if (mediainfo == NULL || rtpsession == NULL || buffer.length() <= 0) return false;
+	if (mediainfo == NULL || rtpsession == NULL || rtppackage.bufferlen() <= 0) return false;
 
-	rtpsession->sendMediaData(mediainfo, timestmap, buffer, mark);
+	rtpsession->sendMediaData(mediainfo, rtppackage);
 
 	return true;
 }

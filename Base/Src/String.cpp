@@ -66,6 +66,7 @@ struct String::StringInternal
 	void alloc(size_t size)
 	{
 		shared_ptr<StringBufer> newbuffer;
+		
 		if (size > 0)
 		{
 			newbuffer = make_shared<StringBufer>(mempool, (uint32_t)size);

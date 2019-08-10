@@ -6,6 +6,7 @@
 #include "RTSP/Defs.h"
 #include "RTSP/RTSPStructs.h"
 #include "Base/Base.h"
+#include "RTSP/RTPPackage.h"
 using namespace Public::Base;
 
 
@@ -44,7 +45,7 @@ public:
 	///@[in] nBufSize RTP 包长度
 	///@[in] nOffset 传入buffer的偏移量
 	///@[return] 0:传入数据不够一帧，继续等待数据, -1:出现错误。
-	bool inputRtpPacket(const RTPHEADER& rtpheader, const char* bufferaddr, uint32_t bufferlen);
+	bool inputRtpPacket(const RTPPackage& rtppackage);
 
 	///清空缓存区
 	bool reset();
@@ -52,6 +53,36 @@ private:
 	struct RTPAnalyzerInternal;
 	RTPAnalyzerInternal* internal;
 
+};
+
+//将完整的音视频数据包打包成RTP包
+class RTSP_API RTPBuilder
+{
+public:
+	typedef Function1<void,const RTPPackage&> RTPPackageCallback;
+public:
+	RTPBuilder(const shared_ptr<MEDIA_INFO>& rtspmedia,const RTPPackageCallback &callback);
+
+	~RTPBuilder();
+
+	//设置帧率,默认25帧
+	void setFrameRate(int framerate);
+
+	//获取帧率
+	int getFrameRate();
+
+	//设置采样率，默认8000
+	void setSamplingRate(int samplingRate);
+
+	//获取采样率
+	int getSamplingRate();
+
+	/// 输入数据必须为一个完整帧
+	bool inputVideoData(unsigned char* data, int size);
+	bool inputAudioData(unsigned char* data, int size);
+private:
+	struct RTPBuilderInternal;
+	RTPBuilderInternal* internal;
 };
 
 }

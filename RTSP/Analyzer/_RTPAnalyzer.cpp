@@ -65,11 +65,15 @@ RTPAnalyzer::~RTPAnalyzer()
 	SAFE_DELETE(internal);
 }
 
-bool RTPAnalyzer::inputRtpPacket(const RTPHEADER& rtpheader, const char* bufferaddr, uint32_t bufferlen)
+bool RTPAnalyzer::inputRtpPacket(const RTPPackage& rtppackage)
 {
-	if (internal->analyze == NULL || bufferaddr == NULL || bufferlen <= 0) return false;
+	const RTPHEADER* rtpheader = rtppackage.header();
+	const char* bufferaddr = rtppackage.data();
+	uint32_t bufferlen = rtppackage.datalen();
 
-	if (internal->analyze->InputData(rtpheader, bufferaddr, bufferlen) != 0) return false;
+	if (internal->analyze == NULL || rtpheader  == NULL||bufferaddr == NULL || bufferlen <= 0) return false;
+
+	if (internal->analyze->InputData(*rtpheader, bufferaddr, bufferlen) != 0) return false;
 
 	return true;
 }

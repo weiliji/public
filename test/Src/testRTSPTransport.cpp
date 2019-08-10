@@ -107,7 +107,7 @@ public:
 	{
 		int a = 0;
 	}
-	virtual void onMediaPackageCallback(const shared_ptr<STREAM_TRANS_INFO> mediainfo, const RTPHEADER& rtpheader, const StringBuffer& buffer)
+	virtual void onMediaPackageCallback(const shared_ptr<STREAM_TRANS_INFO> mediainfo, const RTPPackage& rtppackage)
 	{
 		std::map< RTSPServerSession*, shared_ptr< RTSPServerSessiontmp> > sendlist;
 		
@@ -126,7 +126,7 @@ public:
 			shared_ptr<RTSPServerSession> session = tmp->session;
 			if(session == NULL) continue;
 
-			session->sendMediaPackage(tmp->mediainfo->videoStreamInfo(), ntohl(rtpheader.ts), buffer, rtpheader.m);
+			session->sendMediaPackage(tmp->mediainfo->videoStreamInfo(), rtppackage);
 		}
 
 		int a = 0;

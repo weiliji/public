@@ -118,7 +118,7 @@ public:
 		fflush(fd);
 		if (ret > 0) writepos += ret;
 
-		return ret;
+		return (uint32_t)ret;
 	}
 	virtual uint32_t read(char* buffer, uint32_t len)
 	{

@@ -610,7 +610,7 @@ static int DecodeSpsPpsInfo(const std::string& pSpsPpsBufer, int& nWidth, int& n
 	else
 	{
 		//防止SPS PPS字符串出错导致拷贝崩溃. 例如Public IPC 的SPS PPS 只有一个"," .
-		int nPpsLen = pFindPps - pSpsPpsBufer.c_str();
+		int nPpsLen = (int)(pFindPps - pSpsPpsBufer.c_str());
 		if (nPpsLen > 0)
 		{
 			memcpy(szSpsBufer, pSpsPpsBufer.c_str(), nPpsLen);
@@ -639,7 +639,7 @@ static int DecodeSpsPpsInfo(const std::string& pSpsPpsBufer, int& nWidth, int& n
 	}
 
 	//Decode sps get video size
-	int nRet = DecodeSps((unsigned char*)m_szSpsBuffer.c_str(), m_szSpsBuffer.length(), nWidth, nHetght, m_nFrameRate);
+	int nRet = DecodeSps((unsigned char*)m_szSpsBuffer.c_str(), (int)m_szSpsBuffer.length(), nWidth, nHetght, m_nFrameRate);
 	if (0 != nRet)
 	{
 		m_nFrameRate = 25;

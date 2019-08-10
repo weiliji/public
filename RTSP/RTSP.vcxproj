@@ -192,6 +192,7 @@
   <ItemGroup>
     <ClInclude Include="..\Include\RTSP\Defs.h" />
     <ClInclude Include="..\Include\RTSP\RTPAnalyzer.h" />
+    <ClInclude Include="..\Include\RTSP\RTPPackage.h" />
     <ClInclude Include="..\Include\RTSP\RTSP.h" />
     <ClInclude Include="..\Include\RTSP\RTSPClient.h" />
     <ClInclude Include="..\Include\RTSP\RTSPServer.h" />
@@ -199,10 +200,11 @@
     <ClInclude Include="..\Include\RTSP\RTSPUrl.h" />
     <ClCompile Include="Analyzer\h265frame.cpp" />
     <ClCompile Include="Analyzer\rtcpAnalyzer.cpp" />
-    <ClCompile Include="Analyzer\RTPAnalyzer.cpp" />
     <ClCompile Include="Analyzer\rtpH264Analyzer.cpp" />
     <ClCompile Include="Analyzer\rtpH265Analyzer.cpp" />
     <ClCompile Include="Analyzer\rtpNoneAnalyzer.cpp" />
+    <ClCompile Include="Analyzer\_RTPAnalyzer.cpp" />
+    <ClCompile Include="Analyzer\_RTPBuilder.cpp" />
     <ClCompile Include="client\RTSPClient.cpp" />
     <ClInclude Include="Analyzer\h265frame.h" />
     <ClInclude Include="Analyzer\irtpAnalyzer.h" />
@@ -225,6 +227,7 @@
     <ClInclude Include="common\rtspSession.h" />
     <ClInclude Include="common\wwwAuthenticate.h" />
     <ClInclude Include="common\rtspProtocol.h" />
+    <ClCompile Include="common\RTPPackage.cpp" />
     <ClCompile Include="common\rtp\rtcp.cpp" />
     <ClCompile Include="common\StringParse\rtspHeaderRange.cpp" />
     <ClCompile Include="common\StringParse\rtspHeaderSdp.cpp" />

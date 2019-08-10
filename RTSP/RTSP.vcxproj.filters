@@ -90,6 +90,15 @@
     <ClInclude Include="..\Include\RTSP\RTPAnalyzer.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="common\rtp\rtpsort.h">
+      <Filter>源文件\common\rtp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\RTSP\RTPPackage.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Analyzer\h265frame.h">
+      <Filter>源文件\Analyzer</Filter>
+    </ClInclude>
     <ClInclude Include="Analyzer\irtpAnalyzer.h">
       <Filter>源文件\Analyzer</Filter>
     </ClInclude>
@@ -102,20 +111,14 @@
     <ClInclude Include="Analyzer\rtpH264Analyzer.h">
       <Filter>源文件\Analyzer</Filter>
     </ClInclude>
-    <ClInclude Include="Analyzer\spsParse.h">
-      <Filter>源文件\Analyzer</Filter>
-    </ClInclude>
-    <ClInclude Include="Analyzer\h265frame.h">
-      <Filter>源文件\Analyzer</Filter>
-    </ClInclude>
     <ClInclude Include="Analyzer\rtpH265Analyzer.h">
       <Filter>源文件\Analyzer</Filter>
     </ClInclude>
     <ClInclude Include="Analyzer\rtpNoneAnalyzer.h">
       <Filter>源文件\Analyzer</Filter>
     </ClInclude>
-    <ClInclude Include="common\rtp\rtpsort.h">
-      <Filter>源文件\common\rtp</Filter>
+    <ClInclude Include="Analyzer\spsParse.h">
+      <Filter>源文件\Analyzer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -151,13 +154,19 @@
     <ClCompile Include="common\StringParse\rtspHeaderTransport.cpp">
       <Filter>源文件\common\StringParse</Filter>
     </ClCompile>
-    <ClCompile Include="Analyzer\rtcpAnalyzer.cpp">
+    <ClCompile Include="common\RTPPackage.cpp">
+      <Filter>源文件\common</Filter>
+    </ClCompile>
+    <ClCompile Include="Analyzer\_RTPAnalyzer.cpp">
       <Filter>源文件\Analyzer</Filter>
     </ClCompile>
-    <ClCompile Include="Analyzer\RTPAnalyzer.cpp">
+    <ClCompile Include="Analyzer\_RTPBuilder.cpp">
       <Filter>源文件\Analyzer</Filter>
     </ClCompile>
     <ClCompile Include="Analyzer\h265frame.cpp">
+      <Filter>源文件\Analyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="Analyzer\rtcpAnalyzer.cpp">
       <Filter>源文件\Analyzer</Filter>
     </ClCompile>
     <ClCompile Include="Analyzer\rtpH264Analyzer.cpp">

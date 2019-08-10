@@ -170,7 +170,8 @@ public:
 	{
 		MEDIA_INFO mediatmp = mediainfo.cloneStreamInfo();
 		rtspmedia = shared_ptr<MEDIA_INFO>(new MEDIA_INFO(mediatmp));
-		rtspmedia->ssrc = Value(ssrc).readString();
+		if(rtspmedia->ssrc.length() <= 0)
+			rtspmedia->ssrc = Value(ssrc).readString();
 
 		sendResponse(cmdinfo, HTTPHeader(), rtsp_header_build_sdp(*rtspmedia.get()), RTSPCONENTTYPESDP);
 	}
@@ -187,7 +188,9 @@ public:
 	}
 	void sendSetupResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, const shared_ptr<STREAM_TRANS_INFO>& transporttmp)
 	{
-		transporttmp->transportinfo.ssrc = (int)(ssrc | Time::getCurrentMilliSecond());
+		if(transporttmp->transportinfo.ssrc == 0)
+			transporttmp->transportinfo.ssrc = (int)(ssrc | Time::getCurrentMilliSecond());
+		
 		if (transporttmp->transportinfo.transport == TRANSPORT_INFO::TRANSPORT_RTP_UDP)
 		{
 			uint32_t startport = allockportcallback();
@@ -276,7 +279,7 @@ protected:
 	}
 private:
 	virtual void onContorlDataCallback(const shared_ptr<STREAM_TRANS_INFO>& transinfo, const char* buffer, uint32_t len) = 0;
-	virtual void onMediaDataCallback(const shared_ptr<STREAM_TRANS_INFO>& transinfo, const RTPHEADER& rtpheader, const StringBuffer& buffer) = 0;
+	virtual void onMediaDataCallback(const shared_ptr<STREAM_TRANS_INFO>& transinfo, const RTPPackage& rtppackage) = 0;
 	void _rtspBuildRtspCommand(const shared_ptr<RTSPCommandInfo>& cmd, const std::string& body = "", const std::string& contentype = "")
 	{
 		if (body.length() > 0)

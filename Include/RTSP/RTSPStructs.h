@@ -105,11 +105,14 @@ struct RTSP_API MEDIA_INFO
 	{
 		MEDIA_INFO info;
 
+		info.ssrc = ssrc;
+
 		for (std::list<shared_ptr<STREAM_TRANS_INFO> >::const_iterator iter = infos.begin(); iter != infos.end(); iter++)
 		{
 			shared_ptr<STREAM_TRANS_INFO> streaminfo = make_shared<STREAM_TRANS_INFO>();
 
 			streaminfo->streaminfo = (*iter)->streaminfo;
+			streaminfo->transportinfo.ssrc = (*iter)->transportinfo.ssrc;
 
 			info.infos.push_back(streaminfo);
 		}

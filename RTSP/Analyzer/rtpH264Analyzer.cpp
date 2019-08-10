@@ -27,8 +27,8 @@ RtpH264Analyzer::RtpH264Analyzer(const CBFreamCallBack& callback, const std::str
 	m_pPpsBuffer			= new char[pPps.length()];
 
 
-	m_nSpsLen				= pSps.length();
-	m_nPpsLen				= pPps.length();
+	m_nSpsLen				= (int)pSps.length();
+	m_nPpsLen				= (int)pPps.length();
 	memcpy(m_pSpsBuffer, pSps.c_str(), m_nSpsLen);
 	memcpy(m_pPpsBuffer, pPps.c_str(), m_nPpsLen);
 }

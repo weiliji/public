@@ -15,6 +15,7 @@
 #include "Network/Network.h"
 #include "Base/Base.h"
 #include "HTTP/HTTPParse.h"
+#include "RTSP/RTPPackage.h"
 using namespace Public::Base;
 using namespace Public::Network;
 using namespace Public::HTTP;
@@ -70,7 +71,7 @@ public:
 
 	void sendErrorResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, int errcode, const std::string& errmsg);
 	
-	bool sendMediaPackage(const shared_ptr<STREAM_TRANS_INFO> mediainfo, uint32_t timestmap, const StringBuffer& buffer, bool mark);
+	bool sendMediaPackage(const shared_ptr<STREAM_TRANS_INFO> mediainfo, const RTPPackage& rtppackge);
 	bool sendContorlPackage(const shared_ptr<STREAM_TRANS_INFO> mediainfo, const char* buffer, uint32_t bufferlen);
 private:
 	struct RTSPServerSessionInternal;
@@ -99,7 +100,7 @@ public:
 
 	virtual void onClose(const shared_ptr<RTSPServerSession>& session, const std::string& errmsg) = 0;
 	
-	virtual void onMediaPackageCallback(const shared_ptr<STREAM_TRANS_INFO> mediainfo, const RTPHEADER& rtpheader, const StringBuffer& buffer) {}
+	virtual void onMediaPackageCallback(const shared_ptr<STREAM_TRANS_INFO> mediainfo, const RTPPackage& rtppackge) {}
 	virtual void onContorlPackageCallback(const shared_ptr<STREAM_TRANS_INFO> mediainfo, const char* buffer, uint32_t bufferlen) {}
 };
 

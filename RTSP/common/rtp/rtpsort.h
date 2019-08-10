@@ -55,7 +55,7 @@ public:
 			{
 				rtplist.pop_front();
 
-				datacalblack(transportinfo, *header, StringBuffer(info.framedata.c_str() + sizeof(RTPHEADER), info.framedata.length() - sizeof(RTPHEADER)));
+				datacalblack(transportinfo, RTPPackage(info.framedata,0, (uint32_t)info.framedata.length()));
 
 				if (prevframesn != 0 && (uint16_t)(prevframesn + 1) != (uint16_t)info.sn)
 				{
