@@ -47,7 +47,7 @@ const RTPHEADER* RTPPackage::header() const
 		return NULL;
 	}
 
-	return (RTPHEADER*)buffer;
+	return (RTPHEADER*)(buffer + internal->offset);
 }
 const char* RTPPackage::data() const
 {
@@ -83,7 +83,7 @@ const char* RTPPackage::buffer() const
 		return NULL;
 	}
 
-	return buffer;
+	return (buffer + internal->offset);
 }
 uint32_t RTPPackage::bufferlen() const
 {

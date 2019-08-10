@@ -26,7 +26,7 @@ public:
 
 public:
 	RTSPProtocol(const shared_ptr<Socket>& sock, const CommandCallback& cmdcallback, const DisconnectCallback& disconnectCallback,bool server)
-		:HTTPParse(server), m_sendBuffer(MAXPARSERTSPBUFFERLEN),m_isSending(false)
+		:HTTPParse(server), m_isSending(false)
 	{
 		m_sock = sock;
 		m_cmdcallback = cmdcallback;
@@ -49,10 +49,6 @@ public:
 	}
 
 	uint64_t prevalivetime() const { return m_prevalivetime; }
-	uint32_t sendListSize()
-	{
-		return m_sendBuffer.dataLenght();
-	}
 
 	void sendProtocolData(const std::string& cmdstr)
 	{
@@ -61,12 +57,8 @@ public:
 		logdebug("\r\n%s",cmdstr.c_str());
 
 		Guard locker(m_mutex);
-		if (MAXPARSERTSPBUFFERLEN - m_sendBuffer.dataLenght() < cmdstr.length())
-		{
-			assert(0);
-		}
 
-		m_sendBuffer.production(cmdstr);
+		m_sendList.push_back(shared_ptr<SendPackgeInfo>(new SendPackgeInfo(cmdstr)));
 
 		_checkSendData();
 	}
@@ -79,12 +71,9 @@ public:
 
 
 		Guard locker(m_mutex);
-		if (MAXPARSERTSPBUFFERLEN - m_sendBuffer.dataLenght() < sizeof(INTERLEAVEDFRAME) + rtppackage.bufferlen())
-		{
-			assert(0);
-		}
-		m_sendBuffer.production((const char*)& frame, sizeof(INTERLEAVEDFRAME));
-		m_sendBuffer.production(rtppackage.buffer(), rtppackage.bufferlen());
+
+		m_sendList.push_back(shared_ptr<SendPackgeInfo>(new SendPackgeInfo(String((const char*)& frame, sizeof(INTERLEAVEDFRAME)))));
+		m_sendList.push_back(shared_ptr<SendPackgeInfo>(new SendPackgeInfo(rtppackage)));
 
 		_checkSendData();
 	}
@@ -97,12 +86,8 @@ public:
 
 
 		Guard locker(m_mutex);
-		if (MAXPARSERTSPBUFFERLEN - m_sendBuffer.dataLenght() < sizeof(INTERLEAVEDFRAME)  + bufferlen)
-		{
-			assert(0);
-		}
-		m_sendBuffer.production((const char*)& frame, sizeof(INTERLEAVEDFRAME));
-		m_sendBuffer.production(buffer, bufferlen);
+		m_sendList.push_back(shared_ptr<SendPackgeInfo>(new SendPackgeInfo(std::string((const char*)& frame, sizeof(INTERLEAVEDFRAME)))));
+		m_sendList.push_back(shared_ptr<SendPackgeInfo>(new SendPackgeInfo(std::string(buffer,bufferlen))));
 
 		_checkSendData();
 	}
@@ -113,29 +98,44 @@ public:
 private:
 	void _checkSendData()
 	{
-		if (m_isSending || m_sendBuffer.dataLenght() == 0) return;
+		if (m_isSending || m_sendList.size() == 0) return;
 
 
-		const char* bufferaddr = m_sendBuffer.getConsumeAddr();
-		uint32_t bufferlen = m_sendBuffer.getConsumeLength();
-
+		std::deque<Socket::SBuf> sendbuf;
+		for (std::list<shared_ptr<SendPackgeInfo> >::iterator iter = m_sendList.begin(); iter != m_sendList.end(); iter++)
+		{
+			sendbuf.push_back(Socket::SBuf((*iter)->buffer + (*iter)->sendpos, (*iter)->len - (*iter)->sendpos));
+		}
 
 		m_isSending = true;
 
 		m_prevalivetime = Time::getCurrentMilliSecond();
 
-		m_sock->async_send(bufferaddr, bufferlen, Socket::SendedCallback(&RTSPProtocol::onSocketSendCallback, this));
+		m_sock->async_send(sendbuf, Socket::SendedCallback(&RTSPProtocol::onSocketSendCallback, this));
 	}
 	void onSocketSendCallback(const weak_ptr<Socket>& sock, const char* buffer, int len)
 	{
 		if (len <= 0) return;
 
 		Guard locker(m_mutex);
-
-		if (buffer != m_sendBuffer.getConsumeAddr() || !m_sendBuffer.setConsumeLength(len))
+		for (std::list<shared_ptr<SendPackgeInfo> >::iterator iter = m_sendList.begin(); iter != m_sendList.end() && len > 0;)
 		{
-			assert(0);
+			uint32_t currpagesendlen = min(len, (*iter)->len - (*iter)->sendpos);
+
+			len -= currpagesendlen;
+
+			(*iter)->sendpos += currpagesendlen;
+
+			if ((*iter)->sendpos == (*iter)->len)
+			{
+				m_sendList.erase(iter++);
+			}
+			else
+			{
+				break;
+			}
 		}
+
 		m_isSending = false;
 
 		_checkSendData();
@@ -165,7 +165,8 @@ private:
 
 		m_recvBuffer.resize(m_recvBuffer.length() + len);
 
-		const char* buffertmp = m_recvBuffer.c_str();
+		const char* bufferstartaddr = m_recvBuffer.c_str();
+		const char* buffertmp = bufferstartaddr;
 		uint32_t bufferlen = (uint32_t)m_recvBuffer.length();
 
 		while (bufferlen > 0)
@@ -261,12 +262,12 @@ private:
 
 						if (frame->channel == transportinfo->transportinfo.rtp.t.dataChannel)
 						{
-							RTPPackage rtppackage(m_recvBuffer, (uint32_t)(buffertmp - m_recvBuffer.c_str() + sizeof(INTERLEAVEDFRAME)), (uint32_t)datalen);
+							RTPPackage rtppackage(m_recvBuffer, (uint32_t)(buffertmp - bufferstartaddr + sizeof(INTERLEAVEDFRAME)), (uint32_t)datalen);
 
 							const RTPHEADER* rtpheader = rtppackage.header();
 							if (rtpheader == NULL || rtpheader->v != RTP_VERSION)
 							{
-								assert(0);
+							//	assert(0);
 								break;
 							}
 
@@ -355,9 +356,12 @@ private:
 	DisconnectCallback			m_disconnect;
 
 	String						m_recvBuffer;
-	CircleBuffer				m_sendBuffer;
 
+
+	std::list<shared_ptr<SendPackgeInfo> >m_sendList;
 	bool						m_isSending;
+
+
 	Mutex						m_mutex;
 
 	uint64_t					m_prevalivetime;

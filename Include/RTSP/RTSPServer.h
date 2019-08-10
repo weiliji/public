@@ -57,7 +57,6 @@ public:
 
 	void setAuthenInfo(const std::string& username, const std::string& password);
 	const RTSPUrl& url() const;
-	uint32_t sendListSize() const;
 	uint64_t prevAlivetime() const;
 	shared_ptr<RTSPServerHandler> handler();
 

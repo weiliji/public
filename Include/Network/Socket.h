@@ -77,6 +77,15 @@ enum NetType{
 class NETWORK_API Socket
 {
 public:
+	struct SBuf
+	{
+		const char*		bufadd;
+		uint32_t		buflen;
+		uint32_t		sendlen;
+
+		SBuf(const char* _buf = NULL,uint32_t _len = 0):bufadd(_buf),buflen(_len),sendlen(0){}
+	};
+public:
 	/// socket监听时有accept事件回调方法，第一个参数表示监听socket自身，第二个表示新构造的socket.需要外部释放
 	/// 回调定义参考：void acceptCallbackFunc(Socket* oldSock,Socket* newSock);
 	typedef Function2<void, const weak_ptr<Socket>& /*oldSock*/, const shared_ptr<Socket>& /*newSock*/> AcceptedCallback;
@@ -97,7 +106,7 @@ public:
 	// socket发生send事件回调方法，第一个参数表示连接socket自身，第二个表示实际发送的socket数据长度.
 	///回调定义参考：void sendCallbackFunc(Socket* sock,const char* sendBuffer,int sendlen);
 	typedef Function3<void, const weak_ptr<Socket>& /*sock*/,const char*, int> SendedCallback;
-	
+		
 	/// socket发送udp的recvfrom事件回调方法，第一个参数表示socket自身，第二三个参数表示接收的数据信息地址和长度，第四个参数表示数据发送方ip
 	///回调定义参考：void recvfromCallbackFunc(Socket* sock,const char* recvBuffer, int recvlen ,const NetAddr& otheraddr);
 	typedef Function4<void, const weak_ptr<Socket>& /*sock*/,const char*, int,const NetAddr&> RecvFromCallback;
@@ -219,6 +228,16 @@ public:
 	///  1:只有连接成功后的TCP才支持
 	///注：仅异步IO支持
 	virtual bool async_send(const char * buf, uint32_t len,const SendedCallback& sended){return false;}
+
+	///【异步】投递TCP数据发送事件
+	///param[in]		buf				发送数据缓冲地址，该地址空间内容发送过程中不能被修改删除，直到sended调用后才能操作
+	///param[in]		len				发送数据数据最大值
+	///param[in]		sended			数据发送成后的异步通知，不能为NULL
+	///retun		 true 成功、false 失败 ，返回投递消息结果
+	///注：
+	///  1:只有连接成功后的TCP才支持
+	///注：仅异步IO支持
+	virtual bool async_send(const std::deque<SBuf>& sendbuf, const SendedCallback& sended) { return false; }
 
 	///【同步】TCP发送
 	///param[in]		buf				发送数据缓冲地址

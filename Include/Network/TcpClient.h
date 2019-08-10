@@ -115,6 +115,16 @@ public:
 	///  1:只有连接成功后的TCP才支持
 	virtual bool async_send(const char * buf, uint32_t len,const SendedCallback& sended);
 
+	///【异步】投递TCP数据发送事件
+	///param[in]		buf				发送数据缓冲地址，该地址空间内容发送过程中不能被修改删除，直到sended调用后才能操作
+	///param[in]		len				发送数据数据最大值
+	///param[in]		sended			数据发送成后的异步通知，不能为NULL
+	///retun		 true 成功、false 失败 ，返回投递消息结果
+	///注：
+	///  1:只有连接成功后的TCP才支持
+	///注：仅异步IO支持
+	virtual bool async_send(const std::deque<SBuf>& sendbuf, const SendedCallback& sended);
+
 	///【同步】TCP发送
 	///param[in]		buf				发送数据缓冲地址
 	///param[in]		len				发送数据数据最大值

@@ -397,8 +397,8 @@ int main(int argc, char** argv)
 			fclose(fd);
 		}
 	}
-//	if(0)
-	if (argc == 1)
+	if(0)
+//	if (argc == 1)
 	{
 		runserver(rtspaddrlist);
 	}

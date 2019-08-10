@@ -24,6 +24,7 @@ ifneq ($(strip ${DISAPP}), YES)
 	SubFile += Log/Log.mk	
 	SubFile += zip/zip.mk	
 	SubFile += RTSP/RTSP.mk
+	SubFile += test/test.mk
 endif
 
 #设置打包功能

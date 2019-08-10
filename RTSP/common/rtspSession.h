@@ -56,7 +56,7 @@ public:
 	RTSPSession(bool server):isserver(server)
 	{
 		protocolstartcseq = 0;
-		transportbytcp = true;
+		transportbytcp = false;
 		ssrc = (size_t)this;
 	}
 	~RTSPSession()

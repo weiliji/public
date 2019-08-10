@@ -46,68 +46,21 @@ public:
 
 		String senddata = std::string(buffer, bufferlen);
 
-		rtcp_sendlist.push_back(senddata);
+		rtcp_sendlist.push_back(shared_ptr<SendPackgeInfo>(new SendPackgeInfo(senddata)));
 
-		_sendAndCheckRTCPSend();
+		_sendAndCheckSend(false);
 	}
 	void sendMediaData(const shared_ptr<STREAM_TRANS_INFO>& transportinfo, const RTPPackage& rtppackge)
 	{
 		Guard locker(mutex);
 
-		rtp_sendlist.push_back(rtppackge);
+		rtp_sendlist.push_back(shared_ptr<SendPackgeInfo>(new SendPackgeInfo(rtppackge)));
 
-		_sendAndCheckRTPSend();
-	}
-	void _sendAndCheckRTPSend(const char* buffer = NULL, size_t len = 0)
+		_sendAndCheckSend(true);
+	}	
+	void _sendAndCheckSend(bool isdata, const char* buffer = NULL,size_t len = 0)
 	{
-		std::list<RTPPackage>& sendlist = rtp_sendlist;
-
-		bool needSendData = false;
-		//第一次需要发送数据
-		if (buffer == NULL && sendlist.size() == 1)
-		{
-			needSendData = true;
-		}
-		else if (buffer)
-		{
-			if (len < 0) return;
-
-			if (sendlist.size() <= 0) return;
-
-			{
-				RTPPackage& item = sendlist.front();
-				if (buffer != item.buffer())
-				{
-					assert(0);
-				}
-				sendlist.pop_front();
-			}
-
-			needSendData = true;
-		}
-
-		if (!needSendData) return;
-
-		if (sendlist.size() <= 0) return;
-
-		RTPPackage& item = sendlist.front();
-
-		//处理数据的零拷贝问题，添加前置数据		
-		const char* sendbuffer = item.buffer();
-		uint32_t sendbufferlen = (uint32_t)item.bufferlen();
-
-		shared_ptr<Socket> socktmp = rtp_sock;
-		if (socktmp)
-		{
-			socktmp->async_sendto(sendbuffer, sendbufferlen,
-				NetAddr(dstaddr, isserver ? transportinfo->transportinfo.rtp.u.client_port1 : transportinfo->transportinfo.rtp.u.server_port1),
-				Socket::SendedCallback(&rtpOverUdpSession::RTP_SendCallback, this));
-		}
-	}
-
-	void _sendAndCheckRTCPSend(const char* buffer = NULL,size_t len = 0)
-	{
-		std::list<String>& sendlist = rtcp_sendlist;
+		std::list<shared_ptr<SendPackgeInfo> >& sendlist = isdata ? rtp_sendlist : rtcp_sendlist;
 		
 		bool needSendData = false;
 		//第一次需要发送数据
@@ -122,8 +75,8 @@ public:
 			if (sendlist.size() <= 0) return;
 
 			{
-				String& item = sendlist.front();
-				if (buffer != item.c_str())
+				shared_ptr<SendPackgeInfo> & item = sendlist.front();
+				if (buffer != item->buffer)
 				{
 					assert(0);
 				}
@@ -137,31 +90,44 @@ public:
 
 		if (sendlist.size() <= 0) return;
 
-		String& item = sendlist.front();
+		shared_ptr<SendPackgeInfo> & item = sendlist.front();
 
 		//处理数据的零拷贝问题，添加前置数据		
-		const char* sendbuffer = item.c_str();
-		uint32_t sendbufferlen = (uint32_t)item.length();
+		const char* sendbuffer = item->buffer;
+		uint32_t sendbufferlen = (uint32_t)item->len;
 
-		shared_ptr<Socket> socktmp = rtcp_sock;
-		if (socktmp)
+		if (isdata)
 		{
-			socktmp->async_sendto(sendbuffer, sendbufferlen,
-				NetAddr(dstaddr, isserver ? transportinfo->transportinfo.rtp.u.client_port2 : transportinfo->transportinfo.rtp.u.server_port2),
-				Socket::SendedCallback(&rtpOverUdpSession::RTCP_SendCallback, this));
+			shared_ptr<Socket> socktmp = rtp_sock;
+			if (socktmp)
+			{
+				socktmp->async_sendto(sendbuffer, sendbufferlen,
+					NetAddr(dstaddr, isserver ? transportinfo->transportinfo.rtp.u.client_port1 : transportinfo->transportinfo.rtp.u.server_port1),
+					Socket::SendedCallback(&rtpOverUdpSession::RTP_SendCallback, this));
+			}	
+		}
+		else
+		{
+			shared_ptr<Socket> socktmp = rtcp_sock;
+			if (socktmp)
+			{
+				socktmp->async_sendto(sendbuffer, sendbufferlen,
+					NetAddr(dstaddr, isserver ? transportinfo->transportinfo.rtp.u.client_port2 : transportinfo->transportinfo.rtp.u.server_port2),
+					Socket::SendedCallback(&rtpOverUdpSession::RTCP_SendCallback, this));
+			}	
 		}
 	}
 	void RTP_SendCallback(const weak_ptr<Socket>& sock, const char* buffer, int len)
 	{
 		Guard locker(mutex);
 
-		_sendAndCheckRTPSend(buffer, len);
+		_sendAndCheckSend(true, buffer, len);
 	}
 	void RTCP_SendCallback(const weak_ptr<Socket>& sock, const char* buffer, int len)
 	{
 		Guard locker(mutex);
 
-		_sendAndCheckRTCPSend(buffer, len);
+		_sendAndCheckSend(false, buffer, len);
 	}
 	void RTP_RecvCallback(const weak_ptr<Socket>& sock, const char* buffer, int len,const NetAddr& otearaddr)
 	{
@@ -213,8 +179,8 @@ private:
 
 	shared_ptr<RTPSort>		 rtpsort;
 
-	std::list<RTPPackage>	 rtp_sendlist;
-	std::list<String>		 rtcp_sendlist;
+	std::list<shared_ptr<SendPackgeInfo> > rtp_sendlist;
+	std::list<shared_ptr<SendPackgeInfo> > rtcp_sendlist;
 
 	std::string				 dstaddr;
 };

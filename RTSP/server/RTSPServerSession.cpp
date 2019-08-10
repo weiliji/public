@@ -204,12 +204,6 @@ const RTSPUrl& RTSPServerSession::url() const
 {
 	return internal->rtspurl;
 }
-uint32_t RTSPServerSession::sendListSize() const
-{
-	if (!internal->protocol) return 0;
-
-	return internal->protocol->sendListSize();
-}
 uint64_t RTSPServerSession::prevAlivetime() const
 {
 	if (internal->socketdisconnected) return 0;

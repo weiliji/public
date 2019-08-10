@@ -112,7 +112,11 @@ bool TCPClient::async_recv(const ReceivedCallback& received, int maxlen)
 }
 bool TCPClient::async_send(const char * buf, uint32_t len,const Socket::SendedCallback& sended)
 {
-	return internal->asocket->async_send(buf, len, sended);
+	return internal->asocket->async_send({ SBuf(buf, len) }, sended);
+}
+bool TCPClient::async_send(const std::deque<SBuf>& sendbuf, const SendedCallback& sended)
+{
+	return internal->asocket->async_send(sendbuf, sended);
 }
 int TCPClient::recv(char *buf , uint32_t len)
 {

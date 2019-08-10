@@ -80,7 +80,7 @@ string rtspaddr[] = {
 
 int runClient(const std::string& ipaddr,const std::list<std::string>& rtsplist)
 {
-	shared_ptr<IOWorker>	worker = make_shared<IOWorker>(8);
+	shared_ptr<IOWorker>	worker = make_shared<IOWorker>(Host::getProcessorNum() * 2);
 	shared_ptr<RTSPClientManager> manager = make_shared<RTSPClientManager>(worker,"test");
 
 
@@ -92,8 +92,8 @@ int runClient(const std::string& ipaddr,const std::list<std::string>& rtsplist)
 		rtsplisttmp.push_back(rtspaddr);
 	}
 
-//	if(1)
-	if (0)
+	if(1)
+//	if (0)
 	{
 		rtsplisttmp.clear();
 
@@ -113,7 +113,7 @@ int runClient(const std::string& ipaddr,const std::list<std::string>& rtsplist)
 		RTSPClientInfo info;
 		info.handler = make_shared<RTSPClintSessiontmp1>();
 		info.client = manager->create(info.handler, RTSPUrl(*iter));
-		info.client->initRTPOverUdpType();
+		info.client->initRTPOverTcpType();
 		info.client->start(10000);
 
 		clientlist.push_back(info);

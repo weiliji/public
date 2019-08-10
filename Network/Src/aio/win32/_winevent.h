@@ -42,20 +42,44 @@ struct WinEvent:public Event
 
 struct SendEvent :public WinEvent
 {
+	WSABUF* wsbuf;
+	uint32_t wsbufsize;
 	Socket::SendedCallback sendcallback;
 
-	SendEvent():WinEvent(EventType_Write){}
-
-	void init(const char* buffer, uint32_t len, const Socket::SendedCallback& _callback, const NetAddr& toaddr)
+	SendEvent():WinEvent(EventType_Write), wsbuf(NULL),wsbufsize(0){}
+	~SendEvent() 
 	{
+		if (wsbuf != NULL)
+		{
+			delete[] wsbuf;
+			wsbuf = NULL;
+			wsbufsize = 0;
+		}
+	}
+	void init(const std::deque<Socket::SBuf>& _sendbuf, const Socket::SendedCallback& _callback,const NetAddr& toaddr)
+	{
+		if (wsbuf != NULL)
+		{
+			delete[] wsbuf;
+			wsbuf = NULL;
+			wsbufsize = 0;
+		}
 		reset();
+
 		addr = *(SOCKADDR*)toaddr.getAddr();
 		addrlen = toaddr.getAddrLen();
 		sendcallback = _callback;
-		wbuf.buf = (CHAR*)buffer;
-		wbuf.len = len;
+
+		wsbuf = new WSABUF[_sendbuf.size()];
+		uint32_t sendindex = 0;
+		for (std::deque<Socket::SBuf>::const_iterator iter = _sendbuf.begin(); iter != _sendbuf.end(); iter++, sendindex++)
+		{
+			wsbuf[sendindex].buf = (CHAR*)iter->bufadd;
+			wsbuf[sendindex].len = iter->buflen;
+		}
+		wsbufsize = sendindex;
 	}
-	~SendEvent() {}
+	
 	bool init(const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& _userthread)
 	{
 		Event::init(sock, _userthread);
@@ -64,11 +88,11 @@ struct SendEvent :public WinEvent
 		int ret = 0;
 		if (NetAddr(addr).getPort() == 0)
 		{
-			ret = ::WSASend(sock->getHandle(), &wbuf, 1, &dwBytes, 0, &overlped, NULL);
+			ret = ::WSASend(sock->getHandle(), wsbuf, wsbufsize, &dwBytes, 0, &overlped, NULL);
 		}
 		else
 		{
-			ret = ::WSASendTo(sock->getHandle(), &wbuf, 1, &dwBytes, 0, (sockaddr*)&addr, addrlen, &overlped, NULL);
+			ret = ::WSASendTo(sock->getHandle(), wsbuf, wsbufsize, &dwBytes, 0, (sockaddr*)&addr, addrlen, &overlped, NULL);
 		}
 
 		if (ret == SOCKET_ERROR)
@@ -89,7 +113,7 @@ struct SendEvent :public WinEvent
 	}
 	void doEvent(const shared_ptr<Socket>& sock, int bytes, bool status)
 	{
-		sendcallback(sock, (const char*)wbuf.buf, bytes);
+		sendcallback(sock, (const char*)wsbuf[0].buf, bytes);
 	}
 };
 

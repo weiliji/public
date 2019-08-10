@@ -147,16 +147,16 @@ public:
 
 		return true;
 	}
-	virtual bool async_send(const char * buf, uint32_t len, const SendedCallback& sended) 
+	virtual bool async_send(const std::deque<SBuf>& sendbuf, const SendedCallback& sended)
 	{
 		shared_ptr< _PoolResource> res = resourece;
-		if (sock == -1 || status != NetStatus_connected || buf == NULL || len <= 0 || !sended || res == NULL)
+		if (sock == -1 || status != NetStatus_connected || sendbuf.size() <= 0 || !sended || res == NULL)
 		{
 			return false;
 		}
 
 		//SendEvent(const char* buffer, uint32_t len, const Socket::SendedCallback& _callback, const NetAddr& toaddr)
-		sendevent.init(buf, len, sended, NetAddr());
+		sendevent.init(sendbuf, sended, NetAddr());
 
 		if (!res->postEvent( &sendevent))
 		{
@@ -210,7 +210,7 @@ public:
 		}
 
 		//SendEvent(const char* buffer, uint32_t len, const Socket::SendedCallback& _callback, const NetAddr& toaddr)
-		sendevent.init(buf, len, sended, other);
+		sendevent.init({ SBuf(buf, len) }, sended, other);
 		
 		if (!res->postEvent(&sendevent))
 		{

@@ -4,6 +4,30 @@
 using namespace Public::Base;
 using namespace Public::RTSP;
 
+struct SendPackgeInfo
+{
+private:
+	RTPPackage		rtp;
+	String			data;
+public:
+	const char*		buffer;
+	uint32_t		len;
+	uint32_t		sendpos;
+
+	SendPackgeInfo():sendpos(0){}
+	SendPackgeInfo(const SendPackgeInfo& info)
+	{
+		rtp = info.rtp;
+		data = info.data;
+		buffer = info.buffer;
+		len = info.len;
+		sendpos = info.sendpos;
+	}
+	SendPackgeInfo(const RTPPackage& rtppackge) :rtp(rtppackge), buffer(rtppackge.buffer()), len(rtppackge.bufferlen()), sendpos(0){}
+	SendPackgeInfo(const String& _data):data(_data),buffer(_data.c_str()),len(_data.length()), sendpos(0) {}
+};
+
+
 class RTPSession
 {
 public:

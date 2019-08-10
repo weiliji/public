@@ -247,10 +247,10 @@ public:
 	virtual bool async_connect(const NetAddr& addr, const ConnectedCallback& callback) { return false; }
 	virtual bool async_recv(char *buf, uint32_t len, const ReceivedCallback& received) { return false; }
 	virtual bool async_recv(const ReceivedCallback& received, int maxlen = 1024) { return false; }
-	virtual bool async_send(const char * buf, uint32_t len, const SendedCallback& sended) { return false; }
+	virtual bool async_send(const std::deque<SBuf>& sendbuf, const SendedCallback& sended) { return false; }
 	virtual bool async_recvfrom(char *buf, uint32_t len, const RecvFromCallback& received) { return false; }
 	virtual bool async_recvfrom(const RecvFromCallback& received, int maxlen = 1024) { return false; }
-	virtual bool async_sendto(const char * buf, uint32_t len, const NetAddr& other, const SendedCallback& sended) { return false; }
+	virtual bool async_sendto(const char * buf, uint32_t len,const NetAddr& other, const SendedCallback& sended) { return false; }
 	virtual bool nonBlocking(bool nonblock) { return false; }
 private:
 	virtual bool creatSocket(NetType type) = 0;

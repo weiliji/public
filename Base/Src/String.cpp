@@ -209,6 +209,7 @@ String& String::operator = (const std::string& str)
 }
 String& String::operator = (const String& str)
 {
+	internal->mempool = str.internal->mempool;
 	internal->buffer = str.internal->buffer;
 	return *this;
 }
