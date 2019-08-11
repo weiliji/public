@@ -12,7 +12,8 @@ public:
 
 	WebSocketServerSession::RecvDataCallback	recvcallback;
 	
-	WebSocketRecvContent(WebSocketServerSession* _session):WebSocketProtocol(false,WebSocketProtocol::ParseDataCallback(&WebSocketRecvContent::parseDataCallback,this)), session(session)
+	WebSocketRecvContent(WebSocketServerSession* _session)
+		:WebSocketProtocol(false,WebSocketProtocol::ParseDataCallback(&WebSocketRecvContent::parseDataCallback,this)), session(_session)
 	{}
 	~WebSocketRecvContent() {}
 

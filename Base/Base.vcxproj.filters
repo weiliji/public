@@ -27,9 +27,6 @@
     <ClInclude Include="Src\Thread.h">
       <Filter>源文件</Filter>
     </ClInclude>
-    <ClInclude Include="Src\TimerManager.h">
-      <Filter>源文件</Filter>
-    </ClInclude>
     <ClInclude Include="..\Include\Base\AtomicCount.h">
       <Filter>头文件\Base</Filter>
     </ClInclude>

@@ -50,7 +50,7 @@ uint32_t ChunkData::append(const char* bufferptr, uint32_t len, bool & endoffile
 			//chuned eof
 			if (internal->chunkbodysize == 0)
 			{
-				if (len < (int)(pos + strlen(HTTPSEPERATOR) * 2)) return (uint32_t)(buffer - bufferptr);
+				if ((int)len < (int)(pos + strlen(HTTPSEPERATOR) * 2)) return (uint32_t)(buffer - bufferptr);
 				//是否结束标识 2个HTTPHREADERLINEEND 
 				if (memcmp(buffer + pos, HTTPSEPERATOR HTTPSEPERATOR, strlen(HTTPSEPERATOR) * 2) != 0) return (uint32_t)(buffer - bufferptr);
 

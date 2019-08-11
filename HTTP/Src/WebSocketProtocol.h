@@ -269,7 +269,7 @@ private:
 		int needlen = 2;
 		if (len < needlen) return NULL;
 
-		int fine = buffer[0] >> 7;
+	//	int fine = buffer[0] >> 7;
 		tmpframe->datatype = buffer[0] & 0xf;
 		tmpframe->mask = (uint8_t)buffer[1] >> 7;
 		tmpframe->playloadlen = buffer[1] & 0x7f;

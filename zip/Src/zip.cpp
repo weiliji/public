@@ -36,7 +36,7 @@ public:
 		m_currBinPath = File::getExcutableFileFullPath();
 		m_zipName = m_currBinPath + PATHFLAG + Guid::createGuid().getStringStream() + ".zip";
 
-		m_zfile = zipOpen64(m_zipName.c_str(), NULL);
+		m_zfile = zipOpen64(m_zipName.c_str(), 0);
 		if (m_zfile == NULL)
 		{
 			return false;
@@ -94,7 +94,7 @@ public:
 		
 		std::vector<string> vec = String::split(filename, PATHFLAG);
 		int pos = String::lastIndexOf(filename, PATHFLAG);
-		if (vec.size() == 1 && pos == filename.length() - 1)
+		if (vec.size() == 1 && (size_t)pos == filename.length() - 1)
 		{
 			//filename 直接是文件名，保存在当前目录；
 			File::rename(m_zipName, m_currBinPath + PATHFLAG + filename);
@@ -209,7 +209,7 @@ public:
 		fclose(pfile);
 		zipCloseFileInZip(m_zfile);
 
-		return true;
+		return result;
 	}
 private:
 	bool _filetime(const std::string& filePath, tm_zip& fileTime)

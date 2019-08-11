@@ -142,6 +142,7 @@ struct WriteContent::WriteContentInternal
 
 	shared_ptr<ChunkData> chunk;
 
+	virtual ~WriteContentInternal() {}
 	virtual void setWriteFileName(const std::string& filename)
 	{
 		std::string contenttype = "application/octet-stream";
@@ -156,7 +157,6 @@ struct WriteContent::WriteContentInternal
 			uint32_t mimetypeslen = 0;
 			ContentInfo* mimetypes = MediaType::info(mimetypeslen);
 
-			bool haveFind = false;
 			for (uint32_t i = 0; i < mimetypeslen; i++)
 			{
 				if (strcasecmp(pres.c_str(), mimetypes[i].filetype) == 0)

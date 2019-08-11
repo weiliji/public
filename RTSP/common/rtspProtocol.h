@@ -120,7 +120,7 @@ private:
 		Guard locker(m_mutex);
 		for (std::list<shared_ptr<SendPackgeInfo> >::iterator iter = m_sendList.begin(); iter != m_sendList.end() && len > 0;)
 		{
-			uint32_t currpagesendlen = min(len, (*iter)->len - (*iter)->sendpos);
+			uint32_t currpagesendlen = min((uint32_t)len, (*iter)->len - (*iter)->sendpos);
 
 			len -= currpagesendlen;
 

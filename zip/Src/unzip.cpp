@@ -35,13 +35,13 @@ public:
 		}
 
 		std::vector<std::string> tmp_fileNameList;
-		for (int i = 0; i < ginfo.number_entry; i++)
+		for (uint64_t i = 0; i < ginfo.number_entry; i++)
 		{
 			unz_file_info64 finfo;
 			char filename[256] = {};
 			unzGetCurrentFileInfo64(m_zFile, &finfo, filename, 256, NULL, 0, NULL, 0);
 			int pos = String::lastIndexOf(filename, "/");
-			if (pos == strlen(filename) - 1)
+			if ((size_t)pos == strlen(filename) - 1)
 			{
 				//目录，目录结尾带"/"
 			}
@@ -60,7 +60,7 @@ public:
 
 		Guard locker(m_mutex);
 		{
-			for (uint32_t i = 0; i < tmp_fileNameList.size(); i++)
+			for (size_t i = 0; i < tmp_fileNameList.size(); i++)
 			{
 				UnzipObject::ZipItem item;
 				item.index = i;
@@ -206,7 +206,7 @@ public:
 
 		std::string tmp_name = dirName;
 		int pos = String::lastIndexOf(dirName, "/");
-		if (pos != dirName.length() - 1)
+		if ((size_t)pos != dirName.length() - 1)
 		{
 			//没找到"/",加上
 			tmp_name += PATH_SEPARATOR;
@@ -221,7 +221,7 @@ public:
 		unz_global_info64 ginfo = {};
 		unzGetGlobalInfo64(m_zFile, &ginfo);
 
-		for (int i = 0; i < ginfo.number_entry; i++)
+		for (uint64_t i = 0; i < ginfo.number_entry; i++)
 		{
 			unz_file_info64 finfo;
 			char filename[256] = {};
@@ -232,7 +232,7 @@ public:
 			}
 
 			int pos = String::lastIndexOf(filename, "/");
-			if (pos == strlen(filename) - 1)
+			if ((size_t)pos == strlen(filename) - 1)
 			{
 				//目录
 				std::vector<string> vec = String::split(filename, "/");

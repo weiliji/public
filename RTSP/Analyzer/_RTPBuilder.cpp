@@ -59,10 +59,10 @@ struct RTPBuilder::RTPBuilderInternal
 
 	shared_ptr<MEDIA_INFO> rtspmedia;
 
-	RTPBuilderInternal() :audio_seq_num(0)
-		, video_seq_num(0)
+	RTPBuilderInternal() :video_seq_num(0)
 		, nFrameRate(25)
 		, curtimestamp(0)
+		, audio_seq_num(0)
 		, nAudiobufSize(0)
 		, nSamplingRate(8000)
 	{

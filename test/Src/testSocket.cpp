@@ -1,7 +1,7 @@
 #include "Network/Network.h"
 using namespace Public::Network;
 
-#if 1
+#if 0
 class NetworkServerInfo
 {
 public:
@@ -36,7 +36,7 @@ public:
 
 	void _sendcallback(const weak_ptr<Socket>&, const char* buffer, int len)
 	{
-//		printf("_sendcallback %d\r\n", len);
+		printf("_sendcallback %d\r\n", len);
 		if (--sendcount > 0)
 		{
 
@@ -131,7 +131,7 @@ std::map<Socket*, shared_ptr<Socket> > clientlist;
 
 void _socketRecvcallback(const weak_ptr<Socket>& sock, const char* buf, int len)
 {
-//	printf("_socketRecvcallback %d\r\n", len);
+	printf("_socketRecvcallback %d\r\n", len);
 
 	shared_ptr<Socket> socktmp = sock.lock();
 	if (socktmp == NULL) return;

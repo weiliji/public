@@ -56,11 +56,11 @@ public:
 		while (havereadlen < len && memcache.size() > 0)
 		{
 			BufferItem& item = memcache.front();
-			int readlen = min((int)item.data.size() - item.havereadlen, len - havereadlen);
+			int readlen = min((int)(item.data.size() - item.havereadlen), (int)(len - havereadlen));
 			memcpy(buffer + havereadlen, item.data.c_str() + item.havereadlen, readlen);
 			item.havereadlen += readlen;
 			havereadlen += readlen;
-			if (item.havereadlen == item.data.length())
+			if ((size_t)item.havereadlen == item.data.length())
 			{
 				cachetotalsize -= (int)item.data.length();
 				memcache.pop_front();
@@ -79,7 +79,7 @@ class HTTPCacheFile :public HTTPCache
 {
 public:
 	HTTPCacheFile(const std::string& _filename, bool _deletefile, bool readmode)
-		:filename(_filename), needdelete(_deletefile), filesize(0), writepos(0), readpos(0)
+		:filesize(0), filename(_filename), needdelete(_deletefile),  writepos(0), readpos(0)
 	{
 		fd = fopen(filename.c_str(), readmode ? "rb" : "wb+");
 

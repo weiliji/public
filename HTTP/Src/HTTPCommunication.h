@@ -24,8 +24,8 @@ class HTTPCommunication :public HTTPParse
 {
 public:
 	HTTPCommunication(bool _isserver,const shared_ptr<Socket> & _sock,const shared_ptr<HTTPCommunicationHandler>& _handler,const std::string& _useragent)
-		:HTTPParse(_isserver),socket(_sock),handler(_handler),recvContentLen(-1),recvContentTotalLen(0),isServer(_isserver),
-		sendContentLen(-1), sendTotalLen(0),sendHeaderLen(0), prevalivetime(Time::getCurrentMilliSecond()),useragent(_useragent)
+		:HTTPParse(_isserver), prevalivetime(Time::getCurrentMilliSecond()), handler(_handler), isServer(_isserver), socket(_sock),recvContentLen(-1),recvContentTotalLen(0),
+		sendContentLen(-1), sendHeaderLen(0), sendTotalLen(0), useragent(_useragent)
 	{
 		socket->setDisconnectCallback(Socket::DisconnectedCallback(&HTTPCommunication::onSocketDisconnectCallback, this));
 
@@ -92,7 +92,7 @@ private:
 			{
 				assert(0);
 			}
-			if (len == sendBuffer.length()) sendBuffer.resize(0);
+			if ((size_t)len == sendBuffer.length()) sendBuffer.resize(0);
 			else
 			{
 				char* sendbufferaddr = (char*)sendBuffer.c_str();

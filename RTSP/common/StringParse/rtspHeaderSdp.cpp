@@ -19,8 +19,8 @@ bool parseSDPMediaheader(const char* sdpLine, std::string& header);
 bool parseSDPAttribute_ssrc(char const* sdpLine, std::string& ssrc);
 //...........................................static.............................................
 
-static char* lookupPayloadFormat(unsigned char rtpPayloadType, unsigned& rtpTimestampFrequency, unsigned& numChannels);
-static unsigned guessRTPTimestampFrequency(char const* mediumName, char const* codecName);
+//static char* lookupPayloadFormat(unsigned char rtpPayloadType, unsigned& rtpTimestampFrequency, unsigned& numChannels);
+//static unsigned guessRTPTimestampFrequency(char const* mediumName, char const* codecName);
 static char* parseCLine(char const* sdpLine);
 static bool parseRangeAttribute(char const* sdpLine, std::string& pRange);
 
@@ -144,14 +144,14 @@ bool rtsp_header_parse_sdp(char const* sdpDescription, MEDIA_INFO* pMediaInfo)
 
 		unsigned short fClientPortNum;
 		char* mediumName = strDupSize(sdpLine); // ensures we have enough space
-		char const* protocolName = NULL;
+	//	char const* protocolName = NULL;
 		unsigned payloadFormat;
 
 		if ((sscanf(sdpLine, "m=%s %hu RTP/AVP %u", mediumName, &fClientPortNum, &payloadFormat) == 3 ||
 			sscanf(sdpLine, "m=%s %hu/%*u RTP/AVP %u",mediumName, &fClientPortNum, &payloadFormat) == 3)
 			&& payloadFormat <= 127)
 		{
-			protocolName = "RTP";
+	//		protocolName = "RTP";
 		}
 		else if ((sscanf(sdpLine, "m=%s %hu UDP %u", mediumName, &fClientPortNum, &payloadFormat) == 3 ||
 			sscanf(sdpLine, "m=%s %hu udp %u", mediumName, &fClientPortNum, &payloadFormat) == 3 ||
@@ -159,7 +159,7 @@ bool rtsp_header_parse_sdp(char const* sdpDescription, MEDIA_INFO* pMediaInfo)
 			&& payloadFormat <= 127)
 		{
 			// This is a RAW UDP source
-			protocolName = "UDP";
+	//		protocolName = "UDP";
 		} 
 		else
 		{
@@ -433,14 +433,14 @@ bool parseSDPAttribute_rtpmap(char const* sdpLine, std::string& pCodecName, int 
 
 //.................................................. static ................................................
 
-static char* lookupPayloadFormat(unsigned char rtpPayloadType, unsigned& rtpTimestampFrequency, unsigned& numChannels)
-{
-	return NULL;
-}
-static unsigned guessRTPTimestampFrequency(char const* mediumName, char const* codecName)
-{
-	return 0;
-}
+//static char* lookupPayloadFormat(unsigned char rtpPayloadType, unsigned& rtpTimestampFrequency, unsigned& numChannels)
+//{
+//	return NULL;
+//}
+//static unsigned guessRTPTimestampFrequency(char const* mediumName, char const* codecName)
+//{
+//	return 0;
+//}
 
 
 
@@ -493,7 +493,9 @@ bool parseSDPAttribute_fmtp(char const* sdpLine,int& profile_level_id, std::stri
 	// Later: (i) check that payload format number matches; #####
 	//        (ii) look for other parameters also (generalize?) #####
 	do {
-		if (strncmp(sdpLine, "a=fmtp:", 7) != 0) break; sdpLine += 7;
+		if (strncmp(sdpLine, "a=fmtp:", 7) != 0) break; 
+		sdpLine += 7;
+
 		while (isdigit(*sdpLine)) ++sdpLine;
 
 		// The remaining "sdpLine" should be a sequence of

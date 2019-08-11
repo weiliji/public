@@ -325,7 +325,7 @@ int main()
 
 
 
-#if 0
+#if 1
 #include "Base/Base.h"
 using namespace Public::Base;
 

@@ -193,14 +193,14 @@ private:
 
 			Guard locker(mutex);
 
-			for (std::map<std::string, std::map<std::string, ListenInfo> >::iterator citer = httplistencallbackmap.begin(); citer != httplistencallbackmap.end() && liteninfo.callback == NULL; citer++)
+			for (std::map<std::string, std::map<std::string, ListenInfo> >::iterator citer = httplistencallbackmap.begin(); citer != httplistencallbackmap.end() && !liteninfo.callback; citer++)
 			{
 				RegEx oRegex(citer->first, RegExType_InCase);
 				if(citer->first!= "*" && !RegEx::regex_match(requestPathname,oRegex))
 				{
 					continue;
 				}
-				for (std::map<std::string, ListenInfo>::iterator miter = citer->second.begin() ; miter != citer->second.end() && liteninfo.callback == NULL; miter++)
+				for (std::map<std::string, ListenInfo>::iterator miter = citer->second.begin() ; miter != citer->second.end() && !liteninfo.callback; miter++)
 				{
 					if (strcasecmp(method.c_str(), miter->first.c_str()) == 0)
 					{
@@ -209,7 +209,7 @@ private:
 					}
 				}
 			}
-			for (std::map<std::string, ListenInfo>::iterator miter = httpdefaultlistencallback.begin() ; miter != httpdefaultlistencallback.end() && liteninfo.callback == NULL; miter++)
+			for (std::map<std::string, ListenInfo>::iterator miter = httpdefaultlistencallback.begin() ; miter != httpdefaultlistencallback.end() && !liteninfo.callback; miter++)
 			{
 				if (strcasecmp(method.c_str(), miter->first.c_str()) == 0)
 				{
