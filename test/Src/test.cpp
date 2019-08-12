@@ -1,3 +1,4 @@
+
 #if 0
 #include "Base/Func.h"
 using namespace Public::Base;
@@ -355,7 +356,6 @@ int main()
 }
 
 #endif
-
 
 
 #if 1

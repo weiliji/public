@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\test.cpp" />
-    <ClCompile Include="Src\testHTTP.cpp" />
     <ClCompile Include="Src\testRTSP.cpp" />
     <ClCompile Include="Src\testRTSPServer.cpp" />
     <ClCompile Include="Src\testRTSPTransport.cpp" />
