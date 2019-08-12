@@ -43,6 +43,7 @@
     <ClInclude Include="..\Include\Base\Host.h" />
     <ClInclude Include="..\Include\Base\IntTypes.h" />
     <ClInclude Include="..\Include\Base\IPC.h" />
+    <ClInclude Include="..\Include\Base\LockFreeList.h" />
     <ClInclude Include="..\Include\Base\Math.h" />
     <ClInclude Include="..\Include\Base\Md5.h" />
     <ClInclude Include="..\Include\Base\Mutex.h" />

@@ -291,29 +291,63 @@ int main()
 using namespace Public::Base;
 
 
-class AClass
+int main()
 {
-public:
-	virtual void testa() {}
-	virtual void testb() {}
-};
+	LockFreeList<int> list;
+	list.push_back(1);
+	list.push_back(2);
 
-class BClass :public AClass
+	int val1 = list.front();
+	list.pop_front();
+	
+//	int val2 = list.pop_front();
+
+//	int val3 = list.pop_front();
+
+	int count = list.size();
+
+
+	return 0;
+}
+
+#endif
+
+
+#if 0
+#include "Network/Network.h"
+using namespace Public::Network;
+
+void socketRecv(const weak_ptr<Socket>& sock, const char* buf, int len, const NetAddr& addr)
 {
-public:
+	int a = 0;
+}
 
-	virtual void testa() {}
-	virtual void testc() {}
-};
+void  socketSend(const weak_ptr<Socket>& sock, const char* buf, int len)
+{
+}
+
 
 int main()
 {
-	AClass* ptr = new BClass;
+	shared_ptr<IOWorker> worker = make_shared<IOWorker>(2);
+	shared_ptr<Socket> udp1 = UDP::create(worker);
+	udp1->bind(5000);
+	udp1->async_recvfrom(socketRecv);
 
+	shared_ptr<Socket> udp2 = UDP::create(worker);
 
+	std::deque<Socket::SBuf> sbuf;
+	for (uint32_t i = 0; i < 3; i++)
+	{
+		Socket::SBuf buf;
+		buf.bufadd = new char[10];
+		sprintf((char*)buf.bufadd, "%d", i);
+		buf.buflen = strlen(buf.bufadd);
 
-	auto val = typeid(ptr).raw_name();
+		sbuf.push_back(buf);
+	}
 
+	udp2->async_sendto(sbuf, NetAddr("127.0.0.1", 5000), socketSend);
 
 	getchar();
 
@@ -321,7 +355,6 @@ int main()
 }
 
 #endif
-
 
 
 

@@ -201,16 +201,16 @@ public:
 
 		return true;
 	}
-	virtual bool async_sendto(const char * buf, uint32_t len, const NetAddr& other, const SendedCallback& sended) 
+	virtual bool async_sendto(const std::deque<SBuf>& sendbuf, const NetAddr& other, const SendedCallback& sended)
 	{
 		shared_ptr< _PoolResource> res = resourece;
-		if (sock == -1 || buf == NULL || len <= 0 || !sended ||res == NULL)
+		if (sock == -1 || sendbuf.size() <= 0 || !sended ||res == NULL)
 		{
 			return false;
 		}
 
 		//SendEvent(const char* buffer, uint32_t len, const Socket::SendedCallback& _callback, const NetAddr& toaddr)
-		sendevent.init({ SBuf(buf, len) }, sended, other);
+		sendevent.init(sendbuf, sended, other);
 		
 		if (!res->postEvent(&sendevent))
 		{

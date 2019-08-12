@@ -283,6 +283,18 @@ public:
 	///注：仅异步IO支持
 	virtual bool async_sendto(const char * buf, uint32_t len,const NetAddr& other,const SendedCallback& sended) = 0;
 
+	///【异步】投递UDP数据发送事件
+	///param[in]		buf				发送数据缓冲地址，该地址空间内容发送过程中不能被修改删除，直到sended调用后才能操作
+	///param[in]		len				发送数据数据最大值
+	///param[in]		other			数据发送的目的
+	///param[in]		sended			数据发送成后的异步通知，不能为NULL
+	///retun		返回投递发送数据命令结果
+	///注：
+	///  1:只有UDP才支持
+	///注：仅异步IO支持
+	/// 发送时会自动合并成一个包
+	virtual bool async_sendto(const std::deque<SBuf>& sendbuf, const NetAddr& other, const SendedCallback& sended) = 0;
+
 	///【同步】UDP发送
 	///param[in]		buf				发送数据缓冲地址
 	///param[in]		len				发送数据数据最大值

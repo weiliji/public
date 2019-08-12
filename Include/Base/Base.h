@@ -25,6 +25,7 @@
 #include "Base/Func.h"
 #include "Base/Guard.h"
 #include "Base/IntTypes.h"
+#include "Base/LockFreeList.h"
 #include "Base/Math.h"
 #include "Base/Md5.h"
 #include "Base/Mutex.h"
