@@ -36,25 +36,73 @@
 #include "Base/Semaphore.h"
 #include "Base/Guard.h"
 #include "Base/BaseTemplate.h"
+#include "TimerManager.h"
 
 namespace Public{
 namespace Base{
 
-struct TimerWaitInfo
+
+
+struct Timer::TimerInternal:public TimerObject
 {
-	std::string  		name;
 	Timer::Proc 		fun;
 	unsigned long 		param;
+	std::string  		name;
 
 	int					calledId;
 	bool 				called;
 	bool				started;
 	Mutex 				mutex;
 	Semaphore*			quitsem;
+	shared_ptr<TimerManager> manager;
+public:
+	TimerInternal()
+	{
+		delay = 0;
+		period = 0;
+		param = 0;
+		called = false;
+		started = false;
+		calledId = 0;
+		quitsem = NULL;
+		manager = TimerManager::getManager();
+	}
+	~TimerInternal()
+	{
+		stopandwait();
+	}
 
-	TimerWaitInfo():param(0),calledId(0),called(false),started(false),quitsem(NULL){}
+	bool checkIsNeedRun()
+	{
+		uint64_t curTime = manager->curTime;
 
-	~TimerWaitInfo() { stopandwait(); }
+		{
+			Guard locker(mutex);
+
+			if (called  || !started)
+			{
+				return false;
+			}
+			called = true;
+		}
+
+		return true;
+	}
+
+	bool reset()
+	{
+		Guard locker(mutex);
+		called = false;
+		calledId = 0;
+		if (quitsem != NULL)
+		{
+			quitsem->post();
+		}
+
+		return true;
+	}
+
+
 	void stopandwait()
 	{
 		{
@@ -71,263 +119,32 @@ struct TimerWaitInfo
 		{
 			quitsem->pend();
 		}
+		manager->removeTimer(this);
+		
 		{
 			Guard locker(mutex);
 			called = false;
 			SAFE_DELETE(quitsem);
 		}
 	}
-	bool startRunFunc()
+	bool runFunc()
 	{
-		Guard locker(mutex);
-
-		if (called || !started)
 		{
-			return false;
+			Guard locker(mutex);
+			calledId = Thread::getCurrentThreadID();
 		}
-		called = true;
-		calledId = Thread::getCurrentThreadID();
-
-		return true;
-	}
-
-	bool stopRunFunc()
-	{
-		Guard locker(mutex);
-		called = false;
-		calledId = 0;
-		if (quitsem != NULL)
-		{
-			quitsem->post();
-		}
+		
+		fun(param);
 
 		return true;
 	}
 };
-
-
-class TimerWaitInfoManager
-{
-public:
-	TimerWaitInfoManager() {}
-	~TimerWaitInfoManager() {}
-
-	void insert(void* flag, const shared_ptr<TimerWaitInfo>& timerinfo)
-	{
-		Guard locker(mutex);
-		timerlist[flag] = timerinfo;
-	}
-	void erase(void* flag)
-	{
-		Guard locker(mutex);
-		timerlist.erase(flag);
-	}
-	shared_ptr<TimerWaitInfo> getAndRun(void* flag)
-	{
-		std::map<void*, shared_ptr< TimerWaitInfo> >::iterator iter = timerlist.find(flag);
-		if (iter == timerlist.end()) return make_shared<TimerWaitInfo>();
-
-		iter->second->startRunFunc();
-
-		return iter->second;
-	}
-
-	static TimerWaitInfoManager* instance()
-	{
-		static TimerWaitInfoManager manager;
-		return &manager;
-	}
-private:
-	Mutex	mutex;
-	std::map<void*, shared_ptr< TimerWaitInfo> >timerlist;
-};
-
-
-#ifdef WIN32
-
-struct TimerQueue
-{
-public:
-	HANDLE hTimerQueue;
-
-	TimerQueue()
-	{
-		hTimerQueue = CreateTimerQueue();
-		if (NULL == hTimerQueue)
-		{
-			assert(0);
-		}
-	}
-	~TimerQueue()
-	{
-		if (hTimerQueue != NULL)
-		{
-			DeleteTimerQueue(hTimerQueue);
-			hTimerQueue = NULL;
-		}
-	}
-
-	static TimerQueue* instance()
-	{
-		static TimerQueue queue;
-		return &queue;
-	}
-};
-
-struct Timer::TimerInternal
-{
-	shared_ptr<TimerWaitInfo> waitinfo;
-	HANDLE				hTimer;
-public:
-	TimerInternal()
-	{
-		waitinfo = make_shared<TimerWaitInfo>();
-		hTimer = NULL;
-	}
-	~TimerInternal()
-	{
-		stop();
-		waitinfo->stopandwait();
-		waitinfo = NULL;
-	}
-
-	bool start(const Proc& _fun, uint32_t delay, uint32_t period, unsigned long _param /* = 0 */)
-	{
-		if (hTimer != NULL || waitinfo->started) return false;
-
-		waitinfo->fun = _fun;
-		waitinfo->param = _param;
-
-		waitinfo->started = true;
-
-		TimerWaitInfoManager::instance()->insert(this, waitinfo);
-
-		if (!CreateTimerQueueTimer(&hTimer, TimerQueue::instance()->hTimerQueue, TimerRoutine, this, delay, period, WT_EXECUTEDEFAULT))
-		{
-			assert(0);
-		}
-
-		return true;
-	}
-
-	bool stop()
-	{
-		if (hTimer == NULL || !waitinfo->started) return false;
-
-		waitinfo->started = false;
-
-		DeleteTimerQueueTimer(hTimer, TimerQueue::instance()->hTimerQueue, INVALID_HANDLE_VALUE);
-		hTimer = NULL;
-
-		return true;
-	}
-
-	static VOID CALLBACK TimerRoutine(PVOID lpParameter, BOOLEAN TimerOrWaitFired)
-	{
-		shared_ptr<TimerWaitInfo> timerinfo = TimerWaitInfoManager::instance()->getAndRun(lpParameter);
-		if (timerinfo == NULL) return;
-
-		timerinfo->fun(timerinfo->param);
-
-		timerinfo->stopRunFunc();
-	}
-};
-
-#else
-struct Timer::TimerInternal
-{
-	shared_ptr<TimerWaitInfo> waitinfo;
-	timer_t			timerid;
-public:
-	TimerInternal()
-	{
-		waitinfo = make_shared<TimerWaitInfo>();
-		timerid = 0;
-	}
-	~TimerInternal()
-	{
-		stop();
-		waitinfo->stopandwait();
-		waitinfo = NULL;
-	}
-
-	bool start(const Proc& _fun, uint32_t delay, uint32_t period, unsigned long _param /* = 0 */)
-	{
-		if (timerid != 0 || waitinfo->started) return false;
-
-		waitinfo->fun = _fun;
-		waitinfo->param = _param;
-
-		waitinfo->started = true;
-
-		TimerWaitInfoManager::instance()->insert(this, waitinfo);
-
-		struct sigevent evp;
-		memset(&evp, 0, sizeof(struct sigevent));
-		evp.sigev_value.sival_ptr = this;            //也是标识定时器的，这和timerid有什么区别？回调函数可以获得
-		evp.sigev_notify = SIGEV_THREAD;            //线程通知的方式，派驻新线程
-		evp.sigev_notify_function = timer_thread;        //线程函数地址
-
-		if (timer_create(CLOCK_REALTIME, &evp, &timerid) == -1)
-		{
-			assert(0);
-		}
-
-		// XXX int timer_settime(timer_t timerid, int flags, const struct itimerspec *new_value,struct itimerspec *old_value);
-	// timerid--定时器标识
-	// flags--0表示相对时间，1表示绝对时间
-	// new_value--定时器的新初始值和间隔，如下面的it
-	// old_value--取值通常为0，即第四个参数常为NULL,若不为NULL，则返回定时器的前一个值
-
-	//第一次间隔it.it_value这么长,以后每次都是it.it_interval这么长,就是说it.it_value变0的时候会装载it.it_interval的值
-		struct itimerspec it;
-		memset(&it, 0, sizeof(it));
-
-		it.it_interval.tv_sec = period / 1000;
-		it.it_interval.tv_nsec = (period % 1000)*1000;
-		it.it_value.tv_sec = delay/1000;
-		it.it_value.tv_nsec = (delay%1000)*1000;
-
-		if (timer_settime(timerid, 0, &it, NULL) == -1)
-		{
-			assert(0);
-		}
-
-		return true;
-	}
-
-	bool stop()
-	{
-		if (timerid == 0 || !waitinfo->started) return false;
-
-		waitinfo->started = false;
-
-		timer_delete(timerid);
-		timerid = 0;
-
-
-		return true;
-	}
-
-	static void timer_thread(union sigval v)
-	{
-		shared_ptr<TimerWaitInfo> timerinfo = TimerWaitInfoManager::instance()->getAndRun(v.sival_ptr);
-		if (timerinfo == NULL) return;
-
-		timerinfo->fun(timerinfo->param);
-
-		timerinfo->stopRunFunc();
-	}
-};
-
-#endif
-
 
 Timer::Timer(const std::string& pName)
 {
 	internal = new TimerInternal();
 
-	internal->waitinfo->name = pName;
+	setName(pName);
 }
 
 Timer::~Timer()
@@ -339,44 +156,55 @@ Timer::~Timer()
 
 bool Timer::start(const Proc& fun, uint32_t delay, uint32_t period, unsigned long param /* = 0 */)
 {
-	return internal->start(fun, delay, period, param);
+	internal->fun = fun;
+	internal->delay = (uint64_t)delay;
+	internal->period = period;
+	internal->param = param;
+	internal->started = true;
+
+	internal->manager->addTimer(internal);
+
+	return true;
 }
 
 bool Timer::stop(bool bCallNow /* = false */)
 {
-	return internal->stop();
+	Guard locker(internal->mutex);
+	internal->started = false;
+
+	return true;
 }
  
 bool Timer::stopAndWait()
 {
-	internal->waitinfo->stopandwait();
+	internal->stopandwait();
 	
 	return true;
 }
 
 std::string Timer::getName()
 {
-	return internal->waitinfo->name;
+	return internal->name;
 }
 
 void Timer::setName(const std::string& pszName)
 {
-	internal->waitinfo->name = pszName;
+	internal->name = pszName;
 }
 
 bool Timer::isStarted()
 {
-	return internal->waitinfo->started;
+	return internal->started;
 }
 
 bool Timer::isCalled()
 {
-	return internal->waitinfo->called;
+	return internal->called;
 }
 
 bool Timer::isRunning()
 {
-	return internal->waitinfo->started;
+	return internal->started;
 }
 
 

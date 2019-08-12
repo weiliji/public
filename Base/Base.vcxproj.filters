@@ -195,6 +195,9 @@
     <ClInclude Include="..\Include\Base\CPU.h">
       <Filter>头文件\Base</Filter>
     </ClInclude>
+    <ClInclude Include="Src\TimerManager.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base.cpp">
