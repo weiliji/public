@@ -113,7 +113,7 @@ int runClient(const std::string& ipaddr,const std::list<std::string>& rtsplist)
 		RTSPClientInfo info;
 		info.handler = make_shared<RTSPClintSessiontmp1>();
 		info.client = manager->create(info.handler, RTSPUrl(*iter));
-		info.client->initRTPOverTcpType();
+//		info.client->initRTPOverTcpType();
 		info.client->start(10000);
 
 		clientlist.push_back(info);

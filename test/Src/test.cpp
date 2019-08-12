@@ -155,7 +155,7 @@ int main()
 
 	shared_ptr<OnvifClientManager> manager = make_shared<OnvifClientManager>(worker,"test");
 
-//	manager->disconvery(disconveryCallback);
+	manager->disconvery(disconveryCallback);
 
 	std::string addr = "admin:ms123456@192.168.7.104";
 //	std::string addr = "admin:support2019@192.168.9.205";

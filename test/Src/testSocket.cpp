@@ -11,7 +11,7 @@ public:
 
 	AtomicCount		sendcount;
 
-
+	uint64_t		nowtime;
 	NetworkServerInfo()
 	{
 		data.alloc(10240);

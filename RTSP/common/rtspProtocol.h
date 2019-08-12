@@ -57,7 +57,6 @@ public:
 		logdebug("\r\n%s",cmdstr.c_str());
 
 		Guard locker(m_mutex);
-
 		m_sendList.push_back(shared_ptr<SendPackgeInfo>(new SendPackgeInfo(cmdstr)));
 
 		_checkSendData();
@@ -71,7 +70,6 @@ public:
 
 
 		Guard locker(m_mutex);
-
 		m_sendList.push_back(shared_ptr<SendPackgeInfo>(new SendPackgeInfo(String((const char*)& frame, sizeof(INTERLEAVEDFRAME)))));
 		m_sendList.push_back(shared_ptr<SendPackgeInfo>(new SendPackgeInfo(rtppackage)));
 
