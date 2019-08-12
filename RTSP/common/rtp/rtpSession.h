@@ -24,7 +24,7 @@ public:
 		sendpos = info.sendpos;
 	}
 	SendPackgeInfo(const RTPPackage& rtppackge) :rtp(rtppackge), buffer(rtppackge.buffer()), len(rtppackge.bufferlen()), sendpos(0){}
-	SendPackgeInfo(const String& _data):data(_data),buffer(_data.c_str()),len(_data.length()), sendpos(0) {}
+	SendPackgeInfo(const String& _data):data(_data),buffer(_data.c_str()),len((uint32_t)_data.length()), sendpos(0) {}
 };
 
 

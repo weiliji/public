@@ -75,7 +75,7 @@ bool CPU::getCpuCount(unsigned int &logiccpu, unsigned int &corecpu)
 		{
 		case RelationProcessorCore:
 			processorCoreCount++;
-			logicalProcessorCount += CPU::CountSetBits(ptr->ProcessorMask);
+			logicalProcessorCount += CPU::CountSetBits((unsigned long)ptr->ProcessorMask);
 			break;
 		}
 		byteOffset += sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION);
@@ -107,7 +107,7 @@ bool CPU::limit(unsigned int scale)
 	if (totalcount > systembit)
 	{
 		unsigned int usecount = (unsigned int)(totalcount - idecount);
-		idecount = systembit - usecount;
+		idecount = (unsigned int)systembit - usecount;
 	}
 
 	if ((int)idecount < 1)

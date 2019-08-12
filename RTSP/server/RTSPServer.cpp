@@ -85,8 +85,6 @@ RTSPServer::RTSPServer(const shared_ptr<IOWorker>& worker, const std::string& us
 
 	internal->ioworker = worker;
 	internal->useragent = useragent;
-	internal->pooltimer = make_shared<Timer>("RTSPServer");
-	internal->pooltimer->start(Timer::Proc(&RTSPServerInternal::onpooltimerproc, internal),0,1000);
 
 	if (internal->ioworker == NULL) internal->ioworker = IOWorker::defaultWorker();
 }
