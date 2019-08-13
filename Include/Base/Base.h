@@ -29,6 +29,7 @@
 #include "Base/Math.h"
 #include "Base/Md5.h"
 #include "Base/Mutex.h"
+#include "Base/MsgCenter.h"
 #include "Base/PrintLog.h"
 #include "Base/Process.h"
 #include "Base/ReadWriteMutex.h"

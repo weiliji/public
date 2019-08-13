@@ -75,7 +75,7 @@ class RTSP_API RTSPClientHandler
 public:
 	RTSPClientHandler() {}
 	virtual ~RTSPClientHandler() {}
-
+	
 	virtual void onConnectResponse(bool success, const std::string& errmsg) {}
 
 	virtual void onDescribeResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, const shared_ptr<MEDIA_INFO>& info) { info->cleanExStreamInfo(); }

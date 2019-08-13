@@ -46,6 +46,7 @@
     <ClInclude Include="..\Include\Base\LockFreeList.h" />
     <ClInclude Include="..\Include\Base\Math.h" />
     <ClInclude Include="..\Include\Base\Md5.h" />
+    <ClInclude Include="..\Include\Base\MsgCenter.h" />
     <ClInclude Include="..\Include\Base\Mutex.h" />
     <ClInclude Include="..\Include\Base\OperationResult.h" />
     <ClInclude Include="..\Include\Base\PrintLog.h" />

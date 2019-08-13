@@ -201,6 +201,9 @@
     <ClInclude Include="..\Include\Base\LockFreeList.h">
       <Filter>头文件\Base</Filter>
     </ClInclude>
+    <ClInclude Include="..\Include\Base\MsgCenter.h">
+      <Filter>头文件\Base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base.cpp">

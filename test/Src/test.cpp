@@ -444,3 +444,67 @@ int main(int argc, char** argv)
 	return 0;
 }
 #endif
+
+
+
+#if 1
+#include "Base/Base.h"
+using namespace Public::Base;
+
+void readcalblack1(int a)
+{
+	a = 0;
+}
+
+void readcallback2(int a,const char* b)
+{
+	a = 0;
+}
+
+void readcalblack3(int a,const char* b, const std::string& c)
+{
+	a = 0;
+}
+
+void readcalblack4(int a, const char* b, const std::string& c,double d)
+{
+	a = 0;
+}
+
+int main()
+{
+	MsgCenter msgcenter;
+
+
+	MsgCenter::Worker1<int> worker1 = msgcenter.worker<int>(1);
+
+	worker1->subscribe((void*)NULL,Function1<void,int>(readcalblack1));
+
+	worker1->publish(1);
+
+
+	MsgCenter::Worker2<int,char*> worker2 = msgcenter.worker<int,char*>(2);
+
+	worker2->subscribe((void*)NULL, Function2<void, int,const char*>(readcallback2));
+
+	worker2->publish(1,(char*)"aaa");
+
+
+	MsgCenter::Worker3<int, const char*,const char*> worker3= msgcenter.worker<int,const char*,const char*>(3);
+
+	worker3->subscribe((void*)NULL, Function3<void, int, const char*, const char*>(readcalblack3));
+
+	worker3->publish(1, "aaa","bbbbb");
+
+	MsgCenter::Worker4<int, const char*, const char*,float> worker4 = msgcenter.worker<int, const char*, const char*,float>(4);
+
+	worker4->subscribe((void*)NULL, Function4<void, int, const char*, const char*,double>(readcalblack4));
+
+	worker4->publish(1, "aaa", "bbbbb",0);
+
+	getchar();
+
+	return 0;
+}
+
+#endif
