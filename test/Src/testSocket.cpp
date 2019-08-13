@@ -1,7 +1,7 @@
 #include "Network/Network.h"
 using namespace Public::Network;
 
-#if 0
+#if 1
 class NetworkServerInfo
 {
 public:
@@ -12,10 +12,17 @@ public:
 	AtomicCount		sendcount;
 
 	uint64_t		nowtime;
-	NetworkServerInfo()
+	NetworkServerInfo(const shared_ptr<Socket>& _sock)
 	{
+		sock = _sock;
 		data.alloc(10240);
 		data.resize(10240);
+
+		const char* buffer = data.c_str();
+		uint32_t bufferlen = data.length();
+
+		shared_ptr<Socket> tmp = sock;
+		if (tmp) tmp->async_send(buffer, bufferlen, Socket::SendedCallback(&NetworkServerInfo::_sendcallback, this));
 	}
 	~NetworkServerInfo()
 	{
@@ -37,7 +44,7 @@ public:
 	void _sendcallback(const weak_ptr<Socket>&, const char* buffer, int len)
 	{
 		printf("_sendcallback %d\r\n", len);
-		if (--sendcount > 0)
+	//	if (--sendcount > 0)
 		{
 
 			const char* buffer = data.c_str();
@@ -78,8 +85,7 @@ void _socketDisconnect(const weak_ptr<Socket>& sock, const std::string& err)
 void _socketAccpet(const weak_ptr<Socket>&sock, const shared_ptr<Socket>& newsock)
 {
 	{
-		shared_ptr<NetworkServerInfo> info = make_shared<NetworkServerInfo>();
-		info->sock = newsock;
+		shared_ptr<NetworkServerInfo> info = make_shared<NetworkServerInfo>(newsock);
 		info->sock->async_recv(_socketRecv);
 		info->sock->setDisconnectCallback(_socketDisconnect);
 
@@ -98,12 +104,12 @@ void runServerThread(Thread* ex, void* param)
 	data.alloc(10240);
 	data.resize(10240);
 
-	while (ex->looping())
+//	while (ex->looping())
 	{
-		Thread::sleep(5);
+//		Thread::sleep(10000000000000);
 
 
-		{
+		/*{
 			Guard lock(servermutex);
 
 			for (std::map<Socket*, shared_ptr<NetworkServerInfo> >::iterator iter = serverlist.begin(); iter != serverlist.end(); iter++)
@@ -113,7 +119,7 @@ void runServerThread(Thread* ex, void* param)
 
 				serverinfo->inputData();
 			}
-		}
+		}*/
 	}
 }
 
@@ -136,7 +142,7 @@ void _socketRecvcallback(const weak_ptr<Socket>& sock, const char* buf, int len)
 	shared_ptr<Socket> socktmp = sock.lock();
 	if (socktmp == NULL) return;
 
-	socktmp->async_recv(_socketRecvcallback);
+	socktmp->async_recv(_socketRecvcallback,1024*1024);
 }
 
 void _socketConnectCallback(const weak_ptr<Socket>& sock,bool,const std::string&)
@@ -144,15 +150,16 @@ void _socketConnectCallback(const weak_ptr<Socket>& sock,bool,const std::string&
 	shared_ptr<Socket> socktmp = sock.lock();
 	if (socktmp == NULL) return;
 
-	socktmp->async_recv(_socketRecvcallback);
+	socktmp->async_recv(_socketRecvcallback, 1024 * 1024);
 }
 
 void runClient(const shared_ptr<IOWorker>& worker,uint32_t size)
 {
-	//while(1)
+//	while(1)
 	{
 		if (clientlist.size() > size)
 		{
+		//	break;
 		//	shared_ptr<Socket> sock = clientlist.begin()->second;
 			clientlist.erase(clientlist.begin());
 		//	sock->disconnect();
@@ -160,7 +167,7 @@ void runClient(const shared_ptr<IOWorker>& worker,uint32_t size)
 		shared_ptr<Socket> sock = TCPClient::create(worker);
 		clientlist[sock.get()] = sock;
 
-		sock->async_connect(NetAddr("127.0.0.1", 4444), _socketConnectCallback);
+		sock->async_connect(NetAddr("192.168.2.46", 4444), _socketConnectCallback);
 
 		Thread::sleep(500);
 	}

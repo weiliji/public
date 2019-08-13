@@ -4,13 +4,12 @@
 using namespace Public::HTTP;
 using namespace Public::RTSP;
 
-#define MAXPARSERTSPBUFFERLEN	1024*1024
 #define RTPOVERTCPMAGIC		'$'
 #define RTSPCMDFLAG			"RTSP/1.0"
 
 #define RTSPCONENTTYPESDP	"application/sdp"
 
-#define MAXRTPPACKGESIZE	1024*56
+#define MAXRTPPACKGESIZE	57344 //1024*56
 
 class RTSPProtocol:public HTTPParse
 {

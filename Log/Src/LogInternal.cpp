@@ -166,11 +166,11 @@ void LogInternal::threadProc()
 
 		if (info.loglev > printlev) continue;
 		
-		int writelen = fwrite(info.logprex.c_str(), 1, info.logprex.length(), fd);
+		size_t writelen = fwrite(info.logprex.c_str(), 1, info.logprex.length(), fd);
 		if (writelen > 0) logsize += writelen;
 		
 		char* logstr = (char*)info.logStr.c_str();
-		int logstrlen = info.logStr.length();
+		size_t logstrlen = info.logStr.length();
 		while (logstrlen > 0 && (logstr[logstrlen - 1] == '\n' || logstr[logstrlen - 1] == '\r')) logstrlen--;
 		
 		writelen = fwrite(logstr, 1, logstrlen, fd);

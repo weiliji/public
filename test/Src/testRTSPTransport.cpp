@@ -28,6 +28,8 @@ public:
 	shared_ptr<MEDIA_INFO>		 mediainfo;
 	shared_ptr<RTSPClintessiontmp>	client;
 
+	shared_ptr<STREAM_TRANS_INFO>	videotrans;
+
 	virtual void onOptionRequest(const shared_ptr<RTSPServerSession>& session, const shared_ptr<RTSPCommandInfo>& cmdinfo)
 	{
 		session->sendOptionResponse(cmdinfo);
@@ -39,6 +41,8 @@ public:
 		session->sendPlayResponse(cmdinfo);
 		isplaying = true;
 		mediainfo = _mediainfo;
+
+		videotrans = mediainfo->videoStreamInfo();
 
 		/*Guard locker(mutex);
 		for (std::list< RTSPBufferInfo>::iterator iter = cache.begin(); iter != cache.end(); iter++)
@@ -126,7 +130,10 @@ public:
 			shared_ptr<RTSPServerSession> session = tmp->session;
 			if(session == NULL) continue;
 
-			session->sendMediaPackage(tmp->mediainfo->videoStreamInfo(), rtppackage);
+			shared_ptr<STREAM_TRANS_INFO> trans = tmp->videotrans;
+			if(trans == NULL) continue;
+
+			session->sendMediaPackage(trans, rtppackage);
 		}
 
 		int a = 0;

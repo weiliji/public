@@ -162,14 +162,14 @@ public:
 					 {
 						 buf.reserve(bulkSize);
 
-						 long int available = size - position;
-						 long int canRead = min(bulkSize, available);
+						 size_t available = size - position;
+						 size_t canRead = min(bulkSize, available);
 
 						 if (canRead > 0)
 						 {
 							 buf = std::string(ptr + position, canRead);
 							 position += canRead;
-							 bulkSize -= canRead;
+							 bulkSize -= (long)canRead;
 						 }
 
 
@@ -192,11 +192,11 @@ public:
 			 case Bulk: {
 				 //assert( bulkSize > 0 );
 
-				 long int available = size - position + 1;
-				 long int canRead = min(available, bulkSize);
+				 size_t available = size - position + 1;
+				 size_t canRead = min(available, bulkSize);
 
 				 buf.append(ptr + position - 1, canRead);
-				 bulkSize -= canRead;
+				 bulkSize -= (long)canRead;
 				 position += canRead - 1;
 
 				 if (bulkSize == 0)

@@ -37,7 +37,7 @@ bool RedisSyncClientImpl::connect(const NetAddr& addr, uint32_t connecttime, uin
 
 bool RedisSyncClientImpl::command(const std::string& cmdstr, RedisValue& retvalue)
 {
-	if (sock->send(cmdstr.c_str(), cmdstr.length()) != cmdstr.length())
+	if (sock->send(cmdstr.c_str(), (uint32_t)cmdstr.length()) != cmdstr.length())
 	{
 		return false;
 	}

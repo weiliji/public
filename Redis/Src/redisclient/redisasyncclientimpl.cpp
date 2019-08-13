@@ -75,7 +75,7 @@ void RedisAsyncClientImpl::doAsyncCommand(const std::string& cmdstr, const CmdCa
 	cmd->cmd = std::move(cmdstr);
 	cmd->handler = handler;
 	
-	int nowcmdsize = cmdSendList.size();
+	size_t nowcmdsize = cmdSendList.size();
 
 	cmdSendList.push_back(cmd);
 	cmdWaitRecvList.push_back(cmd);
@@ -95,7 +95,7 @@ void RedisAsyncClientImpl::_socketSendCmd()
 
 	shared_ptr<CmdInfo> cmd = cmdSendList.front();
 
-	socktmp->async_send(cmd->cmd.c_str(), cmd->cmd.length(), Socket::SendedCallback(&RedisAsyncClientImpl::socketSendCallback, this));
+	socktmp->async_send(cmd->cmd.c_str(), (uint32_t)cmd->cmd.length(), Socket::SendedCallback(&RedisAsyncClientImpl::socketSendCallback, this));
 }
 void RedisAsyncClientImpl::socketSendCallback(const weak_ptr<Socket>&s, const char* tmp, int len)
 {
@@ -135,7 +135,7 @@ void RedisAsyncClientImpl::doProcessMessage(const shared_ptr<RedisValue>& v)
 	if (v->isArray())
 	{
 		std::vector<RedisValue> result = v->toArray();
-		int resultSize = result.size();
+		size_t resultSize = result.size();
 		if(resultSize >= 3)
 		{
 			const RedisValue &command = result[0];
