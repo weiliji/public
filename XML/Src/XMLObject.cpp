@@ -68,7 +68,7 @@ bool XMLObject::parseFile(const std::string& file)
 	fseek(fd,0,SEEK_SET);
 
 	char* buffer = new char[totalsize + 100];
-	int readlen = fread(buffer,1,totalsize,fd);
+	size_t readlen = fread(buffer,1,totalsize,fd);
 	buffer[readlen] = 0;
 	fclose(fd);
 

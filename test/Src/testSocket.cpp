@@ -1,7 +1,7 @@
 #include "Network/Network.h"
 using namespace Public::Network;
 
-#if 1
+#if 0
 class NetworkServerInfo
 {
 public:
@@ -189,6 +189,175 @@ int main(int args,const char* argv[])
 
 
 	getchar();
+
+	return 0;
+}
+
+#endif
+
+
+#if 1
+
+class SocketInitObjec
+{
+public:
+	SocketInitObjec()
+	{
+#ifdef WIN32
+		WSADATA wsaData;
+		WORD wVersionRequested;
+
+		wVersionRequested = MAKEWORD(2, 2);
+		int errorCode = WSAStartup(wVersionRequested, &wsaData);
+		if (errorCode != 0)
+		{
+			return;
+		}
+
+		if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 2)
+		{
+			WSACleanup();
+			return;
+		}
+#else
+#endif
+	}
+
+	~SocketInitObjec() {}
+};
+
+SocketInitObjec socketinit;
+
+#define TESTUDPPORT		5002
+#define TESTUDPLEN		1440
+
+#define MAXTHREADNUM		100
+
+void runServerProc(Thread* t,void* param)
+{
+	SOCKET sockClient = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
+
+	SOCKADDR_IN servAddr;
+	servAddr.sin_family = AF_INET;
+	servAddr.sin_addr.S_un.S_addr = inet_addr("192.168.2.16");
+	servAddr.sin_port = htons(TESTUDPPORT + (int)param);
+
+	int addrlen = sizeof(servAddr);
+
+	char buffer[TESTUDPLEN];
+	int sendtimes = 0;
+	while (t->looping())
+	{
+		if(sendtimes++ % 5 == 0)
+			Thread::sleep(1);
+
+		int sendlen = sendto(sockClient, buffer, TESTUDPLEN, 0, (sockaddr*)&servAddr, addrlen);
+
+	//	printf("%d sendtolen %d\r\n", Thread::getCurrentThreadID(), sendlen);
+	}
+
+	closesocket(sockClient);
+}
+
+void runServer()
+{
+	std::list< shared_ptr<Thread>> clientlist;
+
+	for (int i = 0; i < MAXTHREADNUM; i++)
+	{
+		shared_ptr<Thread> t = ThreadEx::creatThreadEx("runServerProc", runServerProc, (void*)i);
+		t->createThread();
+
+		clientlist.push_back(t);
+	}
+
+	getchar();
+}
+
+void runClientProc(Thread* t, void* param)
+{
+	SOCKET socketSrv = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
+
+	SOCKADDR_IN addrSrv;
+	memset(&addrSrv, 0, sizeof(SOCKADDR_IN));
+	addrSrv.sin_family = AF_INET;
+	addrSrv.sin_port = htons(TESTUDPPORT + (int)param);
+
+	// °ó¶¨Ì×½Ó×Ö
+	int iRet = ::bind(socketSrv, (SOCKADDR*)&addrSrv, sizeof(SOCKADDR));
+	if (SOCKET_ERROR == iRet)
+	{
+		assert(0);
+	}
+
+	char buffer[TESTUDPLEN];
+	int recvaddrlen = 0;
+	while (t->looping())
+	{
+		memset(&addrSrv, 0, sizeof(SOCKADDR_IN));
+		addrSrv.sin_family = AF_INET;
+		recvaddrlen = 16;
+
+		int recvlen = recvfrom(socketSrv, buffer, TESTUDPLEN, 0, (SOCKADDR*)&addrSrv, &recvaddrlen);
+
+	//	printf("%d recvfrom %d\r\n", Thread::getCurrentThreadID(), recvlen);
+	}
+
+	closesocket(socketSrv);
+}
+
+void runClient()
+{
+	std::list< shared_ptr<Thread>> clientlist;
+
+	for (int i = 0; i < MAXTHREADNUM; i++)
+	{
+		shared_ptr<Thread> t = ThreadEx::creatThreadEx("runClientProc", runClientProc,(void*) i);
+		t->createThread();
+
+		clientlist.push_back(t);
+	}
+
+	getchar();
+}
+
+void socketRecvCalblack(const weak_ptr <Socket>& sock,const char* buffer,int len,const NetAddr& addr)
+{
+	//printf("%d socketRecvCalblack %d\r\n", Thread::getCurrentThreadID(), len);
+	if (len <= 0)
+	{
+		printf("1111111111111111111111111111\r\n");
+	}
+
+	shared_ptr<Socket> tmp = sock.lock();
+	if (tmp) tmp->async_recvfrom((char*)buffer,TESTUDPLEN,socketRecvCalblack);
+}
+
+void runClient1()
+{
+	shared_ptr<IOWorker> worker = make_shared<IOWorker>(8);
+
+	std::list< shared_ptr<Socket>> socklist;
+
+	for (int i = 0; i < MAXTHREADNUM; i++)
+	{
+		char* buffer = new char[TESTUDPLEN];
+
+		shared_ptr<Socket> udp = UDP::create(worker);
+		udp->bind(TESTUDPPORT + i);
+
+		udp->async_recvfrom(buffer, TESTUDPLEN, socketRecvCalblack);
+
+		socklist.push_back(udp);
+	}
+
+	getchar();
+}
+
+int main(int args,const char* argv[])
+{
+	if (args == 1) runServer();
+	else runClient1();
 
 	return 0;
 }

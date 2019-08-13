@@ -61,7 +61,7 @@ public:
 		}
 
 		char buffer[READBUFFERSIZE] = {};
-		int readSize = 0;
+		size_t readSize = 0;
 		bool result = true;
 		do 
 		{
@@ -93,7 +93,7 @@ public:
 		}
 		
 		std::vector<string> vec = String::split(filename, PATHFLAG);
-		int pos = String::lastIndexOf(filename, PATHFLAG);
+		size_t pos = String::lastIndexOf(filename, PATHFLAG);
 		if (vec.size() == 1 && (size_t)pos == filename.length() - 1)
 		{
 			//filename 直接是文件名，保存在当前目录；
@@ -136,7 +136,7 @@ public:
 		uint32_t crc = 0;
 		if (m_password != "")
 		{
-			_getCrc(itemname.c_str(), itemname.length(), crc);
+			_getCrc(itemname.c_str(), (int)itemname.length(), crc);
 		}
 
 		int err = zipOpenNewFileInZip4(m_zfile, itemname.c_str(), &fileinfo, NULL, 0, NULL, 0, NULL, Z_DEFLATED, 8, 0, -MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY, m_password.c_str(), crc, 0, 0);
@@ -145,7 +145,7 @@ public:
 			return false;
 		}
 
-		err = zipWriteInFileInZip(m_zfile, data.c_str(), data.length());
+		err = zipWriteInFileInZip(m_zfile, data.c_str(), (unsigned int)data.length());
 		if (err != ZIP_OK)
 		{
 			return false;
@@ -184,14 +184,14 @@ public:
 		}
 
 		char buffer[READBUFFERSIZE] = {};
-		int readSize = 0;
+		size_t readSize = 0;
 		bool result = true;
 		do
 		{
 			readSize = fread(buffer, 1, READBUFFERSIZE, pfile);
 			if (readSize > 0)
 			{
-				err = zipWriteInFileInZip(m_zfile, buffer, readSize);
+				err = zipWriteInFileInZip(m_zfile, buffer, (unsigned int)readSize);
 				if (err != ZIP_OK)
 				{
 					result = false;
@@ -251,7 +251,7 @@ private:
 			return false;
 		}
 
-		unsigned long size_read = 0;
+		size_t size_read = 0;
 
 		char * buffer = new char[512 * 1024 * 1024];
 		do
@@ -260,7 +260,7 @@ private:
 			size_read = fread(buffer, 1, 512 * 1024 * 1024, pfile);
 			if (size_read > 0)
 			{
-				calculate_crc = _getCrc(buffer, size_read, calculate_crc);
+				calculate_crc = _getCrc(buffer, (int)size_read, calculate_crc);
 			}
 
 		} while (size_read > 0);

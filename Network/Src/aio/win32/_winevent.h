@@ -183,15 +183,15 @@ struct RecvEvent :public WinEvent
 	}
 	void doEvent(const shared_ptr<Socket>& sock, int bytes, bool status)
 	{
-		if (!status && !socketIsAlive(sock))
+		if (!status && recvcallback && !socketIsAlive(sock))
 		{
 			sock->socketError("socket disconnected");
 		}
-		else if (bytes <= 0 && !socketIsAlive(sock))
+		else if (bytes <= 0 && recvcallback && !socketIsAlive(sock))
 		{
 			sock->socketError("socket disconnected");
 		}
-		else if (status && bytes > 0)
+		else 
 		{
 			if (recvcallback) recvcallback(sock, (const char*)wbuf.buf, bytes);
 			else recvfromcallback(sock, (const char*)wbuf.buf, bytes, NetAddr(*(SockAddr*)&addr));

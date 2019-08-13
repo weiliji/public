@@ -157,6 +157,12 @@ const char* String::c_str() const
 
 	return internal->buffer->buffer;
 }
+char* String::c_str()
+{
+	if (internal == NULL || internal->buffer == NULL || internal->buffer->buffer == NULL) return (char*)emtpystr;
+
+	return internal->buffer->buffer;
+}
 size_t String::length() const
 {
 	if (internal == NULL || internal->buffer == NULL) return 0;

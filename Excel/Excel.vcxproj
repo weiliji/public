@@ -175,7 +175,7 @@
     <RootNamespace>Base</RootNamespace>
     <Keyword>Win32Proj</Keyword>
     <ProjectName>Excel</ProjectName>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>7.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -257,6 +257,7 @@
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(WindowsSDK_IncludePath);$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)\Lib\$(Platform)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)\__Compile\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>

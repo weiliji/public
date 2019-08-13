@@ -65,6 +65,8 @@ public:
 
 	//返回对象地址
 	const char* c_str() const;
+
+	char* c_str();
 	//返回对象数据长度
 	size_t length() const;
 	//重新设置数据长度
