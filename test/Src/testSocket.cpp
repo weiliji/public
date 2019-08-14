@@ -1,3 +1,5 @@
+#include <winsock2.h>
+#include <mswsock.h>
 #include "Network/Network.h"
 using namespace Public::Network;
 
@@ -231,7 +233,11 @@ SocketInitObjec socketinit;
 #define TESTUDPPORT		5002
 #define TESTUDPLEN		1440
 
+#define TESTUDPRECVLEN		TESTUDPLEN * 2
+
 #define MAXTHREADNUM		100
+
+
 
 void runServerProc(Thread* t,void* param)
 {
@@ -248,7 +254,7 @@ void runServerProc(Thread* t,void* param)
 	int sendtimes = 0;
 	while (t->looping())
 	{
-		if(sendtimes++ % 5 == 0)
+		if(sendtimes++ % 10 == 0)
 			Thread::sleep(1);
 
 		int sendlen = sendto(sockClient, buffer, TESTUDPLEN, 0, (sockaddr*)&servAddr, addrlen);
@@ -283,22 +289,33 @@ void runClientProc(Thread* t, void* param)
 	addrSrv.sin_family = AF_INET;
 	addrSrv.sin_port = htons(TESTUDPPORT + (int)param);
 
+	BOOL bReuseaddr = TRUE;
+	int opt = setsockopt(socketSrv, SOL_SOCKET, SO_REUSEADDR, (const char*)&bReuseaddr, sizeof(BOOL));
+
 	// 绑定套接字
 	int iRet = ::bind(socketSrv, (SOCKADDR*)&addrSrv, sizeof(SOCKADDR));
 	if (SOCKET_ERROR == iRet)
 	{
 		assert(0);
+	//	exit(0);
+		return;
 	}
 
-	char buffer[TESTUDPLEN];
-	int recvaddrlen = 0;
+	char buffer[TESTUDPRECVLEN];
+	int recvaddrlen = 16;
+	memset(&addrSrv, 0, sizeof(SOCKADDR_IN));
+	addrSrv.sin_family = AF_INET;
 	while (t->looping())
 	{
 		memset(&addrSrv, 0, sizeof(SOCKADDR_IN));
 		addrSrv.sin_family = AF_INET;
 		recvaddrlen = 16;
 
-		int recvlen = recvfrom(socketSrv, buffer, TESTUDPLEN, 0, (SOCKADDR*)&addrSrv, &recvaddrlen);
+		int recvlen = recvfrom(socketSrv, buffer, TESTUDPRECVLEN, 0, (SOCKADDR*)&addrSrv, &recvaddrlen);
+		if (recvlen <= 0)
+		{
+			printf("1111111111111111111111111111\r\n");
+		}
 
 	//	printf("%d recvfrom %d\r\n", Thread::getCurrentThreadID(), recvlen);
 	}
@@ -330,23 +347,26 @@ void socketRecvCalblack(const weak_ptr <Socket>& sock,const char* buffer,int len
 	}
 
 	shared_ptr<Socket> tmp = sock.lock();
-	if (tmp) tmp->async_recvfrom((char*)buffer,TESTUDPLEN,socketRecvCalblack);
+	if (tmp) tmp->async_recvfrom((char*)buffer, TESTUDPRECVLEN,socketRecvCalblack);
 }
+
+
+#define MAXIOCPTHREADNUM		1
 
 void runClient1()
 {
-	shared_ptr<IOWorker> worker = make_shared<IOWorker>(8);
+	shared_ptr<IOWorker> worker = make_shared<IOWorker>(MAXIOCPTHREADNUM);
 
 	std::list< shared_ptr<Socket>> socklist;
 
 	for (int i = 0; i < MAXTHREADNUM; i++)
 	{
-		char* buffer = new char[TESTUDPLEN];
+		char* buffer = new char[TESTUDPRECVLEN];
 
 		shared_ptr<Socket> udp = UDP::create(worker);
 		udp->bind(TESTUDPPORT + i);
 
-		udp->async_recvfrom(buffer, TESTUDPLEN, socketRecvCalblack);
+		udp->async_recvfrom(buffer, TESTUDPRECVLEN, socketRecvCalblack);
 
 		socklist.push_back(udp);
 	}
@@ -354,8 +374,196 @@ void runClient1()
 	getchar();
 }
 
+
+HANDLE iocp;
+
+
+struct SocketObject
+{
+	OVERLAPPED		overlped;
+	WSABUF			wbuf;
+	SOCKADDR		addr;
+	int 			addrlen;
+	DWORD			dwBytes;
+	DWORD			dwFlags;
+
+	void reset()
+	{
+		memset(&overlped, 0, sizeof(overlped));
+		memset(&wbuf, 0, sizeof(wbuf));
+		memset(&addr, 0, sizeof(addr));
+		dwBytes = dwFlags = 0;
+
+		addr.sa_family = AF_INET;
+		addrlen = sizeof(SOCKADDR);
+	}
+
+	SOCKET			sock;
+	String buffer;
+
+	SocketObject(int num)
+	{
+		buffer.alloc(TESTUDPRECVLEN);
+
+		sock = WSASocket(AF_INET, SOCK_DGRAM, IPPROTO_UDP, NULL, 0, WSA_FLAG_OVERLAPPED);
+		if (sock <= 0)
+		{
+			return;
+		}
+
+		{
+			SOCKADDR_IN addrSrv;
+			memset(&addrSrv, 0, sizeof(SOCKADDR_IN));
+			addrSrv.sin_family = AF_INET;
+			addrSrv.sin_port = htons(TESTUDPPORT + num);
+
+			BOOL bReuseaddr = TRUE;
+			int opt = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&bReuseaddr, sizeof(BOOL));
+
+			// 绑定套接字
+			int iRet = ::bind(sock, (SOCKADDR*)&addrSrv, sizeof(SOCKADDR));
+			if (SOCKET_ERROR == iRet)
+			{
+				assert(0);
+				//	exit(0);
+				return;
+			}
+		}
+
+		unsigned long on_windows = 1;
+
+		ioctlsocket(sock, FIONBIO, &on_windows);
+
+		::CreateIoCompletionPort((HANDLE)sock, iocp, NULL, 0);
+
+		postRecv();
+	}
+
+	void postRecv()
+	{
+		reset();
+
+		wbuf.buf = buffer.c_str();
+		wbuf.len = TESTUDPRECVLEN;
+
+		int ret = WSARecvFrom(sock, &wbuf, 1, &dwBytes, &dwFlags, (sockaddr*)&addr, &addrlen, &overlped, NULL);
+
+		if (ret == SOCKET_ERROR)
+		{
+			int errorno = GetLastError();
+			if (errorno != WSA_IO_PENDING)
+			{
+				assert(0);
+			}
+		}
+	}
+};
+
+void IOCPThreadProc(Thread* t, void* param)
+{
+	while (t->looping())
+	{
+		DWORD bytes = 0;
+		ULONG_PTR key = 0;
+		OVERLAPPED* poverlaped = NULL;
+
+		BOOL ret = ::GetQueuedCompletionStatus(iocp, &bytes, &key, &poverlaped, INFINITE);
+
+		SocketObject* sockobj = CONTAINING_RECORD(poverlaped, SocketObject, overlped);
+
+		if (sockobj == NULL || poverlaped == NULL) return;
+
+		sockobj->postRecv();
+	}
+}
+
+
+void runClient2()
+{
+	iocp = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
+
+	std::list<shared_ptr<Thread> > threadlist;
+	for (int i = 0; i < MAXIOCPTHREADNUM; i++)
+	{
+		shared_ptr<Thread> t = ThreadEx::creatThreadEx("IOCPThreadProc", IOCPThreadProc,NULL, Thread::priorTop, Thread::policyRealtime);
+		t->createThread();
+
+		threadlist.push_back(t);
+	}
+
+	std::list<shared_ptr<SocketObject> >socklist;
+	for (int i = 0; i < MAXTHREADNUM; i++)
+	{
+		shared_ptr<SocketObject> sock = make_shared<SocketObject>(i);
+
+		socklist.push_back(sock);
+	}
+
+
+	getchar();
+
+	for (std::list<shared_ptr<Thread> >::iterator iter = threadlist.begin(); iter != threadlist.end(); iter++)
+	{
+		(*iter)->cancelThread();
+	}
+
+	for (int i = 0; i < MAXIOCPTHREADNUM; i++)
+		::PostQueuedCompletionStatus(iocp, 0, NULL, NULL);
+
+	threadlist.clear();
+
+	if (iocp)
+		CloseHandle(iocp);
+	iocp = NULL;
+
+
+}
+//template<typename T,typename X>
+//struct Memfunc
+//{
+//	typedef X::T Func;
+//};
+
+#define MEMFUNC(T,X) X::*T
+
+template<typename T>
+class testFunction
+{
+public:
+
+	testFunction() {}
+	testFunction(const T* func):ptr(func){}
+	template<typename MF,typename X>
+	testFunction(const MF& f, X* ptr) 
+	{
+		
+	}
+
+	T* ptr;
+};
+
+typedef void(F)(int, int);
+
+void testFunc1(int,int){}
+
+struct TESTAA
+{
+	void testFunc1(int, int) {}
+};
+
 int main(int args,const char* argv[])
 {
+	testFunction<void(int, int)> func1(testFunc1);
+
+//	std::bind(&TESTAA::testFunc1, (TESTAA*)NULL);
+
+
+//	testFunction<void(int, int)>::X x;
+
+//	x.f = testFunc1;
+
+	testFunction<void(int, int)> func2(&TESTAA::testFunc1,(TESTAA*)NULL);
+	
 	if (args == 1) runServer();
 	else runClient1();
 

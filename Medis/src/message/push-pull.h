@@ -42,18 +42,18 @@ public:
 	}
 	uint32_t pullsize()
 	{
-		return pulllist.size();
+		return (uint32_t)pulllist.size();
 	}
 	void push(const RedisValue& val)
 	{
 		if (pulllist.size() == 0) return;
 
-		uint32_t sendindex = (pullindex++) % pulllist.size();
+		size_t sendindex = (pullindex++) % pulllist.size();
 
 		pulllist[sendindex].callback(pulllist[sendindex].user, val);
 	}
 private:
 	CmdMessageCallback		callback;
 	std::vector<PullInfo>	pulllist;
-	uint64_t				pullindex;
+	size_t					pullindex;
 };

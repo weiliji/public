@@ -20,6 +20,7 @@ namespace Network{
 
 #define INVALIDHANDLE -1
 
+
 ///socket工作需要的worker集合，主要在这定义当前socket工作需要的线程数信息
 //内部为boost::asio::io_work，可为boost::asio提供io_server
 class NETWORK_API IOWorker

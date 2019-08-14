@@ -246,7 +246,7 @@ static int readline(char *buf, int max, netbuf *ctl)
 			x = (max >= ctl->cavail) ? ctl->cavail : max - 1;
 			end = _memccpy(bp, ctl->cget, '\n', x);
 			if (end != NULL)
-				x = end - bp;
+				x = (int)(end - bp);
 			retval += x;
 			bp += x;
 			*bp = '\0';

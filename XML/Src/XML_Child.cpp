@@ -267,12 +267,12 @@ void XMLObject::Child::removeChild(const std::string& key,int index)
 }
 int XMLObject::Child::childCount() const
 {
-	return internal->childList.size();
+	return (int)internal->childList.size();
 }
 
 int XMLObject::Child::attributeCount() const
 {
-	return internal->attributeList.size();
+	return (int)internal->attributeList.size();
 }
 
 void XMLObject::Child::attribute(const std::string& key,const Value& val)

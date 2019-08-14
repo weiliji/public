@@ -75,7 +75,7 @@ public:
 	}
 	uint32_t len()
 	{
-		return datalist.size();
+		return (uint32_t)datalist.size();
 	}
 	virtual void addData(const shared_ptr<ValueData>& data)
 	{

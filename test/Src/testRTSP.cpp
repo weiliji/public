@@ -80,7 +80,7 @@ string rtspaddr[] = {
 
 int runClient(const std::string& ipaddr,const std::list<std::string>& rtsplist)
 {
-	shared_ptr<IOWorker>	worker = make_shared<IOWorker>(Host::getProcessorNum() * 2);
+	shared_ptr<IOWorker>	worker = make_shared<IOWorker>(1);
 	shared_ptr<RTSPClientManager> manager = make_shared<RTSPClientManager>(worker,"test");
 
 

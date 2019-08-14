@@ -12,16 +12,16 @@ class _Pool;
 class _PoolResource:public enable_shared_from_this<_PoolResource>
 {
 public:
-	_PoolResource(int socketfd, const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& userthread, const shared_ptr<_Pool>& pool);
+	_PoolResource(SOCKET socketfd, const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& userthread, const shared_ptr<_Pool>& pool);
 	
 	virtual ~_PoolResource();
 
 	virtual bool postEvent(Event* event);
 	virtual bool postEvent(const shared_ptr<Event>& event);
 
-	int socket() { return _socketfd; }
+	SOCKET socket() { return _socketfd; }
 private:
-	int						_socketfd;
+	SOCKET					_socketfd;
 	shared_ptr<_Pool>		_pool;
 	weak_ptr<Socket>		_sock;
 	weak_ptr<_UserThread>	_userthread;
@@ -36,12 +36,12 @@ public:
 	}
 	virtual ~_Pool() { }
 
-	virtual shared_ptr<_PoolResource> addResource(int socketfd, const shared_ptr<Socket>& _sock, const shared_ptr<_UserThread>& _userthread) = 0;
+	virtual shared_ptr<_PoolResource> addResource(SOCKET socketfd, const shared_ptr<Socket>& _sock, const shared_ptr<_UserThread>& _userthread) = 0;
 
-	virtual bool delResource(int socketfd, _PoolResource* res) { return true; }
+	virtual bool delResource(SOCKET socketfd, _PoolResource* res) { return true; }
 
-	virtual bool postEvent(const shared_ptr<_PoolResource>& res, Event* event) { return true; }
-	virtual bool postEvent(const shared_ptr<_PoolResource>& res, const shared_ptr<Event>& event) { return true; }
+	virtual bool addEvent(const shared_ptr<_PoolResource>& res, Event* event) { return true; }
+	virtual bool addEvent(const shared_ptr<_PoolResource>& res, const shared_ptr<Event>& event) { return true; }
 
 	virtual bool postExtExentFunction(const IOWorker::EventCallback& _callback, void* param) 
 	{
@@ -50,7 +50,7 @@ public:
 };
 
 
-inline _PoolResource::_PoolResource(int socketfd, const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& userthread, const shared_ptr<_Pool>& pool)
+inline _PoolResource::_PoolResource(SOCKET socketfd, const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& userthread, const shared_ptr<_Pool>& pool)
 	:_socketfd(socketfd), _pool(pool), _sock(sock), _userthread(userthread)
 {
 
@@ -65,12 +65,12 @@ inline bool _PoolResource::postEvent(Event* event)
 	shared_ptr<Socket> sock = _sock.lock();
 	shared_ptr< _UserThread> userthread = _userthread.lock();
 
-	if (sock == NULL || userthread == NULL || !event->init(sock, userthread))
+	if (sock == NULL || userthread == NULL || !event->postEvent(sock, userthread))
 	{
 		return false;
 	}
 
-	if (!_pool->postEvent(shared_from_this(), event))
+	if (!_pool->addEvent(shared_from_this(), event))
 	{
 		return false;
 	}
@@ -83,12 +83,12 @@ inline bool _PoolResource::postEvent(const shared_ptr<Event>& event)
 	shared_ptr<Socket> sock = _sock.lock();
 	shared_ptr< _UserThread> userthread = _userthread.lock();
 
-	if (sock == NULL || userthread == NULL || !event->init(sock, userthread))
+	if (sock == NULL || userthread == NULL || !event->postEvent(sock, userthread))
 	{
 		return false;
 	}
 
-	if (!_pool->postEvent(shared_from_this(), event))
+	if (!_pool->addEvent(shared_from_this(), event))
 	{
 		return false;
 	}

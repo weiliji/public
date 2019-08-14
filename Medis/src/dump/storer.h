@@ -68,7 +68,7 @@ public:
 		while (1)
 		{
 			StoreHeader header;
-			int readlen = fread(&header, 1, sizeof(StoreHeader), fd);
+			int readlen = (int)fread(&header, 1, sizeof(StoreHeader), fd);
 			if (readlen != sizeof(StoreHeader)) break;
 
 			if (memcmp(header.flag, STOREFLAG, 4) != 0) break;
@@ -79,7 +79,7 @@ public:
 				char* buffertmp = new char[header.headerlen];
 				if (buffertmp == NULL) break;
 
-				int readlen = fread(buffertmp, 1, header.headerlen, fd);
+				int readlen = (int)fread(buffertmp, 1, header.headerlen, fd);
 				if (readlen != header.headerlen)
 				{
 					SAFE_DELETEARRAY(buffertmp);
@@ -93,7 +93,7 @@ public:
 				char* buffertmp = new char[header.datalen];
 				if (buffertmp == NULL) break;
 
-				int readlen = fread(buffertmp, 1, header.datalen, fd);
+				int readlen = (int)fread(buffertmp, 1, header.datalen, fd);
 				if (readlen != header.datalen)
 				{
 					SAFE_DELETEARRAY(buffertmp);
@@ -113,14 +113,14 @@ public:
 	{
 		if (fd == NULL) return false;
 		StoreHeader header;
-		header.headerlen = headerstr.length();
-		header.datalen = data.length();
+		header.headerlen = (uint32_t)headerstr.length();
+		header.datalen = (uint32_t)data.length();
 
-		int ret = fwrite(&header, 1, sizeof(StoreHeader), fd);
-		ret = fwrite(headerstr.c_str(), 1, headerstr.length(), fd);
+		int ret = (int)fwrite(&header, 1, sizeof(StoreHeader), fd);
+		ret = (int)fwrite(headerstr.c_str(), 1, (int)headerstr.length(), fd);
 
 		if(data.length() > 0)
-			ret = fwrite(data.c_str(), 1, data.length(), fd);
+			ret = (int)fwrite(data.c_str(), 1, (int)data.length(), fd);
 
 		return true;
 	}

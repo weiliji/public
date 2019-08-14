@@ -26,7 +26,7 @@ public:
 	}
 	uint32_t subscribesize()
 	{
-		return sublist.size();
+		return (uint32_t)sublist.size();
 	}
 	void publish(const RedisValue& msg)
 	{

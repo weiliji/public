@@ -13,7 +13,7 @@ struct WinEvent:public Event
 {
 	OVERLAPPED		overlped;
 	WSABUF			wbuf;
-	SOCKADDR		addr;
+	NetAddr			addr;
 	int 			addrlen;
 	DWORD			dwBytes;
 	DWORD			dwFlags;
@@ -24,19 +24,16 @@ struct WinEvent:public Event
 		reset();
 	}
 	virtual ~WinEvent() {}
-
-	virtual void doEvent(const shared_ptr<Socket>& sock, int bytes, bool status) {}
-
+	
 	void reset()
 	{
 		memset(&overlped, 0, sizeof(overlped));
 		memset(&wbuf, 0, sizeof(wbuf));
-		memset(&addr, 0, sizeof(addr));
+		
 		dwBytes = dwFlags = 0;
 		newsock = 0;
-
-		addr.sa_family = AF_INET;
-		addrlen = sizeof(SOCKADDR);
+		addr = NetAddr();
+		addrlen = addr.getAddrLen();
 	}
 };
 
@@ -66,8 +63,7 @@ struct SendEvent :public WinEvent
 		}
 		reset();
 
-		addr = *(SOCKADDR*)toaddr.getAddr();
-		addrlen = toaddr.getAddrLen();
+		addr = toaddr;
 		sendcallback = _callback;
 
 		wsbuf = new WSABUF[_sendbuf.size()];
@@ -80,9 +76,9 @@ struct SendEvent :public WinEvent
 		wsbufsize = sendindex;
 	}
 	
-	bool init(const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& _userthread)
+	bool postEvent(const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& _userthread)
 	{
-		Event::init(sock, _userthread);
+		Event::postEvent(sock, _userthread);
 
 
 		int ret = 0;
@@ -92,7 +88,7 @@ struct SendEvent :public WinEvent
 		}
 		else
 		{
-			ret = ::WSASendTo(sock->getHandle(), wsbuf, wsbufsize, &dwBytes, 0, (sockaddr*)&addr, addrlen, &overlped, NULL);
+			ret = ::WSASendTo(sock->getHandle(), wsbuf, wsbufsize, &dwBytes, 0, addr.getAddr(), addrlen, &overlped, NULL);
 		}
 
 		if (ret == SOCKET_ERROR)
@@ -122,9 +118,16 @@ struct RecvEvent :public WinEvent
 	Socket::ReceivedCallback recvcallback;
 	Socket::RecvFromCallback recvfromcallback;
 
-	RecvEvent():WinEvent(EventType_Read){}
+	bool needFreeBuffer ;
 
-	bool needFreeBuffer = false;
+	RecvEvent():WinEvent(EventType_Read), needFreeBuffer(false){}
+	~RecvEvent() 
+	{ 
+		if (needFreeBuffer) 
+			delete[](char*)wbuf.buf;
+	}
+
+
 	void init(char* buffer, uint32_t len, const Socket::ReceivedCallback& _recvcallback, const Socket::RecvFromCallback& _recvfromcallback)
 	{
 		if (needFreeBuffer && wbuf.buf != NULL)
@@ -144,14 +147,10 @@ struct RecvEvent :public WinEvent
 		wbuf.buf = (CHAR*)buffer;
 		wbuf.len = len;
 	}
-	~RecvEvent() 
-	{ 
-		if (needFreeBuffer) 
-			delete[](char*)wbuf.buf;
-	}
-	bool init(const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& _userthread)
+
+	bool postEvent(const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& _userthread)
 	{
-		Event::init(sock, _userthread);
+		Event::postEvent(sock, _userthread);
 
 
 		int ret = 0;
@@ -161,7 +160,7 @@ struct RecvEvent :public WinEvent
 		}
 		else
 		{
-			ret = WSARecvFrom(sock->getHandle(), &wbuf, 1, &dwBytes, &dwFlags,(sockaddr*)&addr, &addrlen, &overlped, NULL);
+			ret = WSARecvFrom(sock->getHandle(), &wbuf, 1, &dwBytes, &dwFlags, addr.getAddr(), &addrlen, &overlped, NULL);
 		}
 
 		if (ret == SOCKET_ERROR)
@@ -194,7 +193,7 @@ struct RecvEvent :public WinEvent
 		else 
 		{
 			if (recvcallback) recvcallback(sock, (const char*)wbuf.buf, bytes);
-			else recvfromcallback(sock, (const char*)wbuf.buf, bytes, NetAddr(*(SockAddr*)&addr));
+			else recvfromcallback(sock, (const char*)wbuf.buf, bytes, addr);
 		}
 	}
 };
@@ -212,9 +211,9 @@ struct AcceptEvent :public WinEvent
 		wbuf.buf = swapBuffer;
 		wbuf.len = SWAPBUFFERLEN;
 	}
-	bool init(const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& _userthread)
+	bool postEvent(const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& _userthread)
 	{
-		Event::init(sock, _userthread);
+		Event::postEvent(sock, _userthread);
 
 
 		LPFN_ACCEPTEX	acceptExFunc;
@@ -295,12 +294,11 @@ struct ConnectEvent :public WinEvent
 		wbuf.len = SWAPBUFFERLEN;
 		connectcallback = _connectcallback;
 
-		addr = *(SOCKADDR*)toaddr.getAddr();
-		addrlen = toaddr.getAddrLen();
+		addr = toaddr;
 	}
-	bool init(const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& _userthread)
+	bool postEvent(const shared_ptr<Socket>& sock, const shared_ptr<_UserThread>& _userthread)
 	{
-		Event::init(sock, _userthread);
+		Event::postEvent(sock, _userthread);
 
 		GUID connetEx = WSAID_CONNECTEX;
 		DWORD bytes = 0;
@@ -313,7 +311,7 @@ struct ConnectEvent :public WinEvent
 			assert(0);
 		}
 
-		if (false == connectExFunc(sock->getHandle(), &addr, addrlen, NULL, 0,NULL, &overlped))
+		if (false == connectExFunc(sock->getHandle(), addr.getAddr(), addrlen, NULL, 0,NULL, &overlped))
 		{
 			int errorno = GetLastError();
 			if (errorno != WSA_IO_PENDING)

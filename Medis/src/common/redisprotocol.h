@@ -162,7 +162,7 @@ public:
 					 {
 						 buf.reserve(bulkSize);
 
-						 long int available = size - position;
+						 long int available = (long int)(size - position);
 						 long int canRead = min(bulkSize, available);
 
 						 if (canRead > 0)
@@ -192,7 +192,7 @@ public:
 			 case Bulk: {
 				 //assert( bulkSize > 0 );
 
-				 long int available = size - position + 1;
+				 long int available = (long int)(size - position + 1);
 				 long int canRead = min(available, bulkSize);
 
 				 buf.append(ptr + position - 1, canRead);

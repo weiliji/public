@@ -57,12 +57,12 @@ public:
 	}
 	uint32_t len()
 	{
-		return datalist.size();
+		return (uint32_t)datalist.size();
 	}
 	bool range(int32_t start, int32_t stop,std::vector<String>& dataarray)
 	{
 		start = 0 + start;
-		stop = datalist.size() + stop;
+		stop = int32_t(datalist.size() + stop);
 
 		int currpos = 0;
 		for (std::list<shared_ptr<ValueData> >::iterator iter = datalist.begin(); iter != datalist.end(); iter++, currpos++)

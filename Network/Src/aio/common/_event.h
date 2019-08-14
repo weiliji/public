@@ -6,9 +6,10 @@
 using namespace Public::Base;
 using namespace Public::Network;
 
+
 struct TCPClient::NewSocketInfo
 {
-	int		newsocket;
+	SOCKET	newsocket;
 	NetAddr	otheraddr;
 };
 
@@ -64,12 +65,9 @@ public:
 			}
 		}
 	}
-
-	//判断事件是否有效
-	virtual bool isValid() { return sock.lock() != NULL; }
 	EventType type() const { return pooltype; }
 
-	virtual bool init(const shared_ptr<Socket>& _sock, const shared_ptr<_UserThread>& _userthread)
+	virtual bool postEvent(const shared_ptr<Socket>& _sock, const shared_ptr<_UserThread>& _userthread)
 	{
 		sock = _sock;
 		userthread = _userthread;

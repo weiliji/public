@@ -197,7 +197,7 @@ bool FtpClient::put(const std::string & localfile, const std::string & remoteFil
 
 	while (true)
 	{
-		iRet = fread(pSndBuf, 1, 1024, pf);
+		iRet = (int)fread(pSndBuf, 1, 1024, pf);
 		iRet = FtpWrite(pSndBuf, iRet, pTransChn);
 		if (feof(pf))
 			break;

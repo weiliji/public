@@ -292,7 +292,7 @@ protected:
 
 	shared_ptr<_PoolResource>		resourece;
 
-	int								sock;
+	SOCKET							sock;
 
 	shared_ptr<_UserThread>			userthread;
 

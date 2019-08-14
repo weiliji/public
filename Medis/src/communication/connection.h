@@ -62,7 +62,7 @@ private:
 		{
 			std::string& data = sendlist.front();
 
-			tmp->async_send(data.c_str(), data.length(), Socket::SendedCallback(&Connection::socketSendCallback, this));
+			tmp->async_send(data.c_str(), (uint32_t)data.length(), Socket::SendedCallback(&Connection::socketSendCallback, this));
 		}
 	}
 	void recvCallback(const weak_ptr<Socket>& user, const char* buftmp, int len)
@@ -101,7 +101,7 @@ private:
 		{
 			std::string& data = sendlist.front();
 
-			tmp->async_send(data.c_str(), data.length(), Socket::SendedCallback(&Connection::socketSendCallback, this));
+			tmp->async_send(data.c_str(), (uint32_t)data.length(), Socket::SendedCallback(&Connection::socketSendCallback, this));
 		}
 	}
 private:

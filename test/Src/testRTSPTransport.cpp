@@ -231,7 +231,7 @@ static shared_ptr<RTSPServerHandler> rtspAceeptCallback(const shared_ptr<RTSPSer
 
 int runserver(const std::list<std::string>& rtsplist)
 {
-	shared_ptr<IOWorker>	worker = make_shared<IOWorker>(Host::getProcessorNum()*2);
+	shared_ptr<IOWorker>	worker = make_shared<IOWorker>(1);
 	shared_ptr<RTSPClientManager> manager = make_shared<RTSPClientManager>(worker,"test");
 
 	

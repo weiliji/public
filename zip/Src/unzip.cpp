@@ -40,7 +40,7 @@ public:
 			unz_file_info64 finfo;
 			char filename[256] = {};
 			unzGetCurrentFileInfo64(m_zFile, &finfo, filename, 256, NULL, 0, NULL, 0);
-			int pos = String::lastIndexOf(filename, "/");
+			size_t pos = String::lastIndexOf(filename, "/");
 			if ((size_t)pos == strlen(filename) - 1)
 			{
 				//目录，目录结尾带"/"
@@ -63,9 +63,9 @@ public:
 			for (size_t i = 0; i < tmp_fileNameList.size(); i++)
 			{
 				UnzipObject::ZipItem item;
-				item.index = i;
+				item.index = (int)i;
 				item.filename = tmp_fileNameList[i];
-				m_fileNameList[i] = item;
+				m_fileNameList[(int)i] = item;
 			}
 		}
 
@@ -205,7 +205,7 @@ public:
 		}
 
 		std::string tmp_name = dirName;
-		int pos = String::lastIndexOf(dirName, "/");
+		size_t pos = String::lastIndexOf(dirName, "/");
 		if ((size_t)pos != dirName.length() - 1)
 		{
 			//没找到"/",加上
@@ -231,7 +231,7 @@ public:
 				continue;
 			}
 
-			int pos = String::lastIndexOf(filename, "/");
+			size_t pos = String::lastIndexOf(filename, "/");
 			if ((size_t)pos == strlen(filename) - 1)
 			{
 				//目录
@@ -303,7 +303,7 @@ private:
 					break;
 				}
 
-				int writeSize = fwrite(readBuf, 1, readSize, pfile);
+				int writeSize = (int)fwrite(readBuf, 1, readSize, pfile);
 				if (writeSize != readSize)
 				{
 					//write error

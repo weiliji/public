@@ -30,6 +30,11 @@ struct NetAddr::NetAddrInternal
 #ifdef SUPPORT_IPV6
 	SockAddrIPv6 	ipv6;
 #endif	
+
+	NetAddrInternal() :type(netaddr_ipv4) 
+	{
+		ipv4.sin_family = AF_INET;
+	}
 };
 
 /// 缺省构造函数，无效地址
@@ -126,7 +131,7 @@ bool NetAddr::operator==( NetAddr & other) const
 // 当前的网络地址是否为有效的
 bool NetAddr::isValid() const
 {
-	return internal->type != netaddr_unknown;
+	return getPort() != 0 || getIP().length() > 0;
 }
 
 NetAddr::NetAddrType NetAddr::getType() const
@@ -316,11 +321,6 @@ int NetAddr::setPort( uint16_t port )
 	internal->ipv6.sin6_family = AF_INET6;
 	internal->ipv6.sin6_port = htons( port );
 #endif
-
-	if(internal->type == netaddr_unknown)
-	{
-		internal->type = netaddr_ipv4;
-	}	
 	
 	return 0;
 }

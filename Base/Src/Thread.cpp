@@ -32,11 +32,6 @@
 namespace Public {
 namespace Base {
 
-#ifdef WIN32
-typedef void* thread_handle_t;
-#elif defined(__linux__)
-typedef pthread_t thread_handle_t;
-#endif
 
 //static ThreadErrorManager threadErrorManager;
 //static Mutex ThreadManagerInfoMutex;
@@ -505,7 +500,10 @@ int Thread::getThreadID()
 {
 	return internal->id;
 }
-
+thread_handle_t Thread::handle() const
+{
+	return internal->handle;
+}
 void Thread::setTimeout(int milliSeconds)
 {
 	Guard guard(internal->mutex);

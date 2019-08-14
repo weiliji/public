@@ -11,7 +11,7 @@ public:
 	}
 	uint32_t keyscount()
 	{
-		return valuelist.size();
+		return (uint32_t)valuelist.size();
 	}
 	void initHeader(const shared_ptr<ValueHeader>& header)
 	{

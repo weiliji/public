@@ -77,8 +77,7 @@ public:
 	
 	/// 网络地址的类型
 	enum NetAddrType{ 
-		netaddr_unknown = 0,   //无效地址类型 
-		netaddr_ipv4,      //IPv4地址类型
+		netaddr_ipv4 = 0,      //IPv4地址类型
 		netaddr_ipv6,      //IPv6地址类型
 	};
 		

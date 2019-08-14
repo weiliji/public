@@ -30,7 +30,7 @@ public:
 
 	uint32_t len()
 	{
-		return value->getData().length();
+		return (uint32_t)value->getData().length();
 	}
 
 	virtual void addData(const shared_ptr<ValueData>& data)

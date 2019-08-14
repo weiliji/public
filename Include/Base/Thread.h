@@ -18,6 +18,11 @@
 namespace Public{
 namespace Base{
 
+#ifdef WIN32
+	typedef HANDLE thread_handle_t;
+#elif defined(__linux__)
+	typedef pthread_t thread_handle_t;
+#endif
 
 typedef struct
 {
@@ -129,6 +134,10 @@ public:
 	/// \retval 线程ID
 	int	getThreadID();
 
+
+	//获取线程句柄
+	thread_handle_t handle() const;
+
 	/// 设置线程名称
 	/// \param name [in] 新的线程名称
 	void setThreadName(const std::string& name);
@@ -157,7 +166,6 @@ public:
 	/// 让调用线程阻塞一段时间
 	/// \param milliSeconds [in] 期望阻塞的毫秒数
 	static void sleep(int milliSeconds);
-
 public:
 	ThreadInternal* internal;
 };
