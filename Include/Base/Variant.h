@@ -11,7 +11,7 @@
 
 #include "Base/IntTypes.h"
 #include "Base/Shared_ptr.h"
-#include "Base/Func.h"
+#include "Base/Function.h"
 #include "Defs.h"
 
 namespace Public {

@@ -14,7 +14,7 @@
 #include "BaseTemplate.h"
 #include "Defs.h"
 #include <string>
-#include "Func.h"
+#include "Function.h"
 
 
 namespace Public {

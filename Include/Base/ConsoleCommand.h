@@ -12,7 +12,7 @@ namespace Public {
 namespace Base {
 
 //ÃüÁî»Øµ÷º¯Êý
-typedef Function2<void, int, char**> ConsoleCmdCallback;
+typedef Function<void, int, char**> ConsoleCmdCallback;
 
 class BASE_API ConsoleCommand : public Thread
 {

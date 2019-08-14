@@ -63,12 +63,6 @@
     <ClInclude Include="..\Include\Base\File.h">
       <Filter>头文件\Base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\Base\Func.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\FuncTempl.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
     <ClInclude Include="..\Include\Base\Guard.h">
       <Filter>头文件\Base</Filter>
     </ClInclude>
@@ -202,6 +196,9 @@
       <Filter>头文件\Base</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\Base\MsgCenter.h">
+      <Filter>头文件\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Function.h">
       <Filter>头文件\Base</Filter>
     </ClInclude>
   </ItemGroup>

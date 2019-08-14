@@ -11,7 +11,7 @@ using namespace Public::Network;
 #define MAXUSERTIMEOUT		5*60*1000
 #define MAXBUFFERLEN		10240
 
-typedef Function3<void, void*,uint32_t, const shared_ptr<RedisValue>&> RecvDataCallback;
+typedef Function<void, void*,uint32_t, const shared_ptr<RedisValue>&> RecvDataCallback;
 
 class Connection
 {

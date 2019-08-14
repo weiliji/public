@@ -11,7 +11,7 @@
 
 #include <stdio.h>
 #include "Defs.h"
-#include "Func.h"
+#include "Function.h"
 #include "IntTypes.h"
 #include <string>
 
@@ -38,7 +38,7 @@ struct LogPrintInfo
 
 /// 打印输出回调函数类型
 /// 参数为要打印的字符串
-typedef Function1<void,const LogPrintInfo&> LogPrinterProc;
+typedef Function<void,const LogPrintInfo&> LogPrinterProc;
 
 ///设置打印等级
 void BASE_API setprintloglevel(LOG_Level level);

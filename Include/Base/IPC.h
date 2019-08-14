@@ -6,7 +6,7 @@
 #include "Base/StaticMemPool.h"
 #include "Base/ShareMem.h"
 #include "Base/Defs.h"
-#include "Base/Func.h"
+#include "Base/Function.h"
 #include <string>
 using namespace  std;
 namespace Public{
@@ -53,7 +53,7 @@ class BASE_API ShareMEMBuffer
 {
 	struct ShareMEMBufferInternal;
 public:
-	typedef Function2<void,void*,int>		ReadMEMCallback;
+	typedef Function<void,void*,int>		ReadMEMCallback;
 private:
 	ShareMEMBuffer(const std::string& shareName, int createBlock, int maxBlock, int rblockSize, int bocknum, int memMaxSize, bool create, void* startAddr, const ReadMEMCallback& callback);
 public:

@@ -198,7 +198,7 @@ int main(int args,const char* argv[])
 #endif
 
 
-#if 1
+#if 0
 
 class SocketInitObjec
 {
@@ -518,52 +518,9 @@ void runClient2()
 
 
 }
-//template<typename T,typename X>
-//struct Memfunc
-//{
-//	typedef X::T Func;
-//};
-
-#define MEMFUNC(T,X) X::*T
-
-template<typename T>
-class testFunction
-{
-public:
-
-	testFunction() {}
-	testFunction(const T* func):ptr(func){}
-	template<typename MF,typename X>
-	testFunction(const MF& f, X* ptr) 
-	{
-		
-	}
-
-	T* ptr;
-};
-
-typedef void(F)(int, int);
-
-void testFunc1(int,int){}
-
-struct TESTAA
-{
-	void testFunc1(int, int) {}
-};
 
 int main(int args,const char* argv[])
-{
-	testFunction<void(int, int)> func1(testFunc1);
-
-//	std::bind(&TESTAA::testFunc1, (TESTAA*)NULL);
-
-
-//	testFunction<void(int, int)>::X x;
-
-//	x.f = testFunc1;
-
-	testFunction<void(int, int)> func2(&TESTAA::testFunc1,(TESTAA*)NULL);
-	
+{	
 	if (args == 1) runServer();
 	else runClient1();
 

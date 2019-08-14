@@ -13,7 +13,7 @@
 #include <string>
 #include "Base/Defs.h"
 #include "Thread.h"
-#include "Func.h"
+#include "Function.h"
 
 namespace Public{
 namespace Base{
@@ -22,7 +22,7 @@ namespace Base{
 class BASE_API ThreadEx
 {
 	public:
-		typedef Function2<void, Thread*, void*>	Proc;
+		typedef Function<void, Thread*, void*>	Proc;
 
 		static shared_ptr<Thread> creatThreadEx(const std::string& name,const Proc& proc, void* param,
 			int priority = Thread::priorDefault, int policy = Thread::policyNormal, int stackSize = 0);

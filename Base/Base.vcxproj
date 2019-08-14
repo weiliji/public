@@ -36,8 +36,7 @@
     <ClInclude Include="..\Include\Base\File.h" />
     <ClInclude Include="..\Include\Base\Directory.h" />
     <ClInclude Include="..\Include\Base\FileFind.h" />
-    <ClInclude Include="..\Include\Base\Func.h" />
-    <ClInclude Include="..\Include\Base\FuncTempl.h" />
+    <ClInclude Include="..\Include\Base\Function.h" />
     <ClInclude Include="..\Include\Base\Guard.h" />
     <ClInclude Include="..\Include\Base\Guid.h" />
     <ClInclude Include="..\Include\Base\Host.h" />

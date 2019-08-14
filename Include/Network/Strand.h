@@ -13,7 +13,7 @@ public:
 	struct NETWORK_API StrandData {
 		virtual ~StrandData() {}
 	};
-	typedef Function1<void, const shared_ptr<StrandData>& > StrandCallback;
+	typedef Function<void, const shared_ptr<StrandData>& > StrandCallback;
 public:
 	Strand(const shared_ptr<IOWorker>& ioworker);
 	virtual ~Strand();

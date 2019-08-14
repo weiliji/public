@@ -2,7 +2,7 @@
 
 #include "../common/redisvalue.h"
 
-typedef Function2<void, void*, const RedisValue&> CmdMessageCallback;
+typedef Function<void, void*, const RedisValue&> CmdMessageCallback;
 
 class Pub_Sub
 {

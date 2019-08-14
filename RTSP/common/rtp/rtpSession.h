@@ -32,10 +32,10 @@ class RTPSession
 {
 public:
 	//Fucntion4<bool isvideo,uint32_t timestmap,const char* buffer,uint32_t bufferlen,bool mark>RTPDataCallback
-	typedef Function2<void, const shared_ptr<STREAM_TRANS_INFO>&, const RTPPackage&> MediaDataCallback;
+	typedef Function<void, const shared_ptr<STREAM_TRANS_INFO>&, const RTPPackage&> MediaDataCallback;
 
 	//控制数据回调
-	typedef Function3<void, const shared_ptr<STREAM_TRANS_INFO>&,const char*, uint32_t> ContorlDataCallback;
+	typedef Function<void, const shared_ptr<STREAM_TRANS_INFO>&,const char*, uint32_t> ContorlDataCallback;
 public:
 	RTPSession(const shared_ptr<STREAM_TRANS_INFO>& _transport,const MediaDataCallback& _datacallback,const ContorlDataCallback& _contorlcallback)
 		:transportinfo(_transport),datacallback(_datacallback), contorlcallback(_contorlcallback){}

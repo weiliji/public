@@ -22,7 +22,7 @@
 #include "Base/DynamicMemPool.h"
 #include "Base/File.h"
 #include "Base/Directory.h"
-#include "Base/Func.h"
+#include "Base/Function.h"
 #include "Base/Guard.h"
 #include "Base/IntTypes.h"
 #include "Base/LockFreeList.h"
@@ -92,7 +92,7 @@
 	PrintLog.h			打印接口
 	String.h			字符串处理
 	SimPipe.h			仿真管道、目前不能用于进程通讯
-	Func.h				回调函数
+	Function.h				回调函数
 	Callback.h			回调调用
 	InstanceObjectDefine.h		单件定义及初始化
 
@@ -135,7 +135,7 @@ public:
 	};
 
 	//关闭事件回调通知函数
-	typedef Function2<void,void*,CloseEvent> 	closeEventCallback;
+	typedef Function<void,void*,CloseEvent> 	closeEventCallback;
 public:
 	/// 打印 Base库 版本信息
 	static void  printVersion();

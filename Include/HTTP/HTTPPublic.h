@@ -86,8 +86,8 @@ public:
 class HTTP_API ChunkData
 {
 public:
-	typedef Function2<uint32_t, const char*, uint32_t> ReadCallback;
-	typedef Function2<uint32_t, const char*, uint32_t> WriteCallback;
+	typedef Function<uint32_t, const char*, uint32_t> ReadCallback;
+	typedef Function<uint32_t, const char*, uint32_t> WriteCallback;
 
 	ChunkData();
 	ChunkData(const WriteCallback& writecallback);
@@ -105,7 +105,7 @@ private:
 class HTTP_API ReadContent :public IContent
 {
 public:
-	typedef Function2<void, const char*, uint32_t> DataCalback;
+	typedef Function<void, const char*, uint32_t> DataCalback;
 public:
 	ReadContent(const shared_ptr<HTTPHeader>& header, WriteContenNotify* notify, HTTPCacheType type,const std::string& filename = "");
 	~ReadContent();

@@ -12,7 +12,7 @@ class HTTP_API HTTPClientRequest
 {
 	friend struct HTTPClientManager;
 public:
-	typedef Function2<void, const shared_ptr<HTTPClientRequest>&, const std::string&> DisconnectCallback;
+	typedef Function<void, const shared_ptr<HTTPClientRequest>&, const std::string&> DisconnectCallback;
 public:
 	HTTPClientRequest(const std::string& method = "GET",const std::string& url = "/",HTTPCacheType type = HTTPCacheType_Mem);
 	virtual ~HTTPClientRequest();
@@ -74,7 +74,7 @@ private:
  class HTTP_API HTTPAsyncClient
  {
  public:
-	 typedef Function2<void, const shared_ptr<HTTPClientRequest>&, const shared_ptr<HTTPClientResponse>& > HTTPCallback;
+	 typedef Function<void, const shared_ptr<HTTPClientRequest>&, const shared_ptr<HTTPClientResponse>& > HTTPCallback;
  public:
 	 HTTPAsyncClient(const shared_ptr<IOWorker>& worker, const std::string& useragent);
 	 ~HTTPAsyncClient();
@@ -88,9 +88,9 @@ private:
  class HTTP_API WebSocketClient
  {
  public:
-	 typedef Function1<void, WebSocketClient*> DisconnectCallback;
-	 typedef Function3<void, WebSocketClient*, const std::string&, WebSocketDataType> RecvDataCallback;
-	 typedef Function3<void, WebSocketClient*,bool,const std::string&> ConnnectCallback;
+	 typedef Function<void, WebSocketClient*> DisconnectCallback;
+	 typedef Function<void, WebSocketClient*, const std::string&, WebSocketDataType> RecvDataCallback;
+	 typedef Function<void, WebSocketClient*,bool,const std::string&> ConnnectCallback;
  public:
 	 WebSocketClient(const shared_ptr<IOWorker>& worker, const std::string& useragent,const std::map<std::string, Value>& headers = std::map<std::string, Value>());
 	 ~WebSocketClient();

@@ -3,7 +3,7 @@
 #include "Base/Defs.h"
 #include "Base/IntTypes.h"
 #include "Base/Time.h"
-#include "Base/Func.h"
+#include "Base/Function.h"
 #include "Base/Value.h"
 #include <string>
 using namespace std;

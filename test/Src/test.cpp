@@ -1,6 +1,6 @@
 
 #if 0
-#include "Base/Func.h"
+#include "Base/Function.h"
 using namespace Public::Base;
 #include "HTTP/HTTP.h"
 using namespace Public::HTTP;
@@ -66,13 +66,13 @@ int main()
 
 	//std::shared_ptr<Test> testptr(new Test);
 
-	//Function1<void, int> testfunc = Function1<void, int>(&Test::testfunc, testptr.get());
+	//Function<void, int> testfunc = Function<void, int>(&Test::testfunc, testptr.get());
 
 	//test(1);
 	
-	//Function2<void,int, int> f = std::bind(&Test::testfunc, std::weak_ptr<Test>(t).lock(), std::placeholders::_1, std::placeholders::_2);
+	//Function<void,int, int> f = std::bind(&Test::testfunc, std::weak_ptr<Test>(t).lock(), std::placeholders::_1, std::placeholders::_2);
 
-	//Function1<void, int> f1 = [&](int) {
+	//Function<void, int> f1 = [&](int) {
 	//	int a = 0;
 	//};
 
@@ -478,33 +478,60 @@ int main()
 
 	MsgCenter::Worker1<int> worker1 = msgcenter.worker<int>(1);
 
-	worker1->subscribe((void*)NULL,Function1<void,int>(readcalblack1));
+	worker1->subscribe((void*)NULL,Function<void,int>(readcalblack1));
 
 	worker1->publish(1);
 
 
 	MsgCenter::Worker2<int,char*> worker2 = msgcenter.worker<int,char*>(2);
 
-	worker2->subscribe((void*)NULL, Function2<void, int,const char*>(readcallback2));
+	worker2->subscribe((void*)NULL, Function<void, int,const char*>(readcallback2));
 
 	worker2->publish(1,(char*)"aaa");
 
 
 	MsgCenter::Worker3<int, const char*,const char*> worker3= msgcenter.worker<int,const char*,const char*>(3);
 
-	worker3->subscribe((void*)NULL, Function3<void, int, const char*, const char*>(readcalblack3));
+	worker3->subscribe((void*)NULL, Function<void, int, const char*, const char*>(readcalblack3));
 
 	worker3->publish(1, "aaa","bbbbb");
 
 	MsgCenter::Worker4<int, const char*, const char*,float> worker4 = msgcenter.worker<int, const char*, const char*,float>(4);
 
-	worker4->subscribe((void*)NULL, Function4<void, int, const char*, const char*,double>(readcalblack4));
+	worker4->subscribe((void*)NULL, Function<void, int, const char*, const char*,double>(readcalblack4));
 
 	worker4->publish(1, "aaa", "bbbbb",0);
 
 	getchar();
 
 	return 0;
+}
+
+#endif
+
+#if 1
+#include "Base/Function.h"
+using namespace Public::Base;
+
+void test1()
+{
+	int a = 0;
+}
+
+void test2(int a,int b)
+{
+	int i = 0;
+}
+
+int main()
+{
+	Function<void> f(test1);
+
+	f();
+
+	Function<void, int,int> f1(test2);
+	f1(2,3);
+
 }
 
 #endif

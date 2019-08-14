@@ -54,14 +54,14 @@ public:
 		struct WrokerFunc1_TMP :public WorkerFunc1
 		{
 			void run(const P1& p1) { func(p1); }
-			Function1<void, T1> func;
+			Function<void, T1> func;
 		};
 	public:
 		IWorker1() {}
 		virtual ~IWorker1() {}
 
 		template<typename T1>
-		void subscribe(void* flag, const Function1<void, T1>& func)
+		void subscribe(void* flag, const Function<void, T1>& func)
 		{
 			shared_ptr<WrokerFunc1_TMP<T1> > worktmp = make_shared<WrokerFunc1_TMP<T1> >();
 			worktmp->func = func;
@@ -81,7 +81,7 @@ public:
 
 		std::string type()
 		{
-			return typeid(Function1<void, const P1&>()).name();
+			return typeid(Function<void, const P1&>()).name();
 		}
 	};
 	template<typename P1, typename P2>
@@ -97,14 +97,14 @@ public:
 		struct WrokerFunc2_TMP :public WorkerFunc2
 		{
 			void run(const P1& p1, const P2& p2) { func(p1, p2); }
-			Function2<void, T1, T2> func;
+			Function<void, T1, T2> func;
 		};
 	public:
 		IWorker2() {}
 		virtual ~IWorker2() {}
 
 		template<typename T1, typename T2>
-		void subscribe(void* flag, const Function2<void, T1, T2>& func)
+		void subscribe(void* flag, const Function<void, T1, T2>& func)
 		{
 			shared_ptr<WrokerFunc2_TMP<T1, T2> > worktmp = make_shared<WrokerFunc2_TMP<T1, T2> >();
 			worktmp->func = func;
@@ -124,7 +124,7 @@ public:
 
 		std::string type()
 		{
-			return typeid(Function2<void, const P1&, const P2&>()).name();
+			return typeid(Function<void, const P1&, const P2&>()).name();
 		}
 	};
 	template<typename P1, typename P2, typename P3>
@@ -140,14 +140,14 @@ public:
 		struct WrokerFunc3_TMP :public WorkerFunc3
 		{
 			void run(const P1& p1, const P2& p2, const P3& p3) { func(p1, p2, p3); }
-			Function3<void, T1, T2, T3> func;
+			Function<void, T1, T2, T3> func;
 		};
 	public:
 		IWorker3() {}
 		virtual ~IWorker3() {}
 
 		template<typename T1, typename T2, typename T3>
-		void subscribe(void* flag, const Function3<void, T1, T2, T3>& func)
+		void subscribe(void* flag, const Function<void, T1, T2, T3>& func)
 		{
 			shared_ptr<WrokerFunc3_TMP<T1, T2, T3> > worktmp = make_shared<WrokerFunc3_TMP<T1, T2, T3> >();
 			worktmp->func = func;
@@ -167,7 +167,7 @@ public:
 
 		std::string type()
 		{
-			return typeid(Function3<void, const P1&, const P2&, const P3&>()).name();
+			return typeid(Function<void, const P1&, const P2&, const P3&>()).name();
 		}
 	};
 	template<typename P1, typename P2, typename P3, typename P4>
@@ -183,14 +183,14 @@ public:
 		struct WrokerFunc4_TMP :public WorkerFunc4
 		{
 			void run(const P1& p1, const P2& p2, const P3& p3, const P4& p4) { func(p1, p2, p3, p4); }
-			Function4<void, T1, T2, T3, T4> func;
+			Function<void, T1, T2, T3, T4> func;
 		};
 	public:
 		IWorker4() {}
 		virtual ~IWorker4() {}
 
 		template<typename T1, typename T2, typename T3, typename T4>
-		void subscribe(void* flag, const Function4<void, T1, T2, T3, T4>& func)
+		void subscribe(void* flag, const Function<void, T1, T2, T3, T4>& func)
 		{
 			shared_ptr<WrokerFunc4_TMP<T1, T2, T3, T4> > worktmp = make_shared<WrokerFunc4_TMP<T1, T2, T3, T4> >();
 			worktmp->func = func;
@@ -210,7 +210,7 @@ public:
 
 		std::string type()
 		{
-			return typeid(Function4<void, const P1&, const P2&, const P3&, const P4&>()).name();
+			return typeid(Function<void, const P1&, const P2&, const P3&, const P4&>()).name();
 		}
 	};
 	shared_ptr<IWorker> getAndSetWroker(int msgid, const shared_ptr<IWorker>& worker)

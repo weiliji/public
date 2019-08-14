@@ -5,7 +5,7 @@
 class Exchange:public Strand
 {
 	struct ExChangeStrandData;
-	typedef Function2<RedisValue, ExChangeStrandData*, const std::vector<RedisValue> &> MessageCommandCallback;
+	typedef Function<RedisValue, ExChangeStrandData*, const std::vector<RedisValue> &> MessageCommandCallback;
 
 	struct ExChangeStrandData :public StrandData
 	{
