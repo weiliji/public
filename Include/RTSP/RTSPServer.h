@@ -30,7 +30,7 @@ class RTSP_API RTSPServer
 {
 public:
 	struct RTSPServerInternal;
-	typedef Function<shared_ptr<RTSPServerHandler>, const shared_ptr<RTSPServerSession>&> ListenCallback;
+	typedef Function<shared_ptr<RTSPServerHandler>(const shared_ptr<RTSPServerSession>&)> ListenCallback;
 public:
 	RTSPServer(const shared_ptr<IOWorker>& worker, const std::string& useragent);
 	virtual ~RTSPServer();

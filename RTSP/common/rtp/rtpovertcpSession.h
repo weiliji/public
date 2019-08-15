@@ -5,8 +5,8 @@
 class rtpOverTcpSesssion :public RTPSession
 {
 public:
-	typedef Function<void, const shared_ptr<STREAM_TRANS_INFO>&, const char*, uint32_t > SendContrlDataCallback;
-	typedef Function<void, const shared_ptr<STREAM_TRANS_INFO>&, const RTPPackage& > SendMediaDataCallback;
+	typedef Function<void(const shared_ptr<STREAM_TRANS_INFO>&, const char*, uint32_t)> SendContrlDataCallback;
+	typedef Function<void(const shared_ptr<STREAM_TRANS_INFO>&, const RTPPackage&) > SendMediaDataCallback;
 public:
 	rtpOverTcpSesssion(const shared_ptr<STREAM_TRANS_INFO>& _transport, 
 		const SendMediaDataCallback& _sendmediacallback,const SendContrlDataCallback& _sendcontrlcallback,

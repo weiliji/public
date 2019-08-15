@@ -35,7 +35,7 @@ public:
 //int nFreamSize			帧长度
 //int nFreamType			帧类型
 //long lTimestamp			时间戳,如果是分包以第一个RTP包时间戳为准
-	typedef Function<void, FrameType, const char*, uint32_t, long> FrameCallback;
+	typedef Function<void(FrameType, const char*, uint32_t, long)> FrameCallback;
 public:
 	RTPAnalyzer(const shared_ptr<STREAM_TRANS_INFO>& transportinfo,const FrameCallback& framcallback);
 	~RTPAnalyzer();
@@ -59,7 +59,7 @@ private:
 class RTSP_API RTPBuilder
 {
 public:
-	typedef Function<void,const RTPPackage&> RTPPackageCallback;
+	typedef Function<void(const RTPPackage&)> RTPPackageCallback;
 public:
 	RTPBuilder(const shared_ptr<MEDIA_INFO>& rtspmedia,const RTPPackageCallback &callback);
 

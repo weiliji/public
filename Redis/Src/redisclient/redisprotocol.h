@@ -470,7 +470,7 @@ private:
 class RedisBuilder
 {
 public:
-	typedef Function<void, const String&> BuildCallback;
+	typedef Function<void(const String&)> BuildCallback;
 public:
 	static void build(const RedisValue &items, BuildCallback& callback)
 	{

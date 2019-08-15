@@ -12,7 +12,7 @@ struct HTTPServrManager;
 class HTTP_API HTTPServerRequest
 {
 public:
-	typedef Function<void,const shared_ptr<HTTPServerRequest>&, const std::string&> DisconnectCallback;
+	typedef Function<void(const shared_ptr<HTTPServerRequest>&, const std::string&)> DisconnectCallback;
 public:
 	HTTPServerRequest(const shared_ptr<HTTPHeader>& header,const shared_ptr<ReadContent>& content,const shared_ptr<Socket>& sock);
 	virtual ~HTTPServerRequest();
@@ -72,8 +72,8 @@ class HTTP_API WebSocketServerSession
 {
 	friend struct HTTPServrManager;
 public:
-	typedef Function<void, WebSocketServerSession*> DisconnectCallback;
-	typedef Function<void, WebSocketServerSession*, const std::string&, WebSocketDataType> RecvDataCallback;
+	typedef Function<void( WebSocketServerSession*)> DisconnectCallback;
+	typedef Function<void(WebSocketServerSession*, const std::string&, WebSocketDataType)> RecvDataCallback;
 public:
 	WebSocketServerSession(const shared_ptr<HTTPCommunication>& commuSession);
 	virtual ~WebSocketServerSession();
@@ -101,8 +101,8 @@ private:
 class HTTP_API HTTPServer
 {
 public:
-	typedef Function<void, const shared_ptr<HTTPServerSession>&> HTTPCallback;
-	typedef Function<void, const shared_ptr<WebSocketServerSession>&> WebsocketCallback;
+	typedef Function<void(const shared_ptr<HTTPServerSession>&)> HTTPCallback;
+	typedef Function<void(const shared_ptr<WebSocketServerSession>&)> WebsocketCallback;
 public:
 	HTTPServer(const shared_ptr<IOWorker>& worker, const std::string& useragent);
 	~HTTPServer();	

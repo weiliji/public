@@ -27,7 +27,7 @@ class BASE_API ThreadPool
 public:
 	struct ThreadPoolInternal;
 	///线程池执行回调函数
-	typedef Function<void, void*> Proc;
+	typedef Function<void(void*)> Proc;
 public:
 	/// 析构函数，创建和销毁线程池
 	/// param[in] type    线程池工作模式

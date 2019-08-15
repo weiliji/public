@@ -20,8 +20,8 @@ public:
 		int contrlChannel;
 	};
 public:
-	typedef Function<void, const shared_ptr<RTSPCommandInfo>&> CommandCallback;
-	typedef Function<void> DisconnectCallback;
+	typedef Function<void(const shared_ptr<RTSPCommandInfo>&)> CommandCallback;
+	typedef Function<void()> DisconnectCallback;
 
 public:
 	RTSPProtocol(const shared_ptr<Socket>& sock, const CommandCallback& cmdcallback, const DisconnectCallback& disconnectCallback,bool server)

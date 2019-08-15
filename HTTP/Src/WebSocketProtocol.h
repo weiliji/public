@@ -101,7 +101,7 @@ class WebSocketProtocol
 		SendItemInfo() :havesendlen(0) {}
 	};
 public:
-	typedef Function<void, const std::string&, WebSocketDataType> ParseDataCallback;
+	typedef Function<void(const std::string&, WebSocketDataType)> ParseDataCallback;
 public:
 	WebSocketProtocol(bool client,const ParseDataCallback& callback):isClient(client),datacallback(callback)
 	{

@@ -12,7 +12,7 @@ namespace Public {
 namespace Base {
 
 //命令回调函数
-typedef Function<void, int, char**> ConsoleCmdCallback;
+typedef Function<void(int,const char**)> ConsoleCmdCallback;
 
 class BASE_API ConsoleCommand : public Thread
 {
@@ -52,7 +52,7 @@ protected:
 private:
 	//分发命令
 	//?,help,exit命令由内部处理，其他命令使用回调函数由用户处理
-	bool dispatchCmd(const int argc, char** argv, ConsoleCmdCallback func);
+	bool dispatchCmd(const int argc,const char** argv, ConsoleCmdCallback func);
 
 	//分离命令和命令参数
 	bool separatePara(const char* command, int& argc, char** argv);

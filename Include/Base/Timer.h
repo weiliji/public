@@ -27,7 +27,7 @@ class BASE_API Timer
 	Timer(Timer const&);
 	Timer& operator=(Timer const&);
 public:
-	typedef Function<void, unsigned long> Proc;
+	typedef Function<void(unsigned long)> Proc;
 
 	/// 构造函数
 	/// \param name [in] 定时器名称

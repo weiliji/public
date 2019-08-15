@@ -143,7 +143,7 @@ bool ConsoleCommand::parseCmd(const char* command)
 			{
 				if (argv[0] == (*it)->name)
 				{
-					dispatchCmd(argc, argv, (*it)->cbfunc);
+					dispatchCmd(argc, (const char**)argv, (*it)->cbfunc);
 					ret = true;
 					break;
 				}
@@ -171,7 +171,7 @@ void ConsoleCommand::threadProc()
 	runing();
 }
 
-bool ConsoleCommand::dispatchCmd(const int argc, char** argv, ConsoleCmdCallback func)
+bool ConsoleCommand::dispatchCmd(const int argc, const char** argv, ConsoleCmdCallback func)
 {
 	if(NULL != argv)
 	{

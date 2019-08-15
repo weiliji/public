@@ -34,6 +34,7 @@ namespace Base {
 /// void test()
 /// {
 /// 	Function<int, int> f1(g);
+/// 	Function<int(int)> f1(g);
 /// 	Function<int, int> f2(&G::g, &gg);
 /// 	assert(f1(1) = 2);
 /// 	assert(f2(1) = 3);
@@ -46,9 +47,11 @@ namespace Base {
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////函数定义///////////////////////////////////////////
 
-template <typename R,typename ... ARGS>
-class Function
+template <typename R, typename... ARGS>
+class _FunctionImpl
 {
+public:
+
 	typedef R(*PTR_FUNCTION)(ARGS ...);
 
 	struct IDENT
@@ -155,54 +158,11 @@ class Function
 	};
 
 	shared_ptr<FUNCTION_OBJECT> _impl;
-public:
+protected:
 	/// 缺省构造函数
-	Function( ){}
-
-	/// 接受成员函数指针构造函数，将类的成员函数和类对象的指针绑定并保存。
-	/// \param [in] f 类的成员函数
-	/// \param [in] o 类对象的指针
-	template<typename O>
-	Function(R(O::*f)(ARGS ...), const O * o)
-	{
-		bind(f,o);
-	}
-
-	template<typename O>
-	Function(R(O::*f)(ARGS ...), const shared_ptr<O>& ptr)
-	{
-		bind(f, ptr);
-	}
-
-	template<typename O>
-	Function(R(O::*f)(ARGS ...), const weak_ptr<O>& ptr)
-	{
-		bind(f, ptr);
-	}
-
-	/// 接受普通函数指针构造函数，保存普通函数指针。
-	/// \param [in] f 函数指针
-	Function(R(*f)(ARGS ...))
-	{
-		bind(f);
-	}
-	Function(const Function& f)
-	{
-		swap(f);		
-	}
-
-	~Function()
-	{
-		realse();
-	}
-	/// 拷贝构造函数
-	/// \param [in] f 源函数指针对象
-	Function& operator=(const Function& f)
-	{
-		swap(f);
-
-		return *this;
-	}
+	_FunctionImpl( ){}
+	~_FunctionImpl() {}
+public:
 	/// 将类的成员函数和类对象的指针绑定并保存。其他类型的函数指针可以=运算符和隐式转换直接完成。
 	template<typename O>
 	void bind(R(O::*f)(ARGS ...), const O * o)
@@ -260,33 +220,7 @@ public:
 	bool operator!() const
 	{
 		return !(bool(*this));
-	}
-
-	bool operator==(const Function& tpl) const
-	{
-		shared_ptr<FUNCTION_OBJECT> tmp = _impl;
-		shared_ptr<FUNCTION_OBJECT> tmp1 = tpl._impl;
-		if (tmp == NULL && tmp1 == NULL)
-		{
-			return true;
-		}
-		if (tmp == NULL || tmp1 == NULL)
-		{
-			return false;
-		}
-		return tmp->ident() == tmp1->ident();
-	}
-
-	bool operator<(const Function& tpl) const
-	{
-		shared_ptr<FUNCTION_OBJECT> tmp = _impl;
-		shared_ptr<FUNCTION_OBJECT> tmp1 = tpl._impl;
-		if (tmp == NULL || tmp1 == NULL)
-		{
-			return false;
-		}
-		return tmp->ident() < tmp1->ident();
-	}
+	}	
 
 	/// 重载()运算符，可以以函数对象的形式来调用保存的函数指针。
 	inline R operator()(ARGS ... a)
@@ -305,12 +239,141 @@ public:
 	{
 		_impl = NULL;
 	}
+};
+
+template <typename R, typename... ARGS>
+class Function:public _FunctionImpl<R,ARGS ...>
+{
+public:
+	Function() {}
+
+	/// 接受成员函数指针构造函数，将类的成员函数和类对象的指针绑定并保存。
+	/// \param [in] f 类的成员函数
+	/// \param [in] o 类对象的指针
+	template<typename O>
+	Function(R(O::*f)(ARGS ...), const O * o)
+	{
+		bind(f, o);
+	}
+
+	template<typename O>
+	Function(R(O::*f)(ARGS ...), const shared_ptr<O>& ptr)
+	{
+		bind(f, ptr);
+	}
+
+	template<typename O>
+	Function(R(O::*f)(ARGS ...), const weak_ptr<O>& ptr)
+	{
+		bind(f, ptr);
+	}
+
+	/// 接受普通函数指针构造函数，保存普通函数指针。
+	/// \param [in] f 函数指针
+	Function(R(*f)(ARGS ...))
+	{
+		bind(f);
+	}
+	Function(const Function& f)
+	{
+		swap(f);
+	}
+
+	~Function()
+	{
+		realse();
+	}
+	/// 拷贝构造函数
+	/// \param [in] f 源函数指针对象
+	Function& operator=(const Function& f)
+	{
+		swap(f);
+
+		return *this;
+	}
+
+	bool operator<(const Function& tpl) const
+	{
+		shared_ptr<FUNCTION_OBJECT> tmp = _impl;
+		shared_ptr<FUNCTION_OBJECT> tmp1 = tpl._impl;
+		if (tmp == NULL || tmp1 == NULL)
+		{
+			return false;
+		}
+		return tmp->ident() < tmp1->ident();
+	}
 	void swap(const Function& f)
 	{
 		_impl = f._impl;
 	}
 };
 
+template <typename R, typename... ARGS>
+class Function<R(ARGS...)> :public _FunctionImpl<R, ARGS ...>
+{
+public:
+	Function() {}
+	
+	/// 接受成员函数指针构造函数，将类的成员函数和类对象的指针绑定并保存。
+	/// \param [in] f 类的成员函数
+	/// \param [in] o 类对象的指针
+	template<typename O>
+	Function(R(O::*f)(ARGS ...), const O * o)
+	{
+		bind(f, o);
+	}
+
+	template<typename O>
+	Function(R(O::*f)(ARGS ...), const shared_ptr<O>& ptr)
+	{
+		bind(f, ptr);
+	}
+
+	template<typename O>
+	Function(R(O::*f)(ARGS ...), const weak_ptr<O>& ptr)
+	{
+		bind(f, ptr);
+	}
+
+	/// 接受普通函数指针构造函数，保存普通函数指针。
+	/// \param [in] f 函数指针
+	Function(R(*f)(ARGS ...))
+	{
+		bind(f);
+	}
+	Function(const Function& f)
+	{
+		swap(f);
+	}
+
+	~Function()
+	{
+		realse();
+	}
+	/// 拷贝构造函数
+	/// \param [in] f 源函数指针对象
+	Function& operator=(const Function& f)
+	{
+		swap(f);
+
+		return *this;
+	}
+
+	bool operator<(const Function& tpl) const
+	{
+		shared_ptr<FUNCTION_OBJECT> tmp = _impl;
+		shared_ptr<FUNCTION_OBJECT> tmp1 = tpl._impl;
+		if (tmp == NULL || tmp1 == NULL)
+		{
+			return false;
+		}
+		return tmp->ident() < tmp1->ident();
+	}
+	void swap(const Function& f)
+	{
+		_impl = f._impl;
+	}
+};
 
 }
 }

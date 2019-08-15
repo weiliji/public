@@ -275,4 +275,4 @@ struct INTERLEAVEDFRAME
 	unsigned int rtp_len : 16;
 };
 
-typedef Function<uint32_t> AllockUdpPortCallback;
+typedef Function<uint32_t()> AllockUdpPortCallback;

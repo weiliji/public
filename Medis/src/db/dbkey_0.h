@@ -12,7 +12,7 @@ using namespace Public::Base;
 using namespace Public::Network;
 
 
-typedef Function<RedisValue, const std::vector<RedisValue> &> CommandCallback;
+typedef Function<RedisValue(const std::vector<RedisValue> &)> CommandCallback;
 
 class DBKey:public Strand
 {

@@ -53,7 +53,7 @@ class BASE_API ShareMEMBuffer
 {
 	struct ShareMEMBufferInternal;
 public:
-	typedef Function<void,void*,int>		ReadMEMCallback;
+	typedef Function<void(void*,int)>		ReadMEMCallback;
 private:
 	ShareMEMBuffer(const std::string& shareName, int createBlock, int maxBlock, int rblockSize, int bocknum, int memMaxSize, bool create, void* startAddr, const ReadMEMCallback& callback);
 public:

@@ -13,9 +13,9 @@ using namespace Public::Network;
 
 namespace redisclient{
 
-typedef Function<void> ConnectCallback;
-typedef Function<void> DisconnectCallback;
-typedef Function<void, const RedisValue&> CmdCallback;
+typedef Function<void()> ConnectCallback;
+typedef Function<void()> DisconnectCallback;
+typedef Function<void(const RedisValue&)> CmdCallback;
 
 typedef CmdCallback SubcribeHandler;
 

@@ -143,4 +143,4 @@ private:
 };
 
 
-typedef Function<void, void*, const RedisValue&> CmdResultCallback;
+typedef Function<void(void*, const RedisValue&)> CmdResultCallback;

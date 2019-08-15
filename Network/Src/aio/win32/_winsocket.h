@@ -22,7 +22,10 @@ public:
 		setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (const char*)&flag, sizeof(flag));
 	}
 
-	~_SystemSocket() {}
+	~_SystemSocket() 
+	{
+		disconnect();
+	}
 
 	virtual bool creatSocket(NetType type)
 	{

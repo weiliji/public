@@ -14,7 +14,7 @@ class Redis_Client;
 class REDIS_API RedisMQ
 {
 public:
-	typedef Function<void,const std::string&,const std::string&>  MessageHandler;
+	typedef Function<void(const std::string&,const std::string&)>  MessageHandler;
 public:
 	RedisMQ(const shared_ptr<IOWorker>& _worker, const NetAddr& addr, const std::string& password, int index);
 	~RedisMQ();

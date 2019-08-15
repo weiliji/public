@@ -135,7 +135,7 @@ public:
 	};
 
 	//关闭事件回调通知函数
-	typedef Function<void,void*,CloseEvent> 	closeEventCallback;
+	typedef Function<void(void*,CloseEvent)> 	closeEventCallback;
 public:
 	/// 打印 Base库 版本信息
 	static void  printVersion();

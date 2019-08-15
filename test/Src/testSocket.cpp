@@ -198,7 +198,7 @@ int main(int args,const char* argv[])
 #endif
 
 
-#if 1
+#if 0
 
 class SocketInitObjec
 {

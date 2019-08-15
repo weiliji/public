@@ -26,7 +26,7 @@ namespace Network{
 class NETWORK_API IOWorker
 {
 public:
-	typedef Function<void, void*> EventCallback;
+	typedef Function<void(void*)> EventCallback;
 public:
 	class NETWORK_API ThreadNum
 	{
@@ -89,28 +89,28 @@ public:
 public:
 	/// socket监听时有accept事件回调方法，第一个参数表示监听socket自身，第二个表示新构造的socket.需要外部释放
 	/// 回调定义参考：void acceptCallbackFunc(Socket* oldSock,Socket* newSock);
-	typedef Function<void, const weak_ptr<Socket>& /*oldSock*/, const shared_ptr<Socket>& /*newSock*/> AcceptedCallback;
+	typedef Function<void(const weak_ptr<Socket>& /*oldSock*/, const shared_ptr<Socket>& /*newSock*/)> AcceptedCallback;
 
 	/// socket异步连接事件回调方法,第一个参数表示连接socket自身
 	///回调定义参考：void connectCallbackFunc(Socket* connectSock);
-	typedef Function<void, const weak_ptr<Socket>& /*connectSock*/,bool,const std::string&> ConnectedCallback;
+	typedef Function<void(const weak_ptr<Socket>& /*connectSock*/,bool,const std::string&)> ConnectedCallback;
 
 	/// socket异步断开事件回调方法,int 第一个参数表示连接socket自身，第二个表示描述断开错误描述，客户端，服务端均使用该事件
 	/// 当socket第一次连接成功后，如果10秒无数据，会主动断开连接，错误，防止 tcp恶意连接，只针对accept产生的socket
 	///回调定义参考：void disconnectCallbackFunc(Socket* connectionSock,const char* disconectErrorInfo);
-	typedef Function<void, const weak_ptr<Socket>& /*connectSock*/,const std::string&> DisconnectedCallback;
+	typedef Function<void(const weak_ptr<Socket>& /*connectSock*/,const std::string&)> DisconnectedCallback;
 
 	// socket发生received事件回调方法，第一个参数表示连接socket自身，第二个表示实际接收的socket数据长度.
 	///回调定义参考：void recvCallbackFunc(Socket* sock,const char* recvBuffer,int recvlen);
-	typedef Function<void, const weak_ptr<Socket>& /*sock*/,const char*, int> ReceivedCallback;
+	typedef Function<void(const weak_ptr<Socket>& /*sock*/,const char*, int)> ReceivedCallback;
 
 	// socket发生send事件回调方法，第一个参数表示连接socket自身，第二个表示实际发送的socket数据长度.
 	///回调定义参考：void sendCallbackFunc(Socket* sock,const char* sendBuffer,int sendlen);
-	typedef Function<void, const weak_ptr<Socket>& /*sock*/,const char*, int> SendedCallback;
+	typedef Function<void(const weak_ptr<Socket>& /*sock*/,const char*, int)> SendedCallback;
 		
 	/// socket发送udp的recvfrom事件回调方法，第一个参数表示socket自身，第二三个参数表示接收的数据信息地址和长度，第四个参数表示数据发送方ip
 	///回调定义参考：void recvfromCallbackFunc(Socket* sock,const char* recvBuffer, int recvlen ,const NetAddr& otheraddr);
-	typedef Function<void, const weak_ptr<Socket>& /*sock*/,const char*, int,const NetAddr&> RecvFromCallback;
+	typedef Function<void(const weak_ptr<Socket>& /*sock*/,const char*, int,const NetAddr&)> RecvFromCallback;
 public:
 	Socket(const shared_ptr<IOWorker>& _worker):worker(_worker){}
 	virtual ~Socket(){}

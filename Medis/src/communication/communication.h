@@ -7,7 +7,7 @@ using namespace Public::Base;
 using namespace Public::Network;
 
 
-typedef Function<void, void*> ConnectionDisconnectCallback;
+typedef Function<void(void*)> ConnectionDisconnectCallback;
 
 class Communication
 {
