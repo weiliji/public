@@ -3,11 +3,11 @@
 //  All Rights Reserved.
 //
 //	Description:
-//	$Id: FuncTempl.h 3 2013-01-21 06:57:38Z  $
+//	$Id: Function.h 3 2013-01-21 06:57:38Z  $
 //
 #pragma  once
 #include "Base/Shared_ptr.h"
-
+#include "Base/BaseTemplate.h"
 namespace Public {
 namespace Base {
 
@@ -15,8 +15,8 @@ namespace Base {
 /// \brief 函数指针类模块
 ///
 /// 支持普通函数指针和成员函数指针的保存，比较，调用等操作。对于成员函数，
-/// 要求类只能是普通类或者是单继承的类，不能是多继承或虚继承的类。FUNCTION_TEMPL是一个宏，
-/// 根据参数个数会被替换成Function，用户通过FunctionN<R, T1, T2, T3,..,TN>方式来使用，
+/// 要求类只能是普通类或者是单继承的类，不能是多继承或虚继承的类。
+/// 根据参数个数会被替换成Function，用户通过Function<R, T1, T2, T3,..,TN>方式来使用，
 /// R表示返回值类型，TN表示参数类型， N表示函数参数个数，目前最大参数为6。示例如下：
 /// \code
 /// int g(int x)
@@ -44,29 +44,6 @@ namespace Base {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-
-//默认返回值的特例化处理
-template<class R>
-struct FUNCTION_DEFAULT_RETURN
-{
-	static R getDefaultValue()
-	{
-		R* ptr = new(std::nothrow) R();
-		R tmp(*ptr);
-		delete ptr;
-		return tmp;
-	}
-};
-
-template<>
-struct FUNCTION_DEFAULT_RETURN<void>
-{
-	static void getDefaultValue()
-	{
-		return void();
-	}
-};
-
 /////////////////////////////////////函数定义///////////////////////////////////////////
 
 template <typename R,typename ... ARGS>
@@ -114,7 +91,7 @@ class Function
 
 		virtual R invoke(ARGS ... a)
 		{
-			if(f == NULL) return FUNCTION_DEFAULT_RETURN<R>::getDefaultValue();
+			if(f == NULL) return INIT_VALUE<R>::Value();
 
 			return f(a ...);
 		}
@@ -136,7 +113,8 @@ class Function
 		typedef R(O::*MEM_FUNCTION)(ARGS ...);
 
 		FUNCTION_MEMBER(MEM_FUNCTION _f, const O * _o):f(_f),o((O *)_o){}
-		FUNCTION_MEMBER(MEM_FUNCTION _f, const shared_ptr<O>& _ptr) :f(_f), o(NULL), ptr(_ptr) {}
+		FUNCTION_MEMBER(MEM_FUNCTION _f, const shared_ptr<O>& _sptr1) :f(_f), o(NULL), wptr(shared_ptr<O>()), sptr(_sptr1) {}
+		FUNCTION_MEMBER(MEM_FUNCTION _f, const weak_ptr<O>& _wptr) :f(_f), o(NULL),wptr(_wptr),sptr(NULL){}		
 
 
 		virtual bool empty() const { return f == NULL; }
@@ -144,12 +122,14 @@ class Function
 		virtual R invoke(ARGS ... a)
 		{
 			O* optr = o;
-			shared_ptr<O> ptrtmp = ptr.lock();
+			shared_ptr<O> ptrtmp = wptr.lock();
+
+			if (ptrtmp == NULL) ptrtmp = sptr;
 			if (ptrtmp != NULL) optr = ptrtmp.get();
 
 			if (optr == NULL || f == NULL)
 			{
-				return FUNCTION_DEFAULT_RETURN<R>::getDefaultValue();
+				return INIT_VALUE<R>::Value();
 			}
 
 			return (optr->*f)(a ...);
@@ -159,7 +139,8 @@ class Function
 			IDENT identi;
 			identi.func = &f;
 			identi.obj = o;
-			shared_ptr<O> tmp = ptr.lock();
+			shared_ptr<O> tmp = wptr.lock();
+			if (tmp == NULL) tmp = sptr;
 			if (tmp != NULL)
 			{
 				identi.obj = tmp.get();
@@ -169,7 +150,8 @@ class Function
 
 		MEM_FUNCTION	f;
 		O*				o;
-		weak_ptr<O>		ptr;
+		weak_ptr<O>		wptr;
+		shared_ptr<O>   sptr;
 	};
 
 	shared_ptr<FUNCTION_OBJECT> _impl;
@@ -189,7 +171,13 @@ public:
 	template<typename O>
 	Function(R(O::*f)(ARGS ...), const shared_ptr<O>& ptr)
 	{
-		bind(f,ptr);
+		bind(f, ptr);
+	}
+
+	template<typename O>
+	Function(R(O::*f)(ARGS ...), const weak_ptr<O>& ptr)
+	{
+		bind(f, ptr);
 	}
 
 	/// 接受普通函数指针构造函数，保存普通函数指针。
@@ -250,6 +238,17 @@ public:
 		}
 		_impl = shared_ptr<FUNCTION_MEMBER<O> >(new FUNCTION_MEMBER<O>(f, ptr));
 	}
+	template<typename O>
+	void bind(R(O::*f)(ARGS ...), const weak_ptr<O>& wptr)
+	{
+		realse();
+
+		if (f == NULL || wptr.lock() == NULL)
+		{
+			return;
+		}
+		_impl = shared_ptr<FUNCTION_MEMBER<O> >(new FUNCTION_MEMBER<O>(f, wptr));
+	}
 	operator bool() const
 	{
 		shared_ptr<FUNCTION_OBJECT> tmp = _impl;
@@ -296,7 +295,7 @@ public:
 
 		if (tmp == NULL)
 		{
-			return FUNCTION_DEFAULT_RETURN<R>::getDefaultValue();
+			return INIT_VALUE<R>::Value();
 		}
 
 		return tmp->invoke(a ...);

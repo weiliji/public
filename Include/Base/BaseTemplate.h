@@ -48,6 +48,30 @@ template<class T> void Init_Array( T *t, int count, T value )
 }
 
 
+
+//默认返回值的特例化处理
+template<class R>
+struct INIT_VALUE
+{
+	static R Value()
+	{
+		R* ptr = new(std::nothrow) R();
+		R tmp(*ptr);
+		delete ptr;
+		return tmp;
+	}
+};
+
+template<>
+struct INIT_VALUE<void>
+{
+	static void Value()
+	{
+		return void();
+	}
+};
+
+
 } // namespace Base
 } // namespace Public
 

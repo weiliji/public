@@ -198,7 +198,7 @@ int main(int args,const char* argv[])
 #endif
 
 
-#if 0
+#if 1
 
 class SocketInitObjec
 {
@@ -453,15 +453,17 @@ struct SocketObject
 			int errorno = GetLastError();
 			if (errorno != WSA_IO_PENDING)
 			{
-				assert(0);
+				exit(0);
 			}
 		}
 	}
 };
 
-void IOCPThreadProc(Thread* t, void* param)
+bool iocpthreadworking = true;
+
+DWORD IOCPThreadProc(void* param)
 {
-	while (t->looping())
+	while (iocpthreadworking)
 	{
 		DWORD bytes = 0;
 		ULONG_PTR key = 0;
@@ -471,10 +473,12 @@ void IOCPThreadProc(Thread* t, void* param)
 
 		SocketObject* sockobj = CONTAINING_RECORD(poverlaped, SocketObject, overlped);
 
-		if (sockobj == NULL || poverlaped == NULL) return;
+		if (sockobj == NULL || poverlaped == NULL) continue;
 
 		sockobj->postRecv();
 	}
+
+	return 0;
 }
 
 
@@ -482,13 +486,9 @@ void runClient2()
 {
 	iocp = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
 
-	std::list<shared_ptr<Thread> > threadlist;
 	for (int i = 0; i < MAXIOCPTHREADNUM; i++)
 	{
-		shared_ptr<Thread> t = ThreadEx::creatThreadEx("IOCPThreadProc", IOCPThreadProc,NULL, Thread::priorTop, Thread::policyRealtime);
-		t->createThread();
-
-		threadlist.push_back(t);
+		CreateThread(NULL, 0, IOCPThreadProc, 0, 0, NULL);
 	}
 
 	std::list<shared_ptr<SocketObject> >socklist;
@@ -502,16 +502,11 @@ void runClient2()
 
 	getchar();
 
-	for (std::list<shared_ptr<Thread> >::iterator iter = threadlist.begin(); iter != threadlist.end(); iter++)
-	{
-		(*iter)->cancelThread();
-	}
+	iocpthreadworking = false;
 
 	for (int i = 0; i < MAXIOCPTHREADNUM; i++)
 		::PostQueuedCompletionStatus(iocp, 0, NULL, NULL);
-
-	threadlist.clear();
-
+	
 	if (iocp)
 		CloseHandle(iocp);
 	iocp = NULL;

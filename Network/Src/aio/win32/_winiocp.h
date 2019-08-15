@@ -33,12 +33,6 @@ public:
 
 class _SystemPoll :public _Pool,public enable_shared_from_this<_SystemPoll>
 {
-	struct RunParam
-	{
-		DWORD bytes;
-		BOOL ret ;
-		WinEvent* winevent;
-	};
 public:
 	_SystemPoll(uint32_t maxthreadnum):_Pool(1)
 	{
@@ -51,13 +45,9 @@ public:
 		int cpunum = Host::getProcessorNum();
 
 		for (int i = 0; i < maxthreadnum; i++)
-//		for (int i = 0; i < 1; i++)
 		{
 			shared_ptr<Thread> t = ThreadEx::creatThreadEx("_SystemPoll",ThreadEx::Proc(&_SystemPoll::threadRunProc, this), NULL, Thread::priorTop, Thread::policyRealtime);
 			t->createThread();
-
-			int mask = 0x01 << i;
-	//		SetThreadAffinityMask((HANDLE)t->handle(), 0x01 << i);
 
 			threadlist.push_back(t);
 		}
@@ -93,8 +83,6 @@ public:
 	{
 		if (iocp == NULL) return;
 
-		ThreadPool::Proc tpfun(&_SystemPoll::threadPoolRunProc, this);
-
 		while (t->looping())
 		{
 			DWORD bytes = 0;
@@ -107,25 +95,8 @@ public:
 
 			if (winevent == NULL || poverlaped == NULL) return;
 
-			//RunParam* runparam = new RunParam;
-			//runparam->bytes = bytes;
-			//runparam->winevent = winevent;
-			//runparam->ret = ret;
-
-			//dispatch(tpfun, runparam);
-
 			winevent->doEvent1((DWORD)bytes, ret);
 		}
-	}
-	void threadPoolRunProc(void* param)
-	{
-		RunParam* runparam = (RunParam*)param;
-
-		if (runparam == NULL) return;
-
-		runparam->winevent->doEvent1(runparam->bytes, runparam->ret);
-
-		SAFE_DELETE(runparam);
 	}
 private:
 	HANDLE	iocp;
