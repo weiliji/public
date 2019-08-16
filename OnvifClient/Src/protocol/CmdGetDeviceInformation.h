@@ -5,24 +5,17 @@
 class CMDGetDeviceInformation :public CmdObject
 {
 public:
-	CMDGetDeviceInformation()
+	CMDGetDeviceInformation():CmdObject(URL_ONVIF_DEVICE_SERVICE)
 	{
-		action = "http://www.onvif.org/ver10/device/wsdl/GetDeviceInformation";
 	}
 	virtual ~CMDGetDeviceInformation() {}
 
 	virtual std::string build(const URL& URL)
 	{
-		stringstream stream;
+		XMLObject::Child& getdeviceinfo = body().addChild("GetDeviceInformation");
+		getdeviceinfo.attribute("xmlns", "http://www.onvif.org/ver10/device/wsdl");
 
-		stream << "<s:Envelope " << onvif_xml_ns << ">"
-			<< buildHeader(URL)
-			<< "<s:Body xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">"
-			<< "<GetDeviceInformation xmlns=\"http://www.onvif.org/ver10/device/wsdl\"/>"
-			<< "</s:Body>"
-			<< "</s:Envelope>";
-
-		return stream.str();
+		return CmdObject::build(URL);
 	}
 	OnvifClientDefs::Info devinfo;
 

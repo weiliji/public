@@ -6,40 +6,52 @@
 class CmdContinuousMove :public CmdObject
 {
 public:
-	CmdContinuousMove(const OnvifClientDefs::PTZCtrl& _ptz,const std::string& _token):ptzctrl(_ptz),token(_token) 
+	CmdContinuousMove(const OnvifClientDefs::PTZCtrl& _ptz,const std::string& _token):CmdObject(URL_ONVIF_PTZ),ptzctrl(_ptz),token(_token)
 	{
-		action = "http://www.onvif.org/ver20/ptz/wsdl/ContinuousMove";
-
-		requesturl = PTZREQUESTURL;
 	}
 	virtual ~CmdContinuousMove() {}
 
 	virtual std::string build(const URL& URL)
 	{
-		stringstream stream;
+		XMLObject::Child& continuousmove = body().addChild("ContinuousMove");
 
-		stream << "<s:Envelope "<< onvif_xml_ns  << ">"
-			<< buildHeader(URL)
-			<< "<s:Body xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">"
-			<< "<ContinuousMove xmlns=\"http://www.onvif.org/ver20/ptz/wsdl\">"
-			<< "<ProfileToken>" << token << "</ProfileToken>"
-			<< "<Velocity>";
-		if (ptzctrl.ctrlType == OnvifClientDefs::PTZCtrl::PTZ_CTRL_PAN)
 		{
-			stream << "<PanTilt x=\""<< ptzctrl.panTiltX << "\" y=\"" << ptzctrl.panTiltY << "\" ";
+			continuousmove.attribute("xmlns", "http://www.onvif.org/ver20/ptz/wsdl");
 		}
-		else if (ptzctrl.ctrlType == OnvifClientDefs::PTZCtrl::PTZ_CTRL_ZOOM)
+
+		//add token
 		{
-			stream << "<Zoom x=\""<< ptzctrl.zoom<<"\" ";
+			continuousmove.addChild("ProfileToken", token);
 		}
-		stream << "xmlns=\"http://www.onvif.org/ver10/schema\" />"
-			<< "</Velocity>";
+
+		//add velocity
+		{
+			XMLObject::Child& velocity = continuousmove.addChild("Velocity");
+
+			if (ptzctrl.ctrlType == OnvifClientDefs::PTZCtrl::PTZ_CTRL_PAN)
+			{
+				XMLObject::Child& pantilt = velocity.addChild("PanTilt");
+
+				pantilt.attribute("x", Value(ptzctrl.panTiltX).readString());
+				pantilt.attribute("y", Value(ptzctrl.panTiltY).readString());
+				pantilt.attribute("xmlns", "http://www.onvif.org/ver10/schema");
+			}
+			else if (ptzctrl.ctrlType == OnvifClientDefs::PTZCtrl::PTZ_CTRL_ZOOM)
+			{
+				XMLObject::Child& zoom = velocity.addChild("Zoom");
+				zoom.attribute("x", Value(ptzctrl.zoom).readString());
+				zoom.attribute("xmlns", "http://www.onvif.org/ver10/schema");
+			}
+		}
+		//add timeout
 		if (ptzctrl.duration != 0)
-			stream << "<Timeout>PT" << ptzctrl.duration << "S</Timeout>";
-		stream << "</ContinuousMove>"
-			<< "</s:Body></s:Envelope>";
+		{
+			XMLObject::Child& timeout = continuousmove.addChild("Timeout");
 
-		return stream.str();
+			timeout.data("PT"+Value(ptzctrl.duration).readString()+"S");
+		}
+
+		return CmdObject::build(URL);
 	}
 
 	virtual bool parse(const XMLObject::Child& body)

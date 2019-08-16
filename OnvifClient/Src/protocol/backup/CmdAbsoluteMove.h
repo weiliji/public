@@ -2,7 +2,7 @@
 #define __ONVIFPROTOCOL_CmdGetStreamURL_H__AbsoluteMove
 #include "CmdObject.h"
 
-
+#if 0
 class CmdAbsoluteMove :public CmdObject
 {
 public:
@@ -37,6 +37,7 @@ private:
 	std::string token;
 };
 
+#endif
 
 
 #endif //__ONVIFPROTOCOL_H__

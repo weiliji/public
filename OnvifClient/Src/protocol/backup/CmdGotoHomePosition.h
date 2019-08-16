@@ -2,6 +2,7 @@
 #define __ONVIFPROTOCOL_CmdGetStreamURL_H__GotoHomePosition
 #include "CmdObject.h"
 
+#if 0
 
 class CmdGotoHomePosition :public CmdObject
 {
@@ -27,6 +28,6 @@ public:
 	virtual bool parse(const XMLObject::Child& body) = 0;
 };
 
-
+#endif
 
 #endif //__ONVIFPROTOCOL_H__

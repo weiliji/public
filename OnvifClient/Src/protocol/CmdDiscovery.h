@@ -6,30 +6,35 @@
 class CmdDiscovery :public CmdObject
 {
 public:
-	CmdDiscovery()
+	CmdDiscovery():CmdObject("")
 	{
-		action = "http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe";
 	}
 	virtual ~CmdDiscovery() {}
 
 	virtual std::string build(const URL& URL)
 	{
-		stringstream stream;
+		{
+			envelop().attribute("xmlns:a", "http://schemas.xmlsoap.org/ws/2004/08/addressing");
+			body().removeAttribute("xmlns:xsi");
+			body().removeAttribute("xmlns:xsd");
+		}	
 
-		stream << "<s:Envelope xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:a=\"http://www.w3.org/2005/08/addressing\">"
-			<< "<s:Header>"
-			<< "<a:Action s:mustUnderstand=\"1\">http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe</a:Action>"
-			<< "<a:MessageID>uuid:" << Guid::createGuid().getStringStream() << "</a:MessageID>"
-			<< "<a:ReplyTo>"
-			<< "<a:Address>http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous</a:Address>"
-			<< "</a:ReplyTo>"
-			<< "<a:To s:mustUnderstand=\"1\">urn:schemas-xmlsoap-org:ws:2005:04:discovery</a:To>"
-			<< "</s:Header>"
-			<< "<s:Body><Probe xmlns=\"http://schemas.xmlsoap.org/ws/2005/04/discovery\">"
-			<< "<d:Types xmlns:d=\"http://schemas.xmlsoap.org/ws/2005/04/discovery\" xmlns:dp0=\"http://www.onvif.org/ver10/network/wsdl\">dp0:NetworkVideoTransmitter</d:Types>"
-			<< "</Probe></s:Body></s:Envelope>";
 
-		return stream.str();
+		header().action = "http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe";
+		header().messageID = "uuid:" + Guid::createGuid().getStringStream();
+		header().replyTo = "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous";
+		header().to = "urn:schemas-xmlsoap-org:ws:2005:04:discovery";
+
+			
+
+		XMLObject::Child& probe = body().addChild("Probe");
+		probe.attribute("xmlns","http://schemas.xmlsoap.org/ws/2005/04/discovery");
+
+		XMLObject::Child& types = probe.addChild("d:Types","dp0:NetworkVideoDisplay");
+		types.attribute("xmlns:d","http://schemas.xmlsoap.org/ws/2005/04/discovery");
+		types.attribute("xmlns:dp0", "http://www.onvif.org/ver10/network/wsdl");
+
+		return CmdObject::build(URL);
 	}
 
 	std::string parseMacAddr(const std::string& macstr)

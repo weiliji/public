@@ -191,34 +191,27 @@
     <ClInclude Include="..\Include\OnvifClient\OnvifClient.h" />
     <ClInclude Include="..\Include\OnvifClient\OnvifClientDefs.h" />
     <ClInclude Include="Src\OnvifDiscovery.h" />
-    <ClInclude Include="Src\protocol\CmdAbsoluteMove.h" />
     <ClInclude Include="Src\protocol\CmdContinuousMove.h" />
     <ClInclude Include="Src\protocol\CmdDiscovery.h" />
-    <ClInclude Include="Src\protocol\CmdGetEvent.h" />
+    <ClInclude Include="Src\protocol\CMDGetEvents.h" />
     <ClInclude Include="Src\protocol\CmdGetCapabilities.h" />
-    <ClInclude Include="Src\protocol\CmdGetConfigurationOptions.h" />
-    <ClInclude Include="Src\protocol\CmdGetConfigurations.h" />
     <ClInclude Include="Src\protocol\CmdGetDeviceInformation.h" />
     <ClInclude Include="Src\protocol\CmdGetNetworkInterfaces.h" />
-    <ClInclude Include="Src\protocol\CmdGetNode.h" />
     <ClInclude Include="Src\protocol\CmdGetPresets.h" />
     <ClInclude Include="Src\protocol\CmdGetProfiles.h" />
-    <ClInclude Include="Src\protocol\CmdGetScopes.h" />
     <ClInclude Include="Src\protocol\CmdGetSnapUri.h" />
     <ClInclude Include="Src\protocol\CmdGetStreamUri.h" />
     <ClInclude Include="Src\protocol\CmdGetSystemDateAndTime.h" />
     <ClInclude Include="Src\protocol\CmdGetVideoEncoderConfigurations.h" />
-    <ClInclude Include="Src\protocol\CmdGotoHomePosition.h" />
     <ClInclude Include="Src\protocol\CmdGotoPreset.h" />
     <ClInclude Include="Src\protocol\CmdObject.h" />
     <ClInclude Include="Src\protocol\CmdRemovePreset.h" />
-    <ClInclude Include="Src\protocol\CmdSetHomePosition.h" />
     <ClInclude Include="Src\protocol\CmdSetPreset.h" />
     <ClInclude Include="Src\protocol\CmdSetSystemDateAndTime.h" />
     <ClInclude Include="Src\protocol\CmdSubEvent.h" />
-    <ClInclude Include="Src\protocol\CmdStopPTZ.h" />
-    <ClInclude Include="Src\protocol\CmdStopRecvAlarm.h" />
+    <ClInclude Include="Src\protocol\CmdContinuousStop.h" />
     <ClInclude Include="Src\protocol\CmdSystemReboot.h" />
+    <ClInclude Include="Src\protocol\GSopProtocol.h" />
     <ClInclude Include="Src\protocol\OnvifProtocol.h" />
   </ItemGroup>
   <ItemGroup>

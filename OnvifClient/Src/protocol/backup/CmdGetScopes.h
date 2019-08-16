@@ -2,6 +2,7 @@
 #define __ONVIFPROTOCOL_PROFILES_H__GetScopes
 #include "CmdObject.h"
 
+#if 0
 
 class CMDGetScopes :public CmdObject
 {
@@ -33,6 +34,8 @@ public:
 	}
 };
 
+
+#endif
 
 
 #endif //__ONVIFPROTOCOL_H__

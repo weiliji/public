@@ -67,12 +67,11 @@ void buildTiXmlElementFormChild(XMLObject::Child& child,TiXmlElement* pElement,X
 	{
 		return;
 	}
-	if(child.attributeCount() == 0 && child.childCount() == 0)
+	if(!child.data().empty())
 	{
 		TiXmlText* childElement = new TiXmlText(child.data().readString().c_str());
 
 		pElement->LinkEndChild(childElement);
-		return;
 	}
 
 	XMLObject::Attribute atti = child.firstAttribute();

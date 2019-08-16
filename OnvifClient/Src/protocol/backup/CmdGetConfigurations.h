@@ -2,6 +2,7 @@
 #define __ONVIFPROTOCOL_CmdGetStreamURL_H__GetConfigurations
 #include "CmdObject.h"
 
+#if 0
 
 class CmdGetConfigurations :public CmdObject
 {
@@ -83,6 +84,6 @@ public:
 	}
 };
 
-
+#endif
 
 #endif //__ONVIFPROTOCOL_H__

@@ -6,27 +6,19 @@
 class CMDGetProfiles :public CmdObject
 {
 public:
-	CMDGetProfiles()
+	CMDGetProfiles():CmdObject(URL_ONVIF_MEDIA)
 	{
-		action = "http://www.onvif.org/ver10/media/wsdl/GetProfiles";
-
-		requesturl = MEDIAREQUESTURL;
 	}
 	virtual ~CMDGetProfiles() {}
 
 	std::string token;
 	virtual std::string build(const URL& URL)
 	{
-		stringstream stream;
+		XMLObject::Child& getprofiles = body().addChild("GetProfiles");
 
-		stream << "<s:Envelope " << onvif_xml_ns << ">"
-			<< buildHeader(URL)
-			<< "<s:Body "
-			<< "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">"
-			<< "<GetProfiles xmlns=\"http://www.onvif.org/ver10/media/wsdl\"/>"
-			<< "</s:Body></s:Envelope>";
+		getprofiles.attribute("xmlns", "http://www.onvif.org/ver10/media/wsdl");
 
-		return stream.str();
+		return CmdObject::build(URL);
 	}
 	OnvifClientDefs::Profiles profileInfo;
 	virtual bool parse(const XMLObject::Child& body)

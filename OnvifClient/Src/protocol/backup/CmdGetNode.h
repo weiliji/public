@@ -2,6 +2,7 @@
 #define __ONVIFPROTOCOL_H__GetNode
 #include "CmdObject.h"
 
+#if 0
 
 class CmdGetNode :public CmdObject
 {
@@ -114,5 +115,6 @@ private:
 };
 
 
+#endif
 
 #endif //__ONVIFPROTOCOL_H__

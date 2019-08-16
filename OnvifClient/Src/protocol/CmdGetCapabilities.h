@@ -17,25 +17,22 @@ public:
 		CAP_PTZ = 6,
 	};
 public:
-	CMDGetCapabilities(CapabilitiesType _cap = CAP_ALL) :cap(_cap)
+	CMDGetCapabilities(CapabilitiesType _cap = CAP_ALL) :CmdObject(URL_ONVIF_DEVICE_SERVICE),cap(_cap)
 	{
-		action = "http://www.onvif.org/ver10/device/wsdl/GetCapabilities";
 	}
 	virtual ~CMDGetCapabilities() {}
 
 	virtual std::string build(const URL& URL)
 	{
-		stringstream stream;
+		XMLObject::Child& getcapabilities = body().addChild("GetCapabilities");
 
-		stream << "<s:Envelope xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\">"
-			<< buildHeader(URL)
-			<< "<s:Body xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">"
-			<< "<GetCapabilities xmlns=\"http://www.onvif.org/ver10/device/wsdl\"> <Category>"
-			<< get_cap_str()
-			<< "</Category></GetCapabilities>"
-			<< "</s:Body></s:Envelope>";
+		getcapabilities.attribute("xmlns","http://www.onvif.org/ver10/device/wsdl");
 
-		return stream.str();
+		//add category
+		getcapabilities.addChild("Category",get_cap_str());
+
+
+		return CmdObject::build(URL);
 	}
 	OnvifClientDefs::Capabilities capabilities;
 	virtual bool parse(const XMLObject::Child& p_xml)

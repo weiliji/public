@@ -22,27 +22,6 @@ public:
 		muludp = UDP::create(ioworker);
 		muludp->bind(DISCONVERYPORT);
 		
-		//{
-		//	/* 设置要加入组播的地址 */
-		//	memset(&mreq,0, sizeof(struct ip_mreq));
-
-		//	/* 设置组地址 */
-		//	mreq.imr_multiaddr.s_addr = inet_addr(DISCONVERADDR);
-		//	/* 设置发送组播消息的源主机的地址信息 */
-		//	mreq.imr_interface.s_addr = htonl(INADDR_ANY);
-
-		//	/* 把本机加入组播地址，即本机网卡作为组播成员，只有加入组才能收到组播消息 */
-		//	if (!muludp->setSocketOpt(IPPROTO_IP, IP_ADD_MEMBERSHIP_V2, (const char*)&mreq, sizeof(struct ip_mreq)))
-		//	{
-		//		return false;
-		//	}
-		//	int loop = 0;
-		//	if (!muludp->setSocketOpt(IPPROTO_IP, IP_MULTICAST_LOOP, (const char*)&loop, sizeof(loop)))
-		//	{
-		//		return false;
-		//	}
-		//}
-
 		muludp->async_recvfrom(Socket::RecvFromCallback(&OnvifDisconvery::onSocketMULRecvCallback, this), 1024 * 10);
 
 
@@ -50,12 +29,6 @@ public:
 	}
 	bool stop()
 	{
-		if (muludp)
-		{
-			muludp->setSocketOpt(IPPROTO_IP, IP_DROP_MEMBERSHIP, (const char*)&mreq, sizeof(struct ip_mreq));
-
-			muludp->disconnect();
-		}
 		muludp = NULL;
 
 		callback(shared_ptr<OnvifClientDefs::DiscoveryInfo>());
@@ -67,6 +40,7 @@ public:
 		NetAddr toaddr(DISCONVERADDR, DISCONVERYPORT);
 
 		CmdDiscovery disconvery;
+		disconvery.initGSopProtocol();
 
 		std::string protocol = disconvery.build(URL());
 
@@ -97,17 +71,10 @@ private:
 			int a = 0;
 		}
 
-		XMLObject xml;
-		if (!xml.parseBuffer(std::string(buffer,len))) return shared_ptr<OnvifClientDefs::DiscoveryInfo>();
-
-		if (strcasecmp(xml.getRoot().name().c_str(),"Envelope") != 0) return shared_ptr<OnvifClientDefs::DiscoveryInfo>();
-
-		const XMLObject::Child& body = xml.getRoot().getChild("Body");
-		if (body.isEmpty()) return shared_ptr<OnvifClientDefs::DiscoveryInfo>();
-
-
 		CmdDiscovery disconvery;
-		if (!disconvery.parse(body)) return shared_ptr<OnvifClientDefs::DiscoveryInfo>();
+		if(!disconvery.parseGSopProtocol(std::string(buffer, len))) return shared_ptr<OnvifClientDefs::DiscoveryInfo>();
+
+		if(!disconvery.parseProtocol()) return shared_ptr<OnvifClientDefs::DiscoveryInfo>();
 
 		return disconvery.info;
 	}

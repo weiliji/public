@@ -1735,8 +1735,15 @@ private:
 class XML_API TiXmlPrinter : public TiXmlVisitor
 {
 public:
-	TiXmlPrinter() : depth( 0 ), simpleTextPrint( false ),
-					 buffer(), indent( "    " ), lineBreak( "\n" ) {}
+	TiXmlPrinter(bool simple = false) : depth( 0 ), simpleTextPrint(simple),
+					 buffer(), indent( "    " ), lineBreak( "\n" ) 
+	{
+		if (simple)
+		{
+			indent = "";
+			lineBreak = "";
+		}
+	}
 
 	virtual bool VisitEnter( const TiXmlDocument& doc );
 	virtual bool VisitExit( const TiXmlDocument& doc );

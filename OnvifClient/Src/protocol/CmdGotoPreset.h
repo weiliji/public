@@ -6,11 +6,8 @@
 class CmdGotoPreset :public CmdObject
 {
 public:
-	CmdGotoPreset(const OnvifClientDefs::PresetInfo& _presetinfo,const std::string& _token):presetinfo(_presetinfo),token(_token)
+	CmdGotoPreset(const OnvifClientDefs::PresetInfo& _presetinfo,const std::string& _token):CmdObject(URL_ONVIF_PTZ),presetinfo(_presetinfo),token(_token)
 	{
-		action = "http://www.onvif.org/ver20/ptz/wsdl/GotoPreset";
-
-		requesturl = PTZREQUESTURL;
 	}
 	virtual ~CmdGotoPreset() {}
 
@@ -19,18 +16,14 @@ public:
 
 	virtual std::string build(const URL& URL)
 	{
-		stringstream stream;
+		XMLObject::Child& gotoptreset = body().addChild("GotoPreset");
 
-		stream << "<s:Envelope " << onvif_xml_ns << ">"
-			<< buildHeader(URL)
-			<< "<s:Body xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">"
-			<< "<GotoPreset xmlns=\"http://www.onvif.org/ver20/ptz/wsdl\">"
-			<< "<ProfileToken>" << token << "</ProfileToken>"
-			<< "<PresetToken>" << presetinfo.token << "</PresetToken>"
-			<< "</GotoPreset>"
-			<< "</s:Body></s:Envelope>";
+		gotoptreset.attribute("xmlns", "http://www.onvif.org/ver20/ptz/wsdl");
 
-		return stream.str();
+		gotoptreset.addChild("ProfileToken", token);
+		gotoptreset.addChild("PresetToken", presetinfo.token);
+
+		return CmdObject::build(URL);
 	}
 	virtual bool parse(const XMLObject::Child& body)
 	{

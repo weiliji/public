@@ -6,23 +6,18 @@
 class CmdGetVideoEncoderConfigurations :public CmdObject
 {
 public:
-	CmdGetVideoEncoderConfigurations()
+	CmdGetVideoEncoderConfigurations():CmdObject(URL_ONVIF_MEDIA)
 	{
-		action = "http://www.onvif.org/ver10/media/wsdl/GetVideoEncoderConfigurations";
 	}
 	virtual ~CmdGetVideoEncoderConfigurations() {}
 
 	virtual std::string build(const URL& URL)
 	{
-		stringstream stream;
+		XMLObject::Child& getvideoencoderconf = body().addChild("GetVideoEncoderConfigurations");
 
-		stream << "<s:Envelope " << onvif_xml_ns << ">"
-			<< buildHeader(URL)
-			<< "<s:Body>"
-			<< "<trt:GetVideoEncoderConfigurations></trt:GetVideoEncoderConfigurations>"
-			<< "</s:Body></s:Envelope>";
+		getvideoencoderconf.attribute("xmlns", "http://www.onvif.org/ver10/media/wsdl");
 
-		return stream.str();
+		return CmdObject::build(URL);
 	}
 	shared_ptr<OnvifClientDefs::VideoEncoderConfigurations> encoder;
 	virtual bool parse(const XMLObject::Child& body) { return false; }

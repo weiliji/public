@@ -6,23 +6,18 @@
 class CmdGetSystemDateAndTime :public CmdObject
 {
 public:
-	CmdGetSystemDateAndTime()
+	CmdGetSystemDateAndTime():CmdObject(URL_ONVIF_DEVICE_SERVICE)
 	{
-		action = "http://www.onvif.org/ver10/device/wsdl/GetSystemDateAndTime";
 	}
 	virtual ~CmdGetSystemDateAndTime() {}
 
 	virtual std::string build(const URL& URL)
 	{
-		stringstream stream;
+		XMLObject::Child& getsystemdatetime = body().addChild("GetSystemDateAndTime");
 
-		stream << "<s:Envelope " << onvif_xml_ns << ">"
-			<< buildHeader(URL)
-			<< "<s:Body>"
-			<< "<GetSystemDateAndTime xmlns=\"http://www.onvif.org/ver10/device/wsdl\" />"
-			<< "</s:Body></s:Envelope>";
-
-		return stream.str();
+		getsystemdatetime.attribute("xmlns", "http://www.onvif.org/ver10/device/wsdl");
+		
+		return CmdObject::build(URL);
 	}
 	Time time;
 	virtual bool parse(const XMLObject::Child& body)

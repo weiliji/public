@@ -160,10 +160,20 @@ struct XMLObject::Child::ChildInternal
 		return empltyAttribute;
 	}
 };
-XMLObject::Child::Child(const std::string& _name)
+XMLObject::Child::Child(const char* _name, const Value& _data)
+{
+	internal = new ChildInternal;
+	if (_name != NULL)
+	{
+		name(_name);
+	}
+	if (!_data.empty()) data(_data);
+}
+XMLObject::Child::Child(const std::string& _name,const Value& _data)
 {
 	internal = new ChildInternal;
 	name(_name);
+	if (!_data.empty()) data(_data);
 }
 XMLObject::Child::Child(const Child& child)
 {
@@ -210,7 +220,7 @@ std::string XMLObject::Child::nametype() const
 }
 void XMLObject::Child::data(const Value& value)
 {
-	internal->value = value.readString();
+	internal->value = value;
 }
 Value XMLObject::Child::data() const
 {
@@ -223,6 +233,14 @@ XMLObject::Child::operator Value() const
 XMLObject::Child& XMLObject::Child::addChild(const XMLObject::Child& child)
 {
 	XMLObject::Child* node = new XMLObject::Child(child);
+
+	internal->childList.push_back(node);
+
+	return *node;
+}
+XMLObject::Child& XMLObject::Child::addChild(const std::string& name, const Value& data)
+{
+	XMLObject::Child* node = new XMLObject::Child(name,data);
 
 	internal->childList.push_back(node);
 
@@ -297,7 +315,7 @@ void XMLObject::Child::attribute(const std::string& key,const Value& val)
 	}
 
 	XMLObject::Attribute attri;
-	attri.name = key;
+	attri.name = name;
 	attri.nametype = nametype;
 	attri.value = val;
 
@@ -388,6 +406,7 @@ XMLObject::Child& XMLObject::Child::operator = (const Child& child)
 {
 	internal->attributeList = child.internal->attributeList;
 	internal->name = child.internal->name;
+	internal->nametype = child.internal->nametype;
 	internal->value = child.internal->value;
 	std::list<XMLObject::Child*>::iterator iter;
 	for(iter = internal->childList.begin();iter != internal->childList.end();iter ++)

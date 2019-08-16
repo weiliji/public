@@ -6,26 +6,25 @@
 class CMDSubEvent :public CmdObject
 {
 public:
-	CMDSubEvent()
+	CMDSubEvent():CmdObject(URL_ONVIF_EVENTS)
 	{
-		action = "http://www.onvif.org/ver10/events/wsdl/EventPortType/CreatePullPointSubscriptionRequest";
-		requesturl = EVENTSREQUESTURL;
 	}
 	virtual ~CMDSubEvent() {}
 
 	virtual std::string build(const URL& URL)
 	{
-		stringstream stream;
+		header().action = "http://www.onvif.org/ver10/events/wsdl/EventPortType/CreatePullPointSubscriptionRequest";
+		header().messageID = "urn:uuid:" + Guid::createGuid().getStringStream();
+		header().replyTo = "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous";
+		header().to = "http://" + URL.getHost() + URL.getPath();
 
-		stream << "<s:Envelope xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:a=\"http://www.w3.org/2005/08/addressing\">"
-			<< buildAlarmHeader(URL,true)
-			<< "<s:Body xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">"
-			<< "<CreatePullPointSubscription xmlns=\"http://www.onvif.org/ver10/events/wsdl\">"
-			<< "<InitialTerminationTime>PT600S</InitialTerminationTime>"
-			<< "</CreatePullPointSubscription>"
-			<< "</s:Body></s:Envelope>";
+		XMLObject::Child& createpullpoint = body().addChild("CreatePullPointSubscription");
 
-		return stream.str();
+		createpullpoint.attribute("xmlns", "http://www.onvif.org/ver10/events/wsdl");
+
+		createpullpoint.addChild("InitialTerminationTime", "PT600S");
+
+		return CmdObject::build(URL);
 	}
 
 	OnvifClientDefs::SubEventResponse	subeventresp;

@@ -6,33 +6,31 @@
 class CmdGetStreamURL :public CmdObject
 {
 public:
-	CmdGetStreamURL(const std::string& _token) :token(_token)
+	CmdGetStreamURL(const std::string& _token) :CmdObject(URL_ONVIF_MEDIA),token(_token)
 	{
-		action = "http://www.onvif.org/ver10/media/wsdl/GetStreamURL";
-
-		requesturl = MEDIAREQUESTURL;
 	}
 	virtual ~CmdGetStreamURL() {}
 
 	virtual std::string build(const URL& URL)
 	{
-		stringstream stream;
+		XMLObject::Child& getstreamuri = body().addChild("GetStreamUri");
 
-		stream << "<s:Envelope " << onvif_xml_ns << ">"
-			<< buildHeader(URL)
-			<< "<s:Body xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">"
-			<< "<GetStreamUri xmlns=\"http://www.onvif.org/ver10/media/wsdl\">"
-			<< "<StreamSetup>"
-			<< "<Stream xmlns=\"http://www.onvif.org/ver10/schema\">RTP-Unicast</Stream>"
-			<< "<Transport xmlns=\"http://www.onvif.org/ver10/schema\">"
-			<< "<Protocol>RTSP</Protocol>"
-			<< "</Transport>"
-			<< "</StreamSetup>"
-			<< "<ProfileToken>" << token << "</ProfileToken>"
-			<< "</GetStreamUri>"
-			<<"</s:Body></s:Envelope>";
+		getstreamuri.attribute("xmlns", "http://www.onvif.org/ver10/media/wsdl");
 
-		return stream.str();
+		getstreamuri.addChild("ProfileToken", token);
+
+
+		XMLObject::Child& streamsetup = getstreamuri.addChild("StreamSetup");
+
+		XMLObject::Child& stream = streamsetup.addChild("Stream","RTP-Unicast");
+		stream.attribute("xmlns","http://www.onvif.org/ver10/schema");
+		
+		XMLObject::Child& transport = streamsetup.addChild("Transport");
+		transport.attribute("xmlns", "http://www.onvif.org/ver10/schema");
+
+		transport.addChild("Protocol","RTSP");
+
+		return CmdObject::build(URL);
 	}
 
 	OnvifClientDefs::StreamUrl streamurl;

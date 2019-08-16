@@ -6,23 +6,25 @@
 class CMDSystemReboot :public CmdObject
 {
 public:
-	CMDSystemReboot()
+	CMDSystemReboot():CmdObject(URL_ONVIF_DEVICE_SERVICE)
 	{
-		action = "http://www.onvif.org/ver10/device/wsdl/SystemReboot";
 	}
 	virtual ~CMDSystemReboot() {}
 
 	virtual std::string build(const URL& URL)
 	{
-		stringstream stream;
+		XMLObject::Child& sysreboot = body().addChild("SystemReboot");
 
-		stream << "<s:Envelope " << onvif_xml_ns << ">"
-			<< buildHeader(URL)
-			<< "<s:Body>"
-			<< "<tds:SystemReboot/>"
-			<< "</s:Body></s:Envelope>";
+		sysreboot.attribute("xmlns", "http://www.onvif.org/ver10/device/wsdl");
 
-		return stream.str();
+		return CmdObject::build(URL);
+	}
+	virtual bool parse(const XMLObject::Child& body)
+	{
+		XMLObject::Child respchild = body.getChild("SystemRebootResponse");
+		if (respchild.isEmpty()) return false;
+
+		return true;
 	}
 };
 

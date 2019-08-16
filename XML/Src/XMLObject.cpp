@@ -135,15 +135,18 @@ std::string XMLObject::toString(Encoding encode) const
 	}
 	TiXmlDocument *doc = new TiXmlDocument;
 
-	TiXmlDeclaration* declaration = new TiXmlDeclaration(internal->version.c_str(), internal->encode == Encoding_UTF8 ? "UTF-8" : "gb2312", "");
-	doc->LinkEndChild(declaration);
+	if (encode != Encoding_Unknown)
+	{
+		TiXmlDeclaration* declaration = new TiXmlDeclaration(internal->version.c_str(), encode == Encoding_UTF8 ? "UTF-8" : "gb2312", "");
+		doc->LinkEndChild(declaration);
+	}	
 
 	TiXmlElement* root = new TiXmlElement(buildVaildXmlString(internal->root.name(),internal->root.nametype() ,internal->encode, encode).c_str());
 
 	buildTiXmlElementFormChild(internal->root, root, internal->encode, encode);
 	doc->LinkEndChild(root);
 
-	TiXmlPrinter printer;
+	TiXmlPrinter printer(true);
 	doc->Accept(&printer);
 
 	delete doc;

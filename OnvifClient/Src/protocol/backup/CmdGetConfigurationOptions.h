@@ -1,7 +1,7 @@
 #ifndef __ONVIFPROTOCOL_H__GetConfigurationOptions
 #define __ONVIFPROTOCOL_H__GetConfigurationOptions
 #include "CmdObject.h"
-
+#if 0
 
 class CmdGetConfigurationOptions :public CmdObject
 {
@@ -203,5 +203,6 @@ private:
 };
 
 
+#endif
 
 #endif //__ONVIFPROTOCOL_H__

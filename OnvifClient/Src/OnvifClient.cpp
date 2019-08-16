@@ -90,6 +90,8 @@ public:
 			req->headers()["Connection"] = "close";
 		}
 
+		cmd->initGSopProtocol();
+
 		req->content()->write(cmd->build(requrl));
 		req->method() = "POST";
 		req->timeout() = timeout;
@@ -130,20 +132,14 @@ private:
 
 			std::string httpbody = response->content()->read();
 
-			XMLObject xml;
-			if (!xml.parseBuffer(httpbody)) break;
-
-			if (xml.getRoot().name() != "Envelope") break;
-
-			const XMLObject::Child& body = xml.getRoot().getChild("Body");
-			if (body.isEmpty()) break;
-
 			shared_ptr<CmdObject> cmdtmp = cmdptr.lock();
 			if (cmdtmp == NULL) break;
 
+			if (!cmdtmp->parseGSopProtocol(httpbody)) break;
+
 			parseSuccess = true;
 
-			success = cmdtmp->parse(body);
+			success = cmdtmp->parseProtocol();
 		} while (0);
 
 		cmdsem.post();
@@ -752,7 +748,7 @@ bool OnvifClient::asyncSubscribeEvent(const SubscribeEventCallback& callback, co
 }
 struct AsyncGetEventItem :public AyncGetItem
 {
-	shared_ptr<CMDGetAlarm> cmd;
+	shared_ptr<CMDGetEvents> cmd;
 
 	OnvifClient::GetEventCallback		callback;
 
@@ -766,7 +762,7 @@ struct AsyncGetEventItem :public AyncGetItem
 OnvifResult OnvifClient::getEvent(const OnvifClientDefs::SubEventResponse& subeventresp, OnvifClientDefs::EventInfos& eventinfos, int timeoutms)
 {
 	shared_ptr< AsyncGetEventItem> cmditem = make_shared<AsyncGetEventItem>();
-	cmditem->cmd = make_shared<CMDGetAlarm>();
+	cmditem->cmd = make_shared<CMDGetEvents>();
 
 	cmditem->start(cmditem->cmd, internal, timeoutms, subeventresp.xaddr);
 
@@ -779,7 +775,7 @@ OnvifResult OnvifClient::getEvent(const OnvifClientDefs::SubEventResponse& subev
 bool OnvifClient::asyncGetEvent(const GetEventCallback& callback, const OnvifClientDefs::SubEventResponse& subeventresp, int timeoutms)
 {
 	shared_ptr< AsyncGetEventItem> cmditem = make_shared<AsyncGetEventItem>();
-	cmditem->cmd = make_shared<CMDGetAlarm>();
+	cmditem->cmd = make_shared<CMDGetEvents>();
 
 	cmditem->start(cmditem->cmd, internal, timeoutms, subeventresp.xaddr);
 

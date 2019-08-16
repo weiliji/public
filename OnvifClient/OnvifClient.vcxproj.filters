@@ -60,22 +60,7 @@
     <ClInclude Include="Src\protocol\CmdGotoPreset.h">
       <Filter>源文件\protocol</Filter>
     </ClInclude>
-    <ClInclude Include="Src\protocol\CmdGotoHomePosition.h">
-      <Filter>源文件\protocol</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\protocol\CmdSetHomePosition.h">
-      <Filter>源文件\protocol</Filter>
-    </ClInclude>
     <ClInclude Include="Src\protocol\CmdContinuousMove.h">
-      <Filter>源文件\protocol</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\protocol\CmdAbsoluteMove.h">
-      <Filter>源文件\protocol</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\protocol\CmdGetConfigurations.h">
-      <Filter>源文件\protocol</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\protocol\CmdGetConfigurationOptions.h">
       <Filter>源文件\protocol</Filter>
     </ClInclude>
     <ClInclude Include="Src\protocol\CmdGetSystemDateAndTime.h">
@@ -87,31 +72,25 @@
     <ClInclude Include="Src\protocol\CmdSystemReboot.h">
       <Filter>源文件\protocol</Filter>
     </ClInclude>
-    <ClInclude Include="Src\protocol\CmdStopRecvAlarm.h">
-      <Filter>源文件\protocol</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\protocol\CmdGetScopes.h">
-      <Filter>源文件\protocol</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\protocol\CmdGetNode.h">
-      <Filter>源文件\protocol</Filter>
-    </ClInclude>
     <ClInclude Include="Src\OnvifDiscovery.h">
       <Filter>源文件</Filter>
     </ClInclude>
     <ClInclude Include="Src\protocol\CmdDiscovery.h">
       <Filter>源文件\protocol</Filter>
     </ClInclude>
-    <ClInclude Include="Src\protocol\CmdStopPTZ.h">
-      <Filter>源文件\protocol</Filter>
-    </ClInclude>
     <ClInclude Include="Src\protocol\CmdRemovePreset.h">
       <Filter>源文件\protocol</Filter>
     </ClInclude>
-    <ClInclude Include="Src\protocol\CmdGetEvent.h">
+    <ClInclude Include="Src\protocol\CmdSubEvent.h">
       <Filter>源文件\protocol</Filter>
     </ClInclude>
-    <ClInclude Include="Src\protocol\CmdSubEvent.h">
+    <ClInclude Include="Src\protocol\GSopProtocol.h">
+      <Filter>源文件\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\protocol\CMDGetEvents.h">
+      <Filter>源文件\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\protocol\CmdContinuousStop.h">
       <Filter>源文件\protocol</Filter>
     </ClInclude>
   </ItemGroup>

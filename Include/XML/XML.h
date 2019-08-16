@@ -31,7 +31,8 @@ public:
 		friend class XMLObject;
 		struct ChildInternal;
 	public:
-		Child(const std::string& name = "");
+		Child(const char* name = NULL,const Value& data = Value());
+		Child(const std::string& name, const Value& data = Value());
 		Child(const Child& child);
 		~Child();
 
@@ -45,6 +46,7 @@ public:
 		operator Value() const;
 
 		Child& addChild(const XMLObject::Child& child);
+		Child& addChild(const std::string& name, const Value& data);
 		Child& getChild(const std::string& name,int index = 0);
 		const Child& getChild(const std::string& name, int index = 0) const;
 		void removeChild(const std::string& name,int index = 0);

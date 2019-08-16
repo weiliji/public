@@ -6,11 +6,8 @@
 class CmdGetPresets :public CmdObject
 {
 public:
-	CmdGetPresets(const std::string& _token):token(_token)
+	CmdGetPresets(const std::string& _token):CmdObject(URL_ONVIF_PTZ),token(_token)
 	{
-		action = "http://www.onvif.org/ver20/ptz/wsdl/GetPresets";
-
-		requesturl = PTZREQUESTURL;
 	}
 	virtual ~CmdGetPresets() {}
 
@@ -18,17 +15,13 @@ public:
 
 	virtual std::string build(const URL& URL)
 	{
-		stringstream stream;
+		XMLObject::Child& getpreset = body().addChild("GetPresets");
 
-		stream << "<s:Envelope " << onvif_xml_ns << ">"
-			<< buildHeader(URL)
-			<< "<s:Body xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">"
-			<< "<GetPresets xmlns=\"http://www.onvif.org/ver20/ptz/wsdl\">"
-			<< "<ProfileToken>" << token << "</ProfileToken>"
-			<< "</GetPresets>"
-			<< "</s:Body></s:Envelope>";
+		getpreset.attribute("xmlns","http://www.onvif.org/ver20/ptz/wsdl");
 
-		return stream.str();
+		getpreset.addChild("ProfileToken",token);
+
+		return CmdObject::build(URL);
 	}
 
 	OnvifClientDefs::PresetInfos preset;

@@ -3,29 +3,29 @@
 #include "CmdObject.h"
 
 
-class CMDGetAlarm :public CmdObject
+class CMDGetEvents :public CmdObject
 {
 public:
-	CMDGetAlarm()
+	CMDGetEvents():CmdObject(URL_ONVIF_EVENTS)
 	{
-		action = "http://www.onvif.org/ver10/events/wsdl/PullPointSubscription/PullMessagesRequest";
 	}
-	virtual ~CMDGetAlarm() {}
+	virtual ~CMDGetEvents() {}
 
 	virtual std::string build(const URL& URL)
 	{
-		stringstream stream;
+		header().action = "http://www.onvif.org/ver10/events/wsdl/PullPointSubscription/PullMessagesRequest";
+		header().messageID = "urn:uuid:" + Guid::createGuid().getStringStream();
+		header().replyTo = "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous";
+		header().to = "http://"+URL.getHost()+URL.getPath();
 
-		stream << "<s:Envelope xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:a=\"http://www.w3.org/2005/08/addressing\">"
-			<< buildAlarmHeader(URL,false)
-			<< "<s:Body xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">"
-			<< "<PullMessages xmlns=\"http://www.onvif.org/ver10/events/wsdl\">"
-			<< "<Timeout>PT1M</Timeout>"
-			<< "<MessageLimit>1024</MessageLimit>"
-			<< "</PullMessages>"
-			<< "</s:Body></s:Envelope>";
+		XMLObject::Child& pullmessage = body().addChild("PullMessages");
 
-		return stream.str();
+		pullmessage.attribute("xmlns","http://www.onvif.org/ver10/events/wsdl");
+
+		pullmessage.addChild("Timeout","PT1M");
+		pullmessage.addChild("MessageLimit", Value(1024));
+
+		return CmdObject::build(URL);
 	}
 
 	OnvifClientDefs::EventInfos eventinfos;

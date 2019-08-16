@@ -6,38 +6,36 @@
 class CmdSetSystemDateAndTime :public CmdObject
 {
 public:
-	CmdSetSystemDateAndTime(const Time& _time) :time(_time)
+	CmdSetSystemDateAndTime(const Time& _time) :CmdObject(URL_ONVIF_DEVICE_SERVICE),time(_time)
 	{
-		action = "http://www.onvif.org/ver10/device/wsdl/SetSystemDateAndTime";
 	}
 	virtual ~CmdSetSystemDateAndTime() {}
 
 	virtual std::string build(const URL& URL)
 	{
-		stringstream stream;
+		XMLObject::Child& setsystemdatetime = body().addChild("SetSystemDateAndTime");
 
-		stream << "<s:Envelope " << onvif_xml_ns << ">"
-			<< buildHeader(URL)
-			<< "<s:Body>"
-			<< "<SetSystemDateAndTime xmlns=\"http://www.onvif.org/ver10/device/wsdl\">"
-			<< "<DateTimeType>Manual</DateTimeType>"
-			<< "<DaylightSavings>false</DaylightSavings>"
-			<< "<UTCDateTime>"
-			<< "<Time xmlns=\"http://www.onvif.org/ver10/schema\">"
-			<< "<Hour>"<<time.hour<<"</Hour>"
-			<< "<Minute>"<<time.minute<<"</Minute>"
-			<< "<Second>"<<time.second<<"</Second>"
-			<< "</Time>"
-			<< "<Date xmlns=\"http://www.onvif.org/ver10/schema\">"
-			<< "<Year>"<<time.year<<"</Year>"
-			<< "<Month>"<<time.month<<"</Month>"
-			<< "<Day>"<<time.day<<"</Day>"
-			<< "</Date>"
-			<< "</UTCDateTime>"
-			<< "</SetSystemDateAndTime>"
-			<< "</s:Body></s:Envelope>";
+		setsystemdatetime.attribute("xmlns", "http://www.onvif.org/ver10/device/wsdl");
 
-		return stream.str();
+		setsystemdatetime.addChild("DateTimeType","Manual");
+		setsystemdatetime.addChild("DaylightSavings", "false");
+
+		XMLObject::Child& utcdatetime = setsystemdatetime.addChild("UTCDateTime");
+		
+		XMLObject::Child& timev = utcdatetime.addChild("Time");
+		timev.attribute("xmlns","http://www.onvif.org/ver10/schema");
+		timev.addChild("Hour",time.hour);
+		timev.addChild("Minute", time.minute);
+		timev.addChild("Second", time.second);
+
+		XMLObject::Child& datev = utcdatetime.addChild("Date");
+		datev.attribute("xmlns", "http://www.onvif.org/ver10/schema");
+		datev.addChild("Year", time.year);
+		datev.addChild("Month", time.month);
+		datev.addChild("Day", time.day);
+
+
+		return CmdObject::build(URL);
 	}
 	virtual bool parse(const XMLObject::Child& body) { return true; }
 private:
