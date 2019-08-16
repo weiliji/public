@@ -24,11 +24,10 @@ public:
 
 		return stream.str();
 	}
-	shared_ptr<Time> time;
+	Time time;
 	virtual bool parse(const XMLObject::Child& body)
 	{
-		time = make_shared<Time>();
-		time->breakTime(Time::getCurrentTime().makeTime());
+		time.breakTime(Time::getCurrentTime().makeTime());
 
 		const XMLObject::Child & resp = body.getChild("GetSystemDateAndTimeResponse");
 		if (!resp) return false;
@@ -39,13 +38,13 @@ public:
 		const XMLObject::Child& utcdate = systemdate.getChild("UTCDateTime");
 		if (!utcdate) return false;
 		
-		time->hour = utcdate.getChild("Time").getChild("Hour").data().readInt();
-		time->minute = utcdate.getChild("Time").getChild("Minute").data().readInt();
-		time->second = utcdate.getChild("Time").getChild("Second").data().readInt();
+		time.hour = utcdate.getChild("Time").getChild("Hour").data().readInt();
+		time.minute = utcdate.getChild("Time").getChild("Minute").data().readInt();
+		time.second = utcdate.getChild("Time").getChild("Second").data().readInt();
 
-		time->year = utcdate.getChild("Date").getChild("Year").data().readInt();
-		time->month = utcdate.getChild("Date").getChild("Month").data().readInt();
-		time->day = utcdate.getChild("Date").getChild("Day").data().readInt();
+		time.year = utcdate.getChild("Date").getChild("Year").data().readInt();
+		time.month = utcdate.getChild("Date").getChild("Month").data().readInt();
+		time.day = utcdate.getChild("Date").getChild("Day").data().readInt();
 		
 		
 		return true; 

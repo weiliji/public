@@ -28,11 +28,9 @@ public:
 
 		return stream.str();
 	}
-	shared_ptr<OnvifClientDefs::Profiles> profileInfo;
+	OnvifClientDefs::Profiles profileInfo;
 	virtual bool parse(const XMLObject::Child& body)
 	{
-		profileInfo = make_shared<OnvifClientDefs::Profiles>();
-
 		XMLObject::Child resp = body.getChild("GetProfilesResponse");
 		if (!resp) return false;
 		
@@ -46,7 +44,7 @@ public:
 
 			if (parseProfileInfo(p_profiles, profile))
 			{
-				profileInfo->infos.push_back(profile);
+				profileInfo.infos.push_back(profile);
 			}
 
 			p_profiles = resp.nextChild();

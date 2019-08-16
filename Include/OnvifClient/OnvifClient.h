@@ -20,6 +20,17 @@ using namespace Public::Network;
 namespace Public {
 namespace Onvif {
 
+typedef enum {
+	OnvifResult_OK,					//正常
+	OnvifResult_ConnectError,		//链接失败
+	OnvifResult_AuthenError,		//认证失败
+	OnvifResult_RequestError,		//请求失败
+	OnvifResult_ResponseError,		//回复失败
+	OnvifResult_ParseError,			//解析回复数据失败
+	OnvifResult_NotSupport,			//不支持
+}OnvifResult;
+
+
 //Onvif客户端
 class OnvifClientManager;
 class ONVIFCLIENT_API OnvifClient
@@ -31,110 +42,140 @@ public:
 public:
 	~OnvifClient();
 
-	shared_ptr<OnvifClientDefs::Info> getInfo(int timeoutms = 10000);			//获取设备信息，错误信息使用XM_GetLastError捕获
+	///--------------------------------设备信息相关---------------------------------//
+	//获取设备信息
+	OnvifResult getInfo(OnvifClientDefs::Info& info,int timeoutms = 10000);	
 
-	typedef Function<void(shared_ptr<OnvifClientDefs::Info>)> GetInfoCalblack;
+	//异步获取设备信息
+	typedef Function<void(OnvifResult,const OnvifClientDefs::Info&)> GetInfoCalblack;
 	bool asyncGetInfo(const GetInfoCalblack& callback, int timeoutms = 10000);
 
-	shared_ptr<OnvifClientDefs::Capabilities> getCapabities(int timeoutms = 10000);	//获取设备能力集合，错误信息使用XM_GetLastError捕获
+	//获取系统时间
+	OnvifResult getSystemDatetime(Time& time, int timeoutms = 10000);
 
-	typedef Function<void(shared_ptr<OnvifClientDefs::Capabilities>)> GetCapabilitiesCallback;
-	bool asyncGetCapabities(const GetCapabilitiesCallback& callbac, int timeoutms = 10000);
-																					
-//	shared_ptr<OnvifClientDefs::Scopes> getScopes(int timeoutms = 10000); //获取描述信息，错误信息使用XM_GetLastError捕获
+	//异步获取系统时间
+	typedef Function<void(OnvifResult, const Time&) > GetSystemDateTimeCallback;
+	bool asyncGetSystemDatetime(const GetSystemDateTimeCallback& callbck, int timeoutms = 10000);
+
+	//设置系统时间
+	OnvifResult SetSystemDatetime(const Time& time, int timeoutms = 10000);
+
+	//异步设置系统时间
+	typedef Function<void(OnvifResult)> SetSystemDatetimeCallback;
+	bool asyncSetSystemDatetime(const SetSystemDatetimeCallback& callback, const Time& time, int timeoutms = 10000);
+
+	//获取网络信息
+	OnvifResult getNetworkInterfaces(OnvifClientDefs::NetworkInterfaces& network, int timeoutms = 10000);
+	//异步获取网络信息
+	typedef Function<void(OnvifResult, const OnvifClientDefs::NetworkInterfaces&)> GetNetworkInterfacesCallback;
+	bool asyncGetNetworkInterfaces(const GetNetworkInterfacesCallback& callback, int timeoutms = 10000);
+
+	//系统重启
+	OnvifResult systemReboot(int timeoutms = 10000);
+
+	//异步系统重启
+	typedef Function<void(OnvifResult)> SystemRebootCallback;
+	bool asyncSystemReboot(const SystemRebootCallback& callback, int timeoutms = 10000);
+
+
+	//获取设备能力集信息
+	OnvifResult getCapabities(OnvifClientDefs::Capabilities& cap,int timeoutms = 10000);
+
+	//异步获取设备能力信息
+	typedef Function<void(OnvifResult, const OnvifClientDefs::Capabilities&)> GetCapabilitiesCallback;
+	bool asyncGetCapabities(const GetCapabilitiesCallback& callback, int timeoutms = 10000);
+								
 	
-	//获取音视频/云台等熟悉
-	shared_ptr<OnvifClientDefs::Profiles> getProfiles(int timeoutms = 10000); //获取配置信息，错误信息使用XM_GetLastError捕获
+	//获取音视频/云台等描述信息
+	OnvifResult getProfiles(OnvifClientDefs::Profiles& profiles,int timeoutms = 10000);
 	
-	typedef Function<void(shared_ptr<OnvifClientDefs::Profiles>)> GetProfilesCallback;
+	//异步获取描述信息
+	typedef Function<void(OnvifResult,const OnvifClientDefs::Profiles&)> GetProfilesCallback;
 	bool asyncGetProfiles(const GetProfilesCallback& callback, int timeoutms = 10000);
 
 
+	///--------------------------------Media相关---------------------------------//
 	//获取视频播放地址
-	shared_ptr<OnvifClientDefs::StreamUrl> getStreamUrl(const OnvifClientDefs::ProfileInfo& info, int timeoutms = 10000); //获取六信息,错误信息使用XM_GetLastError捕获
+	OnvifResult getStreamUrl(const OnvifClientDefs::ProfileInfo& info, OnvifClientDefs::StreamUrl& streamurl,int timeoutms = 10000);
 	
-	typedef Function<void(shared_ptr<OnvifClientDefs::StreamUrl>)> GetStreamUrlCallback;
-	bool asyncGetStreamUrl(const GetStreamUrlCallback& callbac, const OnvifClientDefs::ProfileInfo& info, int timeoutms = 10000);
+	//异步获取视频流地址
+	typedef Function<void(OnvifResult, const OnvifClientDefs::StreamUrl& )> GetStreamUrlCallback;
+	bool asyncGetStreamUrl(const GetStreamUrlCallback& callback, const OnvifClientDefs::ProfileInfo& info, int timeoutms = 10000);
 
 	//获取非预览截图地址
-	shared_ptr<OnvifClientDefs::SnapUrl> getSnapUrl(const OnvifClientDefs::ProfileInfo& info, int timeoutms = 10000);	//获取截图信息，错误信息使用XM_GetLastError捕获
+	OnvifResult getSnapUrl(const OnvifClientDefs::ProfileInfo& info, OnvifClientDefs::SnapUrl& snapurl,int timeoutms = 10000);
 	
-	typedef Function<void(shared_ptr<OnvifClientDefs::SnapUrl>)> GetSnapUrlCallback;
-	bool asyncGetSnapUrl(const GetSnapUrlCallback& callbac, const OnvifClientDefs::ProfileInfo& info, int timeoutms = 10000);
+	//异步获取非预览截图地址
+	typedef Function<void(OnvifResult, const OnvifClientDefs::SnapUrl&)> GetSnapUrlCallback;
+	bool asyncGetSnapUrl(const GetSnapUrlCallback& callback, const OnvifClientDefs::ProfileInfo& info, int timeoutms = 10000);
 
-	//获取网络信息
-	shared_ptr<OnvifClientDefs::NetworkInterfaces> getNetworkInterfaces(int timeoutms = 10000);//网络信息，错误信息使用XM_GetLastError捕获
-
-	typedef Function<void(shared_ptr<OnvifClientDefs::NetworkInterfaces>)> GetNetworkInterfacesCallback;
-	bool asyncGetNetworkInterfaces(const GetNetworkInterfacesCallback& callbac, int timeoutms = 10000);
-																							   
-//	shared_ptr<OnvifClientDefs::VideoEncoderConfigurations> getVideoEncoderConfigurations(int timeoutms = 10000); //获取视频编码信息，错误信息使用XM_GetLastError捕获
 	
+	//获取视频编码配置信息
+	OnvifResult getVideoEncoderConfigurations(OnvifClientDefs::VideoEncoderConfigurations& configs,int timeoutms = 10000);
+	
+	typedef Function<void(OnvifResult, const OnvifClientDefs::VideoEncoderConfigurations&) > GetVideoEncoderConfigurationsCallback;
+	bool asyncGetVideoEncoderConfigurations(const GetVideoEncoderConfigurationsCallback& callback, int timeoutms = 10000);
+
+
+	///----------------------------------------云台相关--------------------------//
 	//云台相关
-	bool continuousMove(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PTZCtrl& ptzctrl, int timeoutms = 10000); //错误信息使用XM_GetLastError捕获
+	OnvifResult continuousMove(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PTZCtrl& ptzctrl, int timeoutms = 10000);
 	
-	typedef Function<void(bool)> ContinuousMoveCallback;
+	//异步云台控制
+	typedef Function<void(OnvifResult)> ContinuousMoveCallback;
 	bool asyncContinuousMoveCallback(const ContinuousMoveCallback& callback, const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PTZCtrl& ptzctrl, int timeoutms = 10000);
 	
-	//bool absoluteMove(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PTZCtrl& ptzctrl, int timeoutms = 10000); //错误信息使用XM_GetLastError捕获
-	bool stopPTZ(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PTZCtrl& ptzctrl, int timeoutms = 10000); //停止云台
+	//停止云台控制
+	OnvifResult stopPTZ(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PTZCtrl& ptzctrl, int timeoutms = 10000);
 	
-	typedef Function<void(bool)> StopPTRCallback;
-	bool asyncStopPtz(const StopPTRCallback& callbac, const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PTZCtrl& ptzctrl, int timeoutms = 10000);
+	//异步停止云台控制
+	typedef Function<void(OnvifResult)> StopPTRCallback;
+	bool asyncStopPtz(const StopPTRCallback& callback, const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PTZCtrl& ptzctrl, int timeoutms = 10000);
 
 	//预置位相关
-	bool setPreset(const OnvifClientDefs::ProfileInfo& info, const std::string& presetname, int timeoutms = 10000);//设置预置位
+	//设置云台预置位
+	OnvifResult setPreset(const OnvifClientDefs::ProfileInfo& info, const std::string& presetname, int timeoutms = 10000);
 	
-	typedef Function<void(bool)> SetPresetCallback;
-	bool asyncSetPresest(const SetPresetCallback& callbac, const OnvifClientDefs::ProfileInfo& info, const std::string& presetname, int timeoutms = 10000);
+	//异步设置云台预置位
+	typedef Function<void(OnvifResult)> SetPresetCallback;
+	bool asyncSetPresest(const SetPresetCallback& callback, const OnvifClientDefs::ProfileInfo& info, const std::string& presetname, int timeoutms = 10000);
 
-	shared_ptr<OnvifClientDefs::PresetInfos> getPreset(const OnvifClientDefs::ProfileInfo& info, int timeoutms = 10000);//获取预置位信息
+	//获取云台预置位
+	OnvifResult getPreset(const OnvifClientDefs::ProfileInfo& info, OnvifClientDefs::PresetInfos& presetinfo,int timeoutms = 10000);
 	
-	typedef Function<void(shared_ptr<OnvifClientDefs::PresetInfos>)> GetPresetCallback;
+	//异步获取云台预置位
+	typedef Function<void(OnvifResult,const OnvifClientDefs::PresetInfos&)> GetPresetCallback;
 	bool asyncGetPreset(const GetPresetCallback& callback, const OnvifClientDefs::ProfileInfo& info, int timeoutms = 10000);
 
-	bool gotoPreset(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PresetInfo& presetinfo, int timeoutms = 10000);//调用预置位
+	//执行预置位
+	OnvifResult gotoPreset(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PresetInfo& presetinfo, int timeoutms = 10000);
 	
-	typedef Function<void(bool)> GotoPresetCallback;
+	//异步执行预置位
+	typedef Function<void(OnvifResult)> GotoPresetCallback;
 	bool asyncGotoPreset(const GotoPresetCallback& callback, const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PresetInfo& presetinfo, int timeoutms = 10000);
 	
-	bool removePreset(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PresetInfo& presetinfo, int timeoutms = 10000);//删除预置位
 
-	typedef Function<void(bool)> RemovePresetCallback;
+	//删除预置位
+	OnvifResult removePreset(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PresetInfo& presetinfo, int timeoutms = 10000);
+
+	//异步删除云台预置位
+	typedef Function<void(OnvifResult)> RemovePresetCallback;
 	bool asyncRemovePreset(const RemovePresetCallback& callback, const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PresetInfo& presetinfo, int timeoutms = 10000);
 
-	//获取云台配置信息
-//	shared_ptr<OnvifClientDefs::PTZConfig> getConfigurations(int timeoutms = 10000); //错误信息使用XM_GetLastError捕获
-//	shared_ptr<OnvifClientDefs::ConfigurationOptions> getConfigurationOptions(const shared_ptr<OnvifClientDefs::PTZConfig>& ptzcfg,int timeoutms = 10000); //错误信息使用XM_GetLastError捕获
-	
-	//获取系统时间
-	shared_ptr<Time> getSystemDatetime(int timeoutms = 10000); //错误信息使用XM_GetLastError捕获
-	
-	typedef Function<void(shared_ptr<Time>) > GetSystemDateTimeCallback;
-	bool asyncGetSystemDatetime(const GetSystemDateTimeCallback& callbck, int timeoutms = 10000);
-
-	bool SetSystemDatetime(const Time& time, int timeoutms = 10000); //错误信息使用XM_GetLastError捕获
-	
-	typedef Function<void(bool)> SetSystemDatetimeCallback;
-	bool asyncSetSystemDatetime(const SetSystemDatetimeCallback& callback, const Time& time, int timeoutms = 10000);
-	
-	bool systemReboot(int timeoutms = 10000);//错误信息使用XM_GetLastError捕获
-
-	typedef Function<void(bool)> SystemRebootCallback;
-	bool asyncSystemReboot(const SystemRebootCallback& callback, int timeoutms = 10000);
+	//---------------------------------------------EVENT相关----------------------------------------//
 
 	//报警事件相关
-	shared_ptr<OnvifClientDefs::StartRecvAlarm> startRecvAlarm(const shared_ptr<OnvifClientDefs::Capabilities>& capabilities,int timeoutms = 10000);
+	OnvifResult subscribeEvent(const OnvifClientDefs::Capabilities& capabilities, OnvifClientDefs::SubEventResponse& subeventresp,int timeoutms = 10000);
 	
-	typedef Function<void(shared_ptr<OnvifClientDefs::StartRecvAlarm>) > StartRecvAlarmCallback;
-	bool asyncStartRecvAlarm(const StartRecvAlarmCallback& callback, const shared_ptr<OnvifClientDefs::Capabilities>& capabilities, int timeoutms = 10000);
+	typedef Function<void(OnvifResult, const OnvifClientDefs::SubEventResponse&) > SubscribeEventCallback;
+	bool asyncSubscribeEvent(const SubscribeEventCallback& callback, const OnvifClientDefs::Capabilities& capabilities, int timeoutms = 10000);
 
-	shared_ptr<OnvifClientDefs::RecvAlarmInfo> recvAlarm(const shared_ptr<OnvifClientDefs::StartRecvAlarm>& alarminfo,int timeoutms = 2*60000);
+	OnvifResult getEvent(const OnvifClientDefs::SubEventResponse& subeventresp,OnvifClientDefs::EventInfos& eventinfos,int timeoutms = 2*60000);
 
-	typedef Function<void(shared_ptr<OnvifClientDefs::RecvAlarmInfo>)> RecvAlarmCallback;
-	bool asyncRecvAlarm(const RecvAlarmCallback& callback, const shared_ptr<OnvifClientDefs::StartRecvAlarm>& alarminfo, int timeoutms = 2 * 60000);
+	typedef Function<void(OnvifResult,const OnvifClientDefs::EventInfos&)> GetEventCallback;
+	bool asyncGetEvent(const GetEventCallback& callback, const OnvifClientDefs::SubEventResponse& subeventresp, int timeoutms = 2 * 60000);
 
-	bool stopRecvAlarm();
+	bool stopSubEvent();
 public:
 	struct OnvifClientInternal;
 private:

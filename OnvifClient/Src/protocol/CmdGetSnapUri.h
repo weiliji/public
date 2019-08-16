@@ -28,17 +28,15 @@ public:
 
 		return stream.str();
 	}
-	shared_ptr<OnvifClientDefs::SnapUrl> snapurl;
+	OnvifClientDefs::SnapUrl snapurl;
 	virtual bool parse(const XMLObject::Child& body)
 	{
-		snapurl = make_shared<OnvifClientDefs::SnapUrl>();
-
 		const XMLObject::Child& resp = body.getChild("GetSnapshotUriResponse");
 		if (!resp) return false;
 
-		snapurl->url = resp.getChild("MediaUri").getChild("Uri").data();
+		snapurl.url = resp.getChild("MediaUri").getChild("Uri").data();
 
-		if (snapurl->url == "") return false;
+		if (snapurl.url == "") return false;
 
 		return true;
 	}

@@ -3,15 +3,15 @@
 #include "CmdObject.h"
 
 
-class CMDStartRecvAlarm :public CmdObject
+class CMDSubEvent :public CmdObject
 {
 public:
-	CMDStartRecvAlarm()
+	CMDSubEvent()
 	{
 		action = "http://www.onvif.org/ver10/events/wsdl/EventPortType/CreatePullPointSubscriptionRequest";
 		requesturl = EVENTSREQUESTURL;
 	}
-	virtual ~CMDStartRecvAlarm() {}
+	virtual ~CMDSubEvent() {}
 
 	virtual std::string build(const URL& URL)
 	{
@@ -28,17 +28,15 @@ public:
 		return stream.str();
 	}
 
-	shared_ptr<OnvifClientDefs::StartRecvAlarm>	startrecvalarm;
+	OnvifClientDefs::SubEventResponse	subeventresp;
 	virtual bool parse(const XMLObject::Child& body)
 	{
-		startrecvalarm = make_shared<OnvifClientDefs::StartRecvAlarm>();
-
 		const XMLObject::Child& resp = body.getChild("CreatePullPointSubscriptionResponse");
 		if (!resp) return false;
 
-		startrecvalarm->xaddr = resp.getChild("SubscriptionReference").getChild("Address").data();
-		startrecvalarm->currentTime = onvif_parse_datetime(resp.getChild("CurrentTime").data());
-		startrecvalarm->terminationTime = onvif_parse_datetime(resp.getChild("TerminationTime").data());
+		subeventresp.xaddr = resp.getChild("SubscriptionReference").getChild("Address").data();
+		subeventresp.currentTime = onvif_parse_datetime(resp.getChild("CurrentTime").data());
+		subeventresp.terminationTime = onvif_parse_datetime(resp.getChild("TerminationTime").data());
 
 		return true;
 	}

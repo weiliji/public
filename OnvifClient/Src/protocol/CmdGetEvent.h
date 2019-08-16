@@ -28,11 +28,9 @@ public:
 		return stream.str();
 	}
 
-	shared_ptr<OnvifClientDefs::RecvAlarmInfo> alarminfo;
+	OnvifClientDefs::EventInfos eventinfos;
 	virtual bool parse(const XMLObject::Child& body)
 	{
-		alarminfo = make_shared<OnvifClientDefs::RecvAlarmInfo>();
-
 		XMLObject::Child response = body.getChild("PullMessagesResponse");
 		if (response.isEmpty()) return false;
 
@@ -41,16 +39,16 @@ public:
 		{
 			do 
 			{
-				OnvifClientDefs::AlarmInfo alarm;
+				OnvifClientDefs::EventInfos::EventInfo event;
 
 				const XMLObject::Child& topicval = messageval.getChild("Topic");
 				if (topicval.isEmpty()) break;
 
-				alarm.topic = topicval.data();
+				event.topic = topicval.data();
 
 				XMLObject::Child msgval = messageval.getChild("Message").getChild("Message");
-				alarm.arrivalTime = onvif_parse_datetime(msgval.attribute("UtcTime"));
-				alarm.operation = msgval.attribute("PropertyOperation");
+				event.arrivalTime = onvif_parse_datetime(msgval.attribute("UtcTime"));
+				event.operation = msgval.attribute("PropertyOperation");
 
 				XMLObject::Child sourceitem = msgval.getChild("Source");
 				XMLObject::Child &sourceval = sourceitem.firstChild("SimpleItem");
@@ -61,7 +59,7 @@ public:
 
 					if (name.length() == 0) continue;
 
-					alarm.sources[name] = value;
+					event.sources[name] = value;
 
 					sourceval = sourceitem.nextChild();
 				}
@@ -75,13 +73,13 @@ public:
 
 					if (name.length() == 0) continue;
 
-					alarm.datas[name] = value;
+					event.datas[name] = value;
 
 					dataval = dataitem.nextChild();
 				}
 
 
-				alarminfo->alarminfos.push_back(alarm);
+				eventinfos.eventInfos.push_back(event);
 
 			} while (0);			
 

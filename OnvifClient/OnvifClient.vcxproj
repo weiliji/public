@@ -194,7 +194,7 @@
     <ClInclude Include="Src\protocol\CmdAbsoluteMove.h" />
     <ClInclude Include="Src\protocol\CmdContinuousMove.h" />
     <ClInclude Include="Src\protocol\CmdDiscovery.h" />
-    <ClInclude Include="Src\protocol\CmdGetAlarm.h" />
+    <ClInclude Include="Src\protocol\CmdGetEvent.h" />
     <ClInclude Include="Src\protocol\CmdGetCapabilities.h" />
     <ClInclude Include="Src\protocol\CmdGetConfigurationOptions.h" />
     <ClInclude Include="Src\protocol\CmdGetConfigurations.h" />
@@ -215,7 +215,7 @@
     <ClInclude Include="Src\protocol\CmdSetHomePosition.h" />
     <ClInclude Include="Src\protocol\CmdSetPreset.h" />
     <ClInclude Include="Src\protocol\CmdSetSystemDateAndTime.h" />
-    <ClInclude Include="Src\protocol\CmdStartRecvAlarm.h" />
+    <ClInclude Include="Src\protocol\CmdSubEvent.h" />
     <ClInclude Include="Src\protocol\CmdStopPTZ.h" />
     <ClInclude Include="Src\protocol\CmdStopRecvAlarm.h" />
     <ClInclude Include="Src\protocol\CmdSystemReboot.h" />

@@ -37,11 +37,9 @@ public:
 
 		return stream.str();
 	}
-	shared_ptr<OnvifClientDefs::Capabilities> capabilities;
+	OnvifClientDefs::Capabilities capabilities;
 	virtual bool parse(const XMLObject::Child& p_xml)
 	{
-		capabilities = make_shared<OnvifClientDefs::Capabilities>();
-
 		const XMLObject::Child& resp = p_xml.getChild("GetCapabilitiesResponse");
 		if (!resp) return false;
 
@@ -49,13 +47,13 @@ public:
 		if (!cap) return false;
 
 		const XMLObject::Child& media = cap.getChild("Media");
-		if(media) capabilities->Media.Support = parseMedia(media);
+		if(media) capabilities.Media.Support = parseMedia(media);
 		
 		const XMLObject::Child& ptz = cap.getChild("PTZ");
-		if(ptz) capabilities->PTZ.Support = parsePtz(ptz);
+		if(ptz) capabilities.PTZ.Support = parsePtz(ptz);
 		
 		const XMLObject::Child& events = cap.getChild("Events");
-		if (events) capabilities->Events.Support = parseEvents(events);
+		if (events) capabilities.Events.Support = parseEvents(events);
 
 		return true;
 	}
@@ -65,7 +63,7 @@ private:
 		const XMLObject::Child& xaddr = body.getChild("XAddr");
 		if (xaddr)
 		{
-			capabilities->Media.xaddr = xaddr.data();
+			capabilities.Media.xaddr = xaddr.data();
 		}
 		else
 		{
@@ -78,17 +76,17 @@ private:
 		const XMLObject::Child& rtpmult = cap.getChild("RTPMulticast");
 		if (rtpmult)
 		{
-			capabilities->Media.RTPMulticast = rtpmult.data().readBool();
+			capabilities.Media.RTPMulticast = rtpmult.data().readBool();
 		}
 		const XMLObject::Child& rtptcp = cap.getChild("RTP_TCP");
 		if (rtptcp)
 		{
-			capabilities->Media.RTP_TCP = rtptcp.data().readBool();
+			capabilities.Media.RTP_TCP = rtptcp.data().readBool();
 		}
 		const XMLObject::Child& rtsp = cap.getChild("RTP_RTSP_TCP");
 		if (rtsp)
 		{
-			capabilities->Media.RTP_RTSP_TCP = rtsp.data().readBool();
+			capabilities.Media.RTP_RTSP_TCP = rtsp.data().readBool();
 		}
 
 		return true;
@@ -100,7 +98,7 @@ private:
 		const XMLObject::Child& xaddr = ptz.getChild("XAddr");
 		if (!xaddr) return false;
 
-		capabilities->PTZ.xaddr = xaddr.data();
+		capabilities.PTZ.xaddr = xaddr.data();
 
 		return true;
 	}
@@ -110,7 +108,7 @@ private:
 		const XMLObject::Child& xaddr = p_events.getChild("XAddr");
 		if (!xaddr) return false;
 
-		capabilities->Events.xaddr = xaddr.data();
+		capabilities.Events.xaddr = xaddr.data();
 
 		return true;
 	}

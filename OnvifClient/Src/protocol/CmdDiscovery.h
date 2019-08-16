@@ -32,6 +32,19 @@ public:
 		return stream.str();
 	}
 
+	std::string parseMacAddr(const std::string& macstr)
+	{
+		int mac[6] = {0,};
+
+		char macaddrstr[64] = { 0 };
+		if (sscanf(macstr.c_str(), "%02d%02d%02d%02d%02d%02d", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) == 6)
+		{
+			sprintf(macaddrstr, "%02d-%02d-%02d-%02d-%02d-%02d", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+		}
+
+		return macaddrstr;
+	}
+
 	shared_ptr<OnvifClientDefs::DiscoveryInfo>	info;
 	virtual bool parse(const XMLObject::Child& body)
 	{
@@ -59,10 +72,18 @@ public:
 				const char* nameflag = "onvif://www.onvif.org/name/";
 
 				size_t pos = String::indexOfByCase(scopevals[i], nameflag);
-				if(pos == -1) continue;
+				if (pos != -1)
+				{
+					info->name = scopevals[i].c_str() + strlen(nameflag);
+				}
 
-				info->name = scopevals[i].c_str() + strlen(nameflag);
-				break;
+				const char* macflag = "onvif://www.onvif.org/macaddress/";
+				
+				pos = String::indexOfByCase(scopevals[i], macflag);
+				if (pos != -1)
+				{
+					info->name = parseMacAddr(scopevals[i].c_str() + strlen(macflag));
+				}
 			}
 		}
 

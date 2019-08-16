@@ -87,12 +87,6 @@
     <ClInclude Include="Src\protocol\CmdSystemReboot.h">
       <Filter>源文件\protocol</Filter>
     </ClInclude>
-    <ClInclude Include="Src\protocol\CmdStartRecvAlarm.h">
-      <Filter>源文件\protocol</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\protocol\CmdGetAlarm.h">
-      <Filter>源文件\protocol</Filter>
-    </ClInclude>
     <ClInclude Include="Src\protocol\CmdStopRecvAlarm.h">
       <Filter>源文件\protocol</Filter>
     </ClInclude>
@@ -112,6 +106,12 @@
       <Filter>源文件\protocol</Filter>
     </ClInclude>
     <ClInclude Include="Src\protocol\CmdRemovePreset.h">
+      <Filter>源文件\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\protocol\CmdGetEvent.h">
+      <Filter>源文件\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\protocol\CmdSubEvent.h">
       <Filter>源文件\protocol</Filter>
     </ClInclude>
   </ItemGroup>

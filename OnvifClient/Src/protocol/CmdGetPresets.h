@@ -31,12 +31,10 @@ public:
 		return stream.str();
 	}
 
-	shared_ptr<OnvifClientDefs::PresetInfos> preset;
+	OnvifClientDefs::PresetInfos preset;
 
 	virtual bool parse(const XMLObject::Child& body)
 	{
-		preset = make_shared<OnvifClientDefs::PresetInfos>();
-
 		XMLObject::Child respchild = body.getChild("GetPresetsResponse");
 		if (respchild.isEmpty()) return false;
 
@@ -47,7 +45,7 @@ public:
 			info.token = presetchild.attribute("token");
 			info.name = presetchild.getChild("Name").data();
 
-			preset->infos.push_back(info);
+			preset.infos.push_back(info);
 
 			presetchild = respchild.nextChild();
 		}

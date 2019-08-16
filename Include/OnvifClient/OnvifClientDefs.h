@@ -218,30 +218,31 @@ struct SnapUrl
 	std::string url;
 };
 
-struct StartRecvAlarm
+struct SubEventResponse
 {
 	URL				xaddr;
 	Time			currentTime;
 	Time			terminationTime;
 };
 
-struct AlarmInfo
+struct EventInfos
 {
-	Time			arrivalTime;
-	std::string		topic;
-	std::string		operation;
-	std::map<std::string, std::string> sources;
-	std::map<std::string, std::string> datas;
-};
+	struct EventInfo
+	{
+		Time			arrivalTime;
+		std::string		topic;
+		std::string		operation;
+		std::map<std::string, std::string> sources;
+		std::map<std::string, std::string> datas;
+	};
 
-struct RecvAlarmInfo
-{
-	std::vector<AlarmInfo> alarminfos;
+	std::vector<EventInfo> eventInfos;
 };
 
 struct DiscoveryInfo
 {
 	std::string		name;
+	std::string		mac;
 	std::vector<std::string> addrs;
 };
 

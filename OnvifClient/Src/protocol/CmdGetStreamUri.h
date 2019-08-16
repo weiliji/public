@@ -35,17 +35,15 @@ public:
 		return stream.str();
 	}
 
-	shared_ptr<OnvifClientDefs::StreamUrl> streamurl;
+	OnvifClientDefs::StreamUrl streamurl;
 	virtual bool parse(const XMLObject::Child& body)
 	{
-		streamurl = make_shared<OnvifClientDefs::StreamUrl>();
-
 		const XMLObject::Child& resp = body.getChild("GetStreamUriResponse");
 		if (!resp) return false;
 
-		streamurl->url = resp.getChild("MediaUri").getChild("Uri").data();
+		streamurl.url = resp.getChild("MediaUri").getChild("Uri").data();
 
-		if (streamurl->url == "") return false;
+		if (streamurl.url == "") return false;
 
 		return true;
 	}

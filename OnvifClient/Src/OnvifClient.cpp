@@ -57,7 +57,7 @@ struct OnvifClient::OnvifClientInternal
 struct AyncGetItem :public enable_shared_from_this<AyncGetItem>
 {
 public:
-	AyncGetItem() :result(false) {}
+	AyncGetItem() :parseSuccess(false),success(false) {}
 	virtual ~AyncGetItem() {}
 
 	bool wait(uint32_t timeout)
@@ -98,10 +98,23 @@ public:
 		internal->asyncclient->request(req, HTTPAsyncClient::HTTPCallback(&AyncGetItem::httpCallback, shared_from_this()));
 	}
 
+	OnvifResult result()
+	{
+		if (response == NULL || response->statusCode() == 408) return OnvifResult_ConnectError;
+		else if (response && response->statusCode() == 401) return OnvifResult_AuthenError;
+		else if (response && response->statusCode() != 200) return OnvifResult_RequestError;
+		else if (response && response->statusCode() == 200 && !parseSuccess) return OnvifResult_ParseError;
+		else if (response && response->statusCode() == 200 && !success) return OnvifResult_ResponseError;
+		else if (success) return OnvifResult_OK;
+
+		return OnvifResult_ResponseError;
+	}
+
 	virtual void doResult() = 0;
 private:
-	void httpCallback(const shared_ptr<HTTPClientRequest>&res, const shared_ptr<HTTPClientResponse>&response)
+	void httpCallback(const shared_ptr<HTTPClientRequest>&res, const shared_ptr<HTTPClientResponse>&_response)
 	{
+		response = _response;
 		do
 		{
 			if (response == NULL || response->statusCode() != 200)
@@ -128,7 +141,9 @@ private:
 			shared_ptr<CmdObject> cmdtmp = cmdptr.lock();
 			if (cmdtmp == NULL) break;
 
-			result = cmdtmp->parse(body);
+			parseSuccess = true;
+
+			success = cmdtmp->parse(body);
 		} while (0);
 
 		cmdsem.post();
@@ -137,13 +152,13 @@ private:
 		internal->delAsyncItem(this);
 	}
 private:
-	shared_ptr<HTTPClientRequest> client;
-	weak_ptr<CmdObject>			  cmdptr;
-	Base::Semaphore				  cmdsem;
+	shared_ptr<HTTPClientResponse>	response;
+	weak_ptr<CmdObject>				cmdptr;
+	Base::Semaphore					cmdsem;
 
 	OnvifClient::OnvifClientInternal* internal;
-public:
-	bool						  result;
+	bool							parseSuccess;
+	bool							success;
 };
 
 
@@ -178,20 +193,21 @@ struct AsyncGetInfoItem:public AyncGetItem
 
 	void doResult()
 	{
-		callback(result ? cmd->devinfo: NULL);
+		callback(result(),cmd->devinfo);
 	}
 };
 
-shared_ptr<OnvifClientDefs::Info> OnvifClient::getInfo(int timeoutms)
+OnvifResult OnvifClient::getInfo(OnvifClientDefs::Info& info,int timeoutms)
 {
 	shared_ptr< AsyncGetInfoItem> cmditem = make_shared<AsyncGetInfoItem>();
 	cmditem->cmd = make_shared<CMDGetDeviceInformation>();
 
 	cmditem->start(cmditem->cmd, internal, timeoutms);
 
-	if(!cmditem->wait(timeoutms)) return shared_ptr<OnvifClientDefs::Info>();
-	
-	return cmditem->cmd->devinfo;
+	cmditem->wait(timeoutms);
+	info = cmditem->cmd->devinfo;
+
+	return cmditem->result();
 }
 
 
@@ -215,22 +231,25 @@ struct AsyncGetCapabilitiesItem :public AyncGetItem
 
 	void doResult()
 	{
-		callback(result ? cmd->capabilities : NULL);
+		callback(result(),cmd->capabilities);
 	}
 };
 
 
-shared_ptr<OnvifClientDefs::Capabilities> OnvifClient::getCapabities(int timeoutms)
+OnvifResult OnvifClient::getCapabities(OnvifClientDefs::Capabilities& cap,int timeoutms)
 {
 	shared_ptr< AsyncGetCapabilitiesItem> cmditem = make_shared<AsyncGetCapabilitiesItem>();
 	cmditem->cmd = make_shared<CMDGetCapabilities>();
 
 	cmditem->start(cmditem->cmd, internal, timeoutms);
 
-	if (!cmditem->wait(timeoutms)) return shared_ptr<OnvifClientDefs::Capabilities>();
+	cmditem->wait(timeoutms);
 
-	return cmditem->cmd->capabilities;
+	cap = cmditem->cmd->capabilities;
+
+	return cmditem->result();
 }
+
 bool OnvifClient::asyncGetCapabities(const GetCapabilitiesCallback& callbac, int timeoutms)
 {
 	shared_ptr< AsyncGetCapabilitiesItem> cmditem = make_shared<AsyncGetCapabilitiesItem>();
@@ -240,15 +259,6 @@ bool OnvifClient::asyncGetCapabities(const GetCapabilitiesCallback& callbac, int
 
 	return true;
 }
-//shared_ptr<OnvifClientDefs::Scopes> OnvifClient::getScopes(int timeoutms)
-//{
-//	shared_ptr<CMDGetScopes> cmd = make_shared<CMDGetScopes>();
-//
-//	internal->sendOvifRequest(cmd.get(), timeoutms);
-//
-//	return cmd->scopes;
-//}
-
 
 struct AsyncGetProfilesItem :public AyncGetItem
 {
@@ -258,19 +268,21 @@ struct AsyncGetProfilesItem :public AyncGetItem
 
 	void doResult()
 	{
-		callback(result ? cmd->profileInfo : NULL);
+		callback(result(),cmd->profileInfo);
 	}
 };
-shared_ptr<OnvifClientDefs::Profiles> OnvifClient::getProfiles(int timeoutms)
+OnvifResult OnvifClient::getProfiles(OnvifClientDefs::Profiles& profs,int timeoutms)
 {
 	shared_ptr< AsyncGetProfilesItem> cmditem = make_shared<AsyncGetProfilesItem>();
 	cmditem->cmd = make_shared<CMDGetProfiles>();
 
 	cmditem->start(cmditem->cmd, internal, timeoutms);
 
-	if (!cmditem->wait(timeoutms)) return shared_ptr<OnvifClientDefs::Profiles>();
+	cmditem->wait(timeoutms);
 
-	return cmditem->cmd->profileInfo;
+	profs = cmditem->cmd->profileInfo;
+
+	return cmditem->result();
 }
 bool OnvifClient::asyncGetProfiles(const GetProfilesCallback& callback, int timeoutms)
 {
@@ -290,19 +302,21 @@ struct AsyncGetStreamUrlItem :public AyncGetItem
 
 	void doResult()
 	{
-		callback(result ? cmd->streamurl : NULL);
+		callback(result(),cmd->streamurl);
 	}
 };
-shared_ptr<OnvifClientDefs::StreamUrl> OnvifClient::getStreamUrl(const OnvifClientDefs::ProfileInfo& info, int timeoutms)
+OnvifResult OnvifClient::getStreamUrl(const OnvifClientDefs::ProfileInfo& info, OnvifClientDefs::StreamUrl& streamurl,int timeoutms)
 {
 	shared_ptr< AsyncGetStreamUrlItem> cmditem = make_shared<AsyncGetStreamUrlItem>();
 	cmditem->cmd = make_shared<CmdGetStreamURL>(info.token);
 
 	cmditem->start(cmditem->cmd, internal, timeoutms);
 
-	if (!cmditem->wait(timeoutms)) return shared_ptr<OnvifClientDefs::StreamUrl>();
+	cmditem->wait(timeoutms);
+	
+	streamurl = cmditem->cmd->streamurl;
 
-	return cmditem->cmd->streamurl;
+	return cmditem->result();
 }
 bool OnvifClient::asyncGetStreamUrl(const GetStreamUrlCallback& callbac, const OnvifClientDefs::ProfileInfo& info, int timeoutms)
 {
@@ -322,20 +336,22 @@ struct AsyncGetSnapUrlItem :public AyncGetItem
 
 	void doResult()
 	{
-		callback(result ? cmd->snapurl : NULL);
+		callback(result(),cmd->snapurl);
 	}
 };
 
-shared_ptr<OnvifClientDefs::SnapUrl> OnvifClient::getSnapUrl(const OnvifClientDefs::ProfileInfo& info, int timeoutms)
+OnvifResult OnvifClient::getSnapUrl(const OnvifClientDefs::ProfileInfo& info, OnvifClientDefs::SnapUrl& snapurl,int timeoutms)
 {
 	shared_ptr< AsyncGetSnapUrlItem> cmditem = make_shared<AsyncGetSnapUrlItem>();
 	cmditem->cmd = make_shared<CmdGetSnapURL>(info.token);
 
 	cmditem->start(cmditem->cmd, internal, timeoutms);
 
-	if (!cmditem->wait(timeoutms)) return shared_ptr<OnvifClientDefs::SnapUrl>();
+	cmditem->wait(timeoutms);
 
-	return cmditem->cmd->snapurl;
+	snapurl = cmditem->cmd->snapurl;
+
+	return cmditem->result();
 }
 bool OnvifClient::asyncGetSnapUrl(const GetSnapUrlCallback& callbac, const OnvifClientDefs::ProfileInfo& info, int timeoutms)
 {
@@ -355,20 +371,23 @@ struct AsyncGetNetworkInterfacesItem :public AyncGetItem
 
 	void doResult()
 	{
-		callback(result ? cmd->network : NULL);
+		callback(result(),cmd->network);
 	}
 };
 
-shared_ptr<OnvifClientDefs::NetworkInterfaces> OnvifClient::getNetworkInterfaces(int timeoutms)
+OnvifResult OnvifClient::getNetworkInterfaces(OnvifClientDefs::NetworkInterfaces& network,int timeoutms)
 {
 	shared_ptr< AsyncGetNetworkInterfacesItem> cmditem = make_shared<AsyncGetNetworkInterfacesItem>();
 	cmditem->cmd = make_shared<CmdGetNetworkInterfaces>();
 
 	cmditem->start(cmditem->cmd, internal, timeoutms);
 
-	if (!cmditem->wait(timeoutms)) return shared_ptr<OnvifClientDefs::NetworkInterfaces>();
+	cmditem->wait(timeoutms);
 
-	return cmditem->cmd->network;
+	network = cmditem->cmd->network;
+
+
+	return cmditem->result();
 }
 
 bool OnvifClient::asyncGetNetworkInterfaces(const GetNetworkInterfacesCallback& callbac, int timeoutms)
@@ -398,19 +417,19 @@ struct AsyncContinuousMoveItem :public AyncGetItem
 
 	void doResult()
 	{
-		callback(result);
+		callback(result());
 	}
 };
-bool OnvifClient::continuousMove(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PTZCtrl& ptzctrl, int timeoutms)
+OnvifResult OnvifClient::continuousMove(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PTZCtrl& ptzctrl, int timeoutms)
 {
 	shared_ptr< AsyncContinuousMoveItem> cmditem = make_shared<AsyncContinuousMoveItem>();
 	cmditem->cmd = make_shared<CmdContinuousMove>(ptzctrl, info.token);
 
 	cmditem->start(cmditem->cmd, internal, timeoutms);
 
-	if (!cmditem->wait(timeoutms)) return false;
+	cmditem->wait(timeoutms);
 
-	return cmditem->result;
+	return cmditem->result();
 }
 bool OnvifClient::asyncContinuousMoveCallback(const ContinuousMoveCallback& callback, const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PTZCtrl& ptzctrl, int timeoutms)
 {
@@ -421,14 +440,6 @@ bool OnvifClient::asyncContinuousMoveCallback(const ContinuousMoveCallback& call
 
 	return true;
 }
-//bool OnvifClient::absoluteMove(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PTZCtrl& ptzctrl, int timeoutms)
-//{
-//	shared_ptr<CmdAbsoluteMove> cmd;// = make_shared<CmdAbsoluteMove>();
-//
-//	if (!internal->sendOvifRequest(cmd.get(), timeoutms)) return false;
-//
-//	return true;
-//}
 
 struct AsyncStopPtzItem :public AyncGetItem
 {
@@ -438,19 +449,19 @@ struct AsyncStopPtzItem :public AyncGetItem
 
 	void doResult()
 	{
-		callback(result);
+		callback(result());
 	}
 };
-bool OnvifClient::stopPTZ(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PTZCtrl& ptzctrl, int timeoutms)
+OnvifResult OnvifClient::stopPTZ(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PTZCtrl& ptzctrl, int timeoutms)
 {
 	shared_ptr< AsyncStopPtzItem> cmditem = make_shared<AsyncStopPtzItem>();
 	cmditem->cmd = make_shared<CmdStopPTZ>(ptzctrl, info.token);
 
 	cmditem->start(cmditem->cmd, internal, timeoutms);
 
-	if (!cmditem->wait(timeoutms)) return false;
+	cmditem->wait(timeoutms);
 
-	return cmditem->result;
+	return cmditem->result();
 }
 bool OnvifClient::asyncStopPtz(const StopPTRCallback& callbac, const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PTZCtrl& ptzctrl, int timeoutms)
 {
@@ -470,20 +481,20 @@ struct AsyncSetPresestItem :public AyncGetItem
 
 	void doResult()
 	{
-		callback(result);
+		callback(result());
 	}
 };
 
-bool OnvifClient::setPreset(const OnvifClientDefs::ProfileInfo& info, const std::string& presetname, int timeoutms)
+OnvifResult OnvifClient::setPreset(const OnvifClientDefs::ProfileInfo& info, const std::string& presetname, int timeoutms)
 {
 	shared_ptr< AsyncSetPresestItem> cmditem = make_shared<AsyncSetPresestItem>();
 	cmditem->cmd = make_shared<CmdSetPreset>(presetname, info.token);
 
 	cmditem->start(cmditem->cmd, internal, timeoutms);
 
-	if (!cmditem->wait(timeoutms)) return false;
+	cmditem->wait(timeoutms);
 
-	return cmditem->result;
+	return cmditem->result();
 }
 bool OnvifClient::asyncSetPresest(const SetPresetCallback& callbac, const OnvifClientDefs::ProfileInfo& info, const std::string& presetname, int timeoutms)
 {
@@ -503,20 +514,22 @@ struct AsyncGetPresestItem :public AyncGetItem
 
 	void doResult()
 	{
-		callback(result ? cmd->preset : NULL);
+		callback(result(), cmd->preset);
 	}
 };
 
-shared_ptr<OnvifClientDefs::PresetInfos> OnvifClient::getPreset(const OnvifClientDefs::ProfileInfo& info, int timeoutms)
+OnvifResult OnvifClient::getPreset(const OnvifClientDefs::ProfileInfo& info, OnvifClientDefs::PresetInfos& presetinfo,int timeoutms)
 {
 	shared_ptr< AsyncGetPresestItem> cmditem = make_shared<AsyncGetPresestItem>();
 	cmditem->cmd = make_shared<CmdGetPresets>(info.token);
 
 	cmditem->start(cmditem->cmd, internal, timeoutms);
 
-	if (!cmditem->wait(timeoutms)) return shared_ptr<OnvifClientDefs::PresetInfos>();
+	cmditem->wait(timeoutms);
 
-	return cmditem->cmd->preset;
+	presetinfo = cmditem->cmd->preset;
+
+	return cmditem->result();
 }
 bool OnvifClient::asyncGetPreset(const GetPresetCallback& callback, const OnvifClientDefs::ProfileInfo& info, int timeoutms)
 {
@@ -536,19 +549,19 @@ struct AsyncGotoPresetItem :public AyncGetItem
 
 	void doResult()
 	{
-		callback(result);
+		callback(result());
 	}
 };
-bool  OnvifClient::gotoPreset(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PresetInfo& presetinfo, int timeoutms)
+OnvifResult  OnvifClient::gotoPreset(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PresetInfo& presetinfo, int timeoutms)
 {
 	shared_ptr< AsyncGotoPresetItem> cmditem = make_shared<AsyncGotoPresetItem>();
 	cmditem->cmd = make_shared<CmdGotoPreset>(presetinfo, info.token);
 
 	cmditem->start(cmditem->cmd, internal, timeoutms);
 
-	if (!cmditem->wait(timeoutms)) return false;
+	cmditem->wait(timeoutms);
 
-	return true;
+	return cmditem->result();
 }
 bool OnvifClient::asyncGotoPreset(const GotoPresetCallback& callback, const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PresetInfo& presetinfo, int timeoutms)
 {
@@ -568,20 +581,20 @@ struct AsyncRemovePresetItem :public AyncGetItem
 
 	void doResult()
 	{
-		callback(result);
+		callback(result());
 	}
 };
 
-bool  OnvifClient::removePreset(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PresetInfo& presetinfo, int timeoutms)
+OnvifResult  OnvifClient::removePreset(const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PresetInfo& presetinfo, int timeoutms)
 {
 	shared_ptr< AsyncRemovePresetItem> cmditem = make_shared<AsyncRemovePresetItem>();
 	cmditem->cmd = make_shared<CmdRemovePreset>(presetinfo, info.token);
 
 	cmditem->start(cmditem->cmd, internal, timeoutms);
 
-	if (!cmditem->wait(timeoutms)) return false;
+	cmditem->wait(timeoutms);
 
-	return true;
+	return cmditem->result();
 }
 bool OnvifClient::asyncRemovePreset(const RemovePresetCallback& callback, const OnvifClientDefs::ProfileInfo& info, const OnvifClientDefs::PresetInfo& presetinfo, int timeoutms)
 {
@@ -592,24 +605,6 @@ bool OnvifClient::asyncRemovePreset(const RemovePresetCallback& callback, const 
 
 	return true;
 }
-//shared_ptr<OnvifClientDefs::PTZConfig> OnvifClient::getConfigurations(int timeoutms)
-//{
-//	shared_ptr<CmdGetConfigurations> cmd = make_shared<CmdGetConfigurations>();
-//
-//	if (!internal->sendOvifRequest(cmd.get(), timeoutms)) return shared_ptr<OnvifClientDefs::PTZConfig>();
-//
-//	return cmd->ptzcfg;
-//}
-//shared_ptr<OnvifClientDefs::ConfigurationOptions> OnvifClient::getConfigurationOptions(const shared_ptr<OnvifClientDefs::PTZConfig>& ptzcfg, int timeoutms)
-//{
-//	if (ptzcfg == NULL) return make_shared<OnvifClientDefs::ConfigurationOptions>();
-//
-//	shared_ptr<CmdGetConfigurationOptions> cmd = make_shared<CmdGetConfigurationOptions>(ptzcfg->token);
-//
-//	if (!internal->sendOvifRequest(cmd.get(), timeoutms)) return shared_ptr<OnvifClientDefs::ConfigurationOptions>();
-//
-//	return cmd->options;
-//}
 
 struct AsyncGetSystemDatetimeItem :public AyncGetItem
 {
@@ -619,19 +614,21 @@ struct AsyncGetSystemDatetimeItem :public AyncGetItem
 
 	void doResult()
 	{
-		callback(result ? cmd->time : NULL);
+		callback(result(), cmd->time);
 	}
 };
-shared_ptr<Time> OnvifClient::getSystemDatetime(int timeoutms)
+OnvifResult OnvifClient::getSystemDatetime(Time& time,int timeoutms)
 {
 	shared_ptr< AsyncGetSystemDatetimeItem> cmditem = make_shared<AsyncGetSystemDatetimeItem>();
 	cmditem->cmd = make_shared<CmdGetSystemDateAndTime>();
 
 	cmditem->start(cmditem->cmd, internal, timeoutms);
 
-	if (!cmditem->wait(timeoutms)) return shared_ptr<Time>();
+	cmditem->wait(timeoutms);
 
-	return cmditem->cmd->time;
+	time = cmditem->cmd->time;
+
+	return cmditem->result();
 }
 bool OnvifClient::asyncGetSystemDatetime(const GetSystemDateTimeCallback& callbck, int timeoutms)
 {
@@ -651,20 +648,20 @@ struct AsyncSetSystemDatetimeItem :public AyncGetItem
 
 	void doResult()
 	{
-		callback(result);
+		callback(result());
 	}
 };
 
-bool OnvifClient::SetSystemDatetime(const Time& time, int timeoutms)
+OnvifResult OnvifClient::SetSystemDatetime(const Time& time, int timeoutms)
 {
 	shared_ptr< AsyncSetSystemDatetimeItem> cmditem = make_shared<AsyncSetSystemDatetimeItem>();
 	cmditem->cmd = make_shared<CmdSetSystemDateAndTime>(time);
 
 	cmditem->start(cmditem->cmd, internal, timeoutms);
 
-	if (!cmditem->wait(timeoutms)) return false;
+	cmditem->wait(timeoutms);
 
-	return true;
+	return cmditem->result();
 }
 bool OnvifClient::asyncSetSystemDatetime(const SetSystemDatetimeCallback& callback, const Time& time, int timeoutms)
 {
@@ -684,20 +681,20 @@ struct AsyncSystemRebootItem :public AyncGetItem
 
 	void doResult()
 	{
-		callback(result);
+		callback(result());
 	}
 };
 
-bool OnvifClient::systemReboot(int timeoutms)
+OnvifResult OnvifClient::systemReboot(int timeoutms)
 {
 	shared_ptr< AsyncSystemRebootItem> cmditem = make_shared<AsyncSystemRebootItem>();
 	cmditem->cmd = make_shared<CMDSystemReboot>();
 
 	cmditem->start(cmditem->cmd, internal, timeoutms);
 
-	if (!cmditem->wait(timeoutms)) return false;
+	cmditem->wait(timeoutms);
 
-	return true;
+	return cmditem->result();
 }
 bool OnvifClient::asyncSystemReboot(const SystemRebootCallback& callback, int timeoutms)
 {
@@ -709,88 +706,87 @@ bool OnvifClient::asyncSystemReboot(const SystemRebootCallback& callback, int ti
 	return true;
 }
 
-struct AsyncStartRecvAlarmItem :public AyncGetItem
+struct AsyncSubscribeEventItem :public AyncGetItem
 {
-	shared_ptr<CMDStartRecvAlarm> cmd;
+	shared_ptr<CMDSubEvent> cmd;
 
-	OnvifClient::StartRecvAlarmCallback		callback;
+	OnvifClient::SubscribeEventCallback		callback;
 
 	void doResult()
 	{
-		callback(result ? cmd->startrecvalarm : NULL);
+		callback(result(), cmd->subeventresp);
 	}
 };
 
-shared_ptr<OnvifClientDefs::StartRecvAlarm>  OnvifClient::startRecvAlarm(const shared_ptr<OnvifClientDefs::Capabilities>& capabilities,int timeoutms)
+OnvifResult  OnvifClient::subscribeEvent(const OnvifClientDefs::Capabilities& capabilities, OnvifClientDefs::SubEventResponse& subeventresp,int timeoutms)
 {
-	if (capabilities == NULL || !capabilities->Events.Support)
+	if (!capabilities.Events.Support)
 	{
-		return shared_ptr<OnvifClientDefs::StartRecvAlarm>();
+		return OnvifResult_NotSupport;
 	}
 
-	shared_ptr< AsyncStartRecvAlarmItem> cmditem = make_shared<AsyncStartRecvAlarmItem>();
-	cmditem->cmd = make_shared<CMDStartRecvAlarm>();
+	shared_ptr< AsyncSubscribeEventItem> cmditem = make_shared<AsyncSubscribeEventItem>();
+	cmditem->cmd = make_shared<CMDSubEvent>();
 
 	cmditem->start(cmditem->cmd, internal, timeoutms);
 
-	if (!cmditem->wait(timeoutms)) return shared_ptr<OnvifClientDefs::StartRecvAlarm>();
+	cmditem->wait(timeoutms);
 
-	return cmditem->cmd->startrecvalarm;
+	subeventresp = cmditem->cmd->subeventresp;
+
+	return cmditem->result();
 }
-bool OnvifClient::asyncStartRecvAlarm(const StartRecvAlarmCallback& callback, const shared_ptr<OnvifClientDefs::Capabilities>& capabilities, int timeoutms)
+bool OnvifClient::asyncSubscribeEvent(const SubscribeEventCallback& callback, const OnvifClientDefs::Capabilities& capabilities, int timeoutms)
 {
-	if (capabilities == NULL || !capabilities->Events.Support)
+	if (!capabilities.Events.Support)
 	{
 		return false;
 	}
 
-	shared_ptr< AsyncStartRecvAlarmItem> cmditem = make_shared<AsyncStartRecvAlarmItem>();
-	cmditem->cmd = make_shared<CMDStartRecvAlarm>();
+	shared_ptr< AsyncSubscribeEventItem> cmditem = make_shared<AsyncSubscribeEventItem>();
+	cmditem->cmd = make_shared<CMDSubEvent>();
 
 	cmditem->start(cmditem->cmd, internal, timeoutms);
 
 	return true;
 }
-struct AsyncRecvAlarmItem :public AyncGetItem
+struct AsyncGetEventItem :public AyncGetItem
 {
 	shared_ptr<CMDGetAlarm> cmd;
 
-	OnvifClient::RecvAlarmCallback		callback;
+	OnvifClient::GetEventCallback		callback;
 
 	void doResult()
 	{
-		callback(result ? cmd->alarminfo : NULL);
+		callback(result(),cmd->eventinfos);
 	}
 };
 
 
-shared_ptr<OnvifClientDefs::RecvAlarmInfo> OnvifClient::recvAlarm(const shared_ptr<OnvifClientDefs::StartRecvAlarm>& alarminfo, int timeoutms)
+OnvifResult OnvifClient::getEvent(const OnvifClientDefs::SubEventResponse& subeventresp, OnvifClientDefs::EventInfos& eventinfos, int timeoutms)
 {
-	if (alarminfo == NULL) return shared_ptr<OnvifClientDefs::RecvAlarmInfo>();
-
-	shared_ptr< AsyncRecvAlarmItem> cmditem = make_shared<AsyncRecvAlarmItem>();
+	shared_ptr< AsyncGetEventItem> cmditem = make_shared<AsyncGetEventItem>();
 	cmditem->cmd = make_shared<CMDGetAlarm>();
 
-	cmditem->start(cmditem->cmd, internal, timeoutms);
+	cmditem->start(cmditem->cmd, internal, timeoutms, subeventresp.xaddr);
 
-	if (!cmditem->wait(timeoutms)) return shared_ptr<OnvifClientDefs::RecvAlarmInfo>();
+	cmditem->wait(timeoutms);
+	eventinfos = cmditem->cmd->eventinfos;
 
-	return cmditem->cmd->alarminfo;
+	return cmditem->result();
 }
 
-bool OnvifClient::asyncRecvAlarm(const RecvAlarmCallback& callback, const shared_ptr<OnvifClientDefs::StartRecvAlarm>& alarminfo, int timeoutms)
+bool OnvifClient::asyncGetEvent(const GetEventCallback& callback, const OnvifClientDefs::SubEventResponse& subeventresp, int timeoutms)
 {
-	if (alarminfo == NULL) return false;
-
-	shared_ptr< AsyncRecvAlarmItem> cmditem = make_shared<AsyncRecvAlarmItem>();
+	shared_ptr< AsyncGetEventItem> cmditem = make_shared<AsyncGetEventItem>();
 	cmditem->cmd = make_shared<CMDGetAlarm>();
 
-	cmditem->start(cmditem->cmd, internal, timeoutms);
+	cmditem->start(cmditem->cmd, internal, timeoutms, subeventresp.xaddr);
 
 	return true;
 }
 
-bool OnvifClient::stopRecvAlarm()
+bool OnvifClient::stopSubEvent()
 {
 	return true;
 }
