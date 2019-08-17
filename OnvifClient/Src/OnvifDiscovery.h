@@ -22,6 +22,27 @@ public:
 		muludp = UDP::create(ioworker);
 		muludp->bind(DISCONVERYPORT);
 		
+		{
+			/* 设置要加入组播的地址 */
+			memset(&mreq,0, sizeof(struct ip_mreq));
+
+			/* 设置组地址 */
+			mreq.imr_multiaddr.s_addr = inet_addr(DISCONVERADDR);
+			/* 设置发送组播消息的源主机的地址信息 */
+			mreq.imr_interface.s_addr = htonl(INADDR_ANY);
+
+			/* 把本机加入组播地址，即本机网卡作为组播成员，只有加入组才能收到组播消息 */
+			if (!muludp->setSocketOpt(IPPROTO_IP, IP_ADD_MEMBERSHIP_V2, (const char*)&mreq, sizeof(struct ip_mreq)))
+			{
+				return false;
+			}
+			int loop = 0;
+			if (!muludp->setSocketOpt(IPPROTO_IP, IP_MULTICAST_LOOP, (const char*)&loop, sizeof(loop)))
+			{
+				return false;
+			}
+		}
+
 		muludp->async_recvfrom(Socket::RecvFromCallback(&OnvifDisconvery::onSocketMULRecvCallback, this), 1024 * 10);
 
 
@@ -65,12 +86,6 @@ private:
 	}
 	shared_ptr<OnvifClientDefs::DiscoveryInfo> parseDiscoverMessage(const char* buffer, int len)
 	{
-		size_t pos = String::indexOf(std::string(buffer, len), "ProbeMatches");
-		if (pos != -1)
-		{
-			int a = 0;
-		}
-
 		CmdDiscovery disconvery;
 		if(!disconvery.parseGSopProtocol(std::string(buffer, len))) return shared_ptr<OnvifClientDefs::DiscoveryInfo>();
 

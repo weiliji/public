@@ -30,7 +30,7 @@ public:
 		XMLObject::Child& probe = body().addChild("Probe");
 		probe.attribute("xmlns","http://schemas.xmlsoap.org/ws/2005/04/discovery");
 
-		XMLObject::Child& types = probe.addChild("d:Types","dp0:NetworkVideoDisplay");
+		XMLObject::Child& types = probe.addChild("d:Types","dp0:NetworkVideoTransmitter");
 		types.attribute("xmlns:d","http://schemas.xmlsoap.org/ws/2005/04/discovery");
 		types.attribute("xmlns:dp0", "http://www.onvif.org/ver10/network/wsdl");
 
