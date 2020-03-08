@@ -6,28 +6,30 @@
 class CmdSetPreset :public CmdObject
 {
 public:
-	CmdSetPreset(const std::string& _presetname,const std::string& _ptztoken):CmdObject(URL_ONVIF_PTZ),presetname(_presetname),ptztoken(_ptztoken)
+	CmdSetPreset(uint32_t _index, const std::string& _presetname,const std::string& _ptztoken):CmdObject(URL_ONVIF_PTZ), index(_index),presetname(_presetname),ptztoken(_ptztoken)
 	{
 	}
 	virtual ~CmdSetPreset() {}
 
+    uint32_t index;
 	std::string presetname;
 	std::string ptztoken;
 
 	virtual std::string build(const URL& URL)
 	{
-		XMLObject::Child& setpreset = body().addChild("SetPreset");
+		XML::Child& setpreset = body().addChild("SetPreset");
 
-		setpreset.attribute("xmlns", "http://www.onvif.org/ver20/ptz/wsdl");
+		setpreset.addAttribute("xmlns", "http://www.onvif.org/ver20/ptz/wsdl");
 
 		setpreset.addChild("ProfileToken", ptztoken);
+        setpreset.addChild("PresetToken", index);
 		setpreset.addChild("PresetName", presetname);
 
 		return CmdObject::build(URL);
 	}
-	virtual bool parse(const XMLObject::Child& body)
+	virtual bool parse(const XML::Child& body)
 	{
-		const XMLObject::Child& responseval = body.getChild("SetPresetResponse");
+		const XML::Child& responseval = body.getChild("SetPresetResponse");
 
 		return !responseval.isEmpty();
 	}

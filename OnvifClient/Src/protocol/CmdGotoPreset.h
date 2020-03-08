@@ -6,28 +6,28 @@
 class CmdGotoPreset :public CmdObject
 {
 public:
-	CmdGotoPreset(const OnvifClientDefs::PresetInfo& _presetinfo,const std::string& _token):CmdObject(URL_ONVIF_PTZ),presetinfo(_presetinfo),token(_token)
+	CmdGotoPreset(uint32_t _index, const std::string& _token):CmdObject(URL_ONVIF_PTZ), index(_index), token(_token)
 	{
 	}
 	virtual ~CmdGotoPreset() {}
 
-	OnvifClientDefs::PresetInfo presetinfo;
+    uint32_t index;
 	std::string token;
 
 	virtual std::string build(const URL& URL)
 	{
-		XMLObject::Child& gotoptreset = body().addChild("GotoPreset");
+		XML::Child& gotoptreset = body().addChild("GotoPreset");
 
-		gotoptreset.attribute("xmlns", "http://www.onvif.org/ver20/ptz/wsdl");
+		gotoptreset.addAttribute("xmlns", "http://www.onvif.org/ver20/ptz/wsdl");
 
 		gotoptreset.addChild("ProfileToken", token);
-		gotoptreset.addChild("PresetToken", presetinfo.token);
+		gotoptreset.addChild("PresetToken", index);
 
 		return CmdObject::build(URL);
 	}
-	virtual bool parse(const XMLObject::Child& body)
+	virtual bool parse(const XML::Child& body)
 	{
-		const XMLObject::Child& respchild = body.getChild("GotoPresetResponse");
+		const XML::Child& respchild = body.getChild("GotoPresetResponse");
 		if (respchild.isEmpty()) return false;
 
 		return true;

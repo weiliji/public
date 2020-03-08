@@ -27,6 +27,11 @@ public:
 	/// 析构函数,会销毁系统互斥量
 	~Mutex();
 
+	/// 尝试进入临界区
+	/// \retval true 成功
+	/// \retval false 失败
+	bool tryEnter();
+
 	/// 进入临界区
 	/// \retval true 成功
 	/// \retval false 失败

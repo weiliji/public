@@ -2,9 +2,7 @@
 #include "../common/udpPortAlloc.h"
 using namespace Public::RTSP;
 
-#define MAXRTSPCONNECTIONTIMEOUT	60*1000
-
-struct RTSPServer::RTSPServerInternal:public UDPPortAlloc
+struct RTSPServer::RTSPServerInternal
 {
 	std::string							useragent;
 
@@ -20,53 +18,65 @@ struct RTSPServer::RTSPServerInternal:public UDPPortAlloc
 
 	shared_ptr<Timer>					pooltimer;
 
+	shared_ptr<UDPPortAlloc>			portalloc;
+
 	RTSPServerInternal() {}
 
 	void onpooltimerproc(unsigned long)
 	{
-		std::list< shared_ptr<RTSPServerSession> > freelisttmp;
+		std::map<Socket*, shared_ptr<RTSPServerSession> > serverlistmp;
 		{
-			Guard locker(mutex); 
+			Guard locker(mutex);
+			serverlistmp = serverlist;
+		}
 
-			uint64_t nowtime = Time::getCurrentMilliSecond();
-
-			for (std::map<Socket*, shared_ptr<RTSPServerSession> >::iterator iter = serverlist.begin(); iter != serverlist.end();)
+		for (std::map<Socket*, shared_ptr<RTSPServerSession> >::iterator iter = serverlistmp.begin(); iter != serverlistmp.end();iter++)
+		{
+			shared_ptr<RTSPServerSession> session = iter->second;
+			
+			session->onPoolTimerProc(); 
+			if (session->sessionIsTimeout())
 			{
-				uint64_t prevtime = iter->second->prevAlivetime();
-				if (prevtime == 0 || (nowtime > prevtime && nowtime - prevtime > MAXRTSPCONNECTIONTIMEOUT))
+				session->closedByTimeout();
+				session->disconnect();
+
 				{
-					freelisttmp.push_back(iter->second);
-					serverlist.erase(iter++);
+					Guard locker(mutex);
+					serverlist.erase(iter->first);
 				}
-				else
+
+				continue;
+			}
+
+			if (session->connectStatus() != NetStatus_connected)
+			{
+				session->disconnect();
+
 				{
-					iter++;
+					Guard locker(mutex);
+					serverlist.erase(iter->first);
 				}
 			}
 		}
-
-		for (std::list< shared_ptr<RTSPServerSession> >::iterator iter = freelisttmp.begin(); iter != freelisttmp.end(); iter++)
+	}
+	void inputSocket(const shared_ptr<Socket>& newsock, const char* buffer, uint32_t bufferlen)
+	{
 		{
-			shared_ptr<RTSPServerHandler> handler = (*iter)->handler();
-			if (handler)
+			shared_ptr<RTSPServerSession> session = shared_ptr<RTSPServerSession>(new  RTSPServerSession(ioworker, listencallback, portalloc, useragent));
+
 			{
-				handler->onClose(*iter,(*iter)->prevAlivetime() == 0 ? "disconnect":"timeout");
+				Guard locker(mutex);
+				serverlist[newsock.get()] = session;
 			}
-			(*iter)->disconnect();
+
+			session->initRTSPServerSessionPtr(session,newsock,buffer,bufferlen);
 		}
 	}
 	void onsocketaccept(const weak_ptr<Socket>& sock, const shared_ptr<Socket>& newsock)
 	{
 		if(newsock)
 		{
-			AllockUdpPortCallback alloccallback(&UDPPortAlloc::allockRTPPort, (UDPPortAlloc*)this);
-
-			shared_ptr<RTSPServerSession> session = shared_ptr<RTSPServerSession>(new  RTSPServerSession(ioworker,newsock, listencallback, alloccallback, useragent));
-			session->initRTSPServerSessionPtr(session);
-
-
-			Guard locker(mutex);
-			serverlist[newsock.get()] = session;
+			inputSocket(newsock, NULL, 0);
 		}
 		
 
@@ -79,14 +89,12 @@ struct RTSPServer::RTSPServerInternal:public UDPPortAlloc
 };
 
 
-RTSPServer::RTSPServer(const shared_ptr<IOWorker>& worker, const std::string& useragent)
+RTSPServer::RTSPServer(const std::string& useragent)
 {
 	internal = new RTSPServerInternal();
 
-	internal->ioworker = worker;
 	internal->useragent = useragent;
-
-	if (internal->ioworker == NULL) internal->ioworker = IOWorker::defaultWorker();
+	internal->portalloc = make_shared<UDPPortAlloc>();
 }
 RTSPServer::~RTSPServer()
 {
@@ -96,20 +104,23 @@ RTSPServer::~RTSPServer()
 }
 bool RTSPServer::initRTPOverUdpType(uint32_t startport, uint32_t stopport)
 {
-	internal->setUdpPortInfo(startport, stopport);
+	internal->portalloc->setUdpPortInfo(startport, stopport);
 
 	return true;
 }
-bool RTSPServer::run(uint32_t port, const ListenCallback& callback)
+bool RTSPServer::run(const shared_ptr<IOWorker>& worker, uint32_t port, const ListenCallback& callback)
 {
 	internal->listencallback = callback;
 	internal->port = port;
+	internal->ioworker = worker;
 
-	if (internal->ioworker == NULL || internal->port == 0) return false;
+	if (internal->ioworker == NULL) internal->ioworker = IOWorker::defaultWorker();
 
-	internal->tcpserver = TCPServer::create(internal->ioworker, port);
-	internal->tcpserver->async_accept(Socket::AcceptedCallback(&RTSPServerInternal::onsocketaccept, internal));
-
+	if (internal->ioworker != NULL || internal->port != 0)
+	{
+		internal->tcpserver = TCPServer::create(internal->ioworker, port);
+		internal->tcpserver->async_accept(Socket::AcceptedCallback(&RTSPServerInternal::onsocketaccept, internal));
+	}
 
 	internal->pooltimer = make_shared<Timer>("RTSPServer");
 	internal->pooltimer->start(Timer::Proc(&RTSPServerInternal::onpooltimerproc, internal), 0, 1000);
@@ -127,4 +138,9 @@ bool RTSPServer::stop()
 uint32_t RTSPServer::listenPort() const
 {
 	return internal->port;
+}
+
+void RTSPServer::inputSocket(const shared_ptr<Socket>& sock, const char* buffer, uint32_t bufferlen)
+{
+	internal->inputSocket(sock, buffer, bufferlen);
 }

@@ -6,7 +6,6 @@
 //	Description:
 //	$Id: Thread.h 159 2013-09-03 05:37:51Z  $
 
-
 #ifndef __BASE_THREAD_H_
 #define __BASE_THREAD_H_
 #include <stdio.h>
@@ -15,43 +14,44 @@
 #include "Defs.h"
 #include "Function.h"
 
-namespace Public{
-namespace Base{
+namespace Public
+{
+namespace Base
+{
 
 #ifdef WIN32
-	typedef HANDLE thread_handle_t;
-#elif defined(__linux__)
-	typedef pthread_t thread_handle_t;
+typedef HANDLE thread_handle_t;
+#elif defined(__linux__) || defined(__APPLE__)
+typedef pthread_t thread_handle_t;
 #endif
 
 typedef struct
 {
-	int errorCode;				///错误码
-	std::string info;			///错误信息
-	std::string stacks;			///错误堆栈
+	int errorCode;		///错误码
+	std::string info;   ///错误信息
+	std::string stacks; ///错误堆栈
 } XM_ErrorInfo;
 
 /// 按线程设置最后的错误码
 /// \param errCode [in] 错误码
 /// \param info [in] 错误码的描述信息
 /// \retval true 成功
-/// \retval false 失败	
+/// \retval false 失败
 bool BASE_API XM_SetLastError(int errCode, const char *info);
 
 bool BASE_API XM_SetLastErrorInfo(int errCode, const char *fmt, ...);
-
 
 /// 按线程设置最后的错误码
 /// \param errCode [in] 错误码
 /// \param info [in] 错误码的描述信息
 /// \retval true 成功
-/// \retval false 失败	
+/// \retval false 失败
 bool BASE_API XM_SetLastErrorEx(const XM_ErrorInfo &lastinfo);
 
 /// 获得最后的错误码
 /// \param errinfo [out] 错误码
 /// \retval true 成功
-/// \retval false 失败	
+/// \retval false 失败
 bool BASE_API XM_GetLastError(XM_ErrorInfo &errinfo);
 
 /// 清空最后的错误码
@@ -62,9 +62,8 @@ bool BASE_API XM_ClearLastError();
 /// 往错误信息中添加附加的调用栈信息
 /// \param detail [in] 附加信息
 /// \retval true 成功
-/// \retval false 失败	
+/// \retval false 失败
 bool BASE_API XM_AddLastErrorStack(const char *detail);
-
 
 struct ThreadInternal;
 
@@ -72,8 +71,8 @@ struct ThreadInternal;
 /// \brief 多平台线程类; 提供继承方式创建线程
 class BASE_API Thread
 {
-	Thread(Thread const&);
-	Thread& operator=(Thread const&);
+	Thread(Thread const &);
+	Thread &operator=(Thread const &);
 
 public:
 	enum Priority
@@ -85,8 +84,8 @@ public:
 
 	enum Policy
 	{
-		policyNormal = 0,		///< 普通线程
-		policyRealtime = 1		///< 实时线程
+		policyNormal = 0,  ///< 普通线程
+		policyRealtime = 1 ///< 实时线程
 	};
 
 	/// 构造函数,并没有创建系统线程
@@ -97,7 +96,7 @@ public:
 	/// \param policy [in] 线程调度策略
 	/// \param stackSize [in] 为线程指定的堆栈大小,如果等于0或者小于平台要求必须的值,
 	///        则使用平台缺省值.
-	Thread(const std::string& name, int priority = priorDefault, int policy = policyNormal, int stackSize = 0);
+	Thread(const std::string &name, int priority = priorDefault, int policy = policyNormal, int stackSize = 0);
 
 	/// 析构函数,如果线程还在执行,会销毁线程
 	virtual ~Thread();
@@ -117,7 +116,7 @@ public:
 
 	/// 终止线程,和销毁线程不同在于它是由操作系统强制销毁线程,不保证用户数据安全.
 	/// \retval true 成功
-	/// \retval false 失败 
+	/// \retval false 失败
 	bool terminateThread();
 
 	/// 取消线程,设置线程退出标志,非阻塞方式,不等待线程结束
@@ -132,15 +131,14 @@ public:
 
 	/// 得到线程ID
 	/// \retval 线程ID
-	int	getThreadID();
-
+	int getThreadID();
 
 	//获取线程句柄
 	thread_handle_t handle() const;
 
 	/// 设置线程名称
 	/// \param name [in] 新的线程名称
-	void setThreadName(const std::string& name);
+	void setThreadName(const std::string &name);
 
 	/// 设置超时时间
 	/// \param milliSeconds [in] 超时毫秒数,设置为0表示清空设置
@@ -166,14 +164,12 @@ public:
 	/// 让调用线程阻塞一段时间
 	/// \param milliSeconds [in] 期望阻塞的毫秒数
 	static void sleep(int milliSeconds);
+
 public:
-	ThreadInternal* internal;
+	ThreadInternal *internal;
 };
 
 } // namespace Base
 } // namespace Public
 
-
-
 #endif //_BASE_THREAD_H_
-

@@ -6,8 +6,8 @@ using namespace Public::RTSP;
 using namespace Public::Base;
 
 
-std::string rtsp_header_build_sdp(const MEDIA_INFO& info);
-bool rtsp_header_parse_sdp(char const* sdpDescription, MEDIA_INFO* pMediaInfo);
+std::string rtsp_header_build_sdp(const RTSP_Media_Infos& info);
+bool rtsp_header_parse_sdp(char const* sdpDescription, RTSP_Media_Infos* pMediaInfo);
 
 
 #endif

@@ -2,32 +2,27 @@
 
 #include "irtpAnalyzer.h"
 
-#define H264_STATRTCODE_LEN	4
-
 class RtpH264Analyzer : public IRtpAnalyzer
 {
 public:
 	RtpH264Analyzer(const CBFreamCallBack& callback,const std::string& pSps, const std::string& pPps);
 	~RtpH264Analyzer(void);
 
-	virtual int InputData(const RTPHEADER& rtpheader, const char* pBuf, unsigned short nBufLen);
-	
+	virtual int InputData(const shared_ptr<STREAM_TRANS_INFO>& transinfo, const shared_ptr<RTPPackage>& rtp);
 private:
-	int  SetH264StartCode(char* pBuf, int nOffset);
-	
-private:
+	shared_ptr<RTPFrame>	m_frame;
+
+
+
 	FU_INDICATOR	m_stFuIndictor;
 	FU_HEADER		m_stNalHeader;
 
 	CBFreamCallBack m_pFramCallBack; 
 
-	char*			m_pSpsBuffer;
-	char*			m_pPpsBuffer;
-	int				m_nSpsLen;
-	int				m_nPpsLen;
+	String			m_pSpsBuffer;
+	String			m_pPpsBuffer;
 
-	char			*m_pVideoBuf;
-	int				m_nVideoBufLen;
+//	String			m_pVideoBuf;
 	
 	int				m_nLastSeq;
 	FrameType		m_nFreamType;

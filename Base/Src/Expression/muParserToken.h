@@ -69,7 +69,7 @@ namespace mu
       TString m_strTok;   ///< Token string
       TString m_strVal;   ///< Value for string variables
       value_type m_fVal;  ///< the value 
-      std::auto_ptr<ParserCallback> m_pCallback;
+      std::shared_ptr<ParserCallback> m_pCallback;
 
   public:
 
@@ -192,7 +192,7 @@ namespace mu
         m_iIdx = -1;
         
         m_pTok = 0;
-        m_pCallback.reset(0);
+		m_pCallback = NULL;
 
         return *this;
       }
@@ -210,7 +210,7 @@ namespace mu
         m_strTok = a_strTok;
         m_iIdx = -1;
         m_pTok = (void*)a_pVar;
-        m_pCallback.reset(0);
+		m_pCallback = NULL;
         return *this;
       }
 
@@ -228,7 +228,7 @@ namespace mu
         m_iIdx = static_cast<int>(a_iSize);
 
         m_pTok = 0;
-        m_pCallback.reset(0);
+		m_pCallback = NULL;
         return *this;
       }
 

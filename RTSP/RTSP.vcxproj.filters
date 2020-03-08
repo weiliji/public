@@ -1,10 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="源文件">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
     <Filter Include="头文件">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
@@ -13,20 +9,21 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
     <Filter Include="源文件\common">
       <UniqueIdentifier>{d92e0db4-ad67-4291-9572-158475069aa1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\common\StringParse">
+      <UniqueIdentifier>{1e919799-53a4-437b-b632-f98849b31d30}</UniqueIdentifier>
     </Filter>
     <Filter Include="源文件\service">
       <UniqueIdentifier>{6821f5da-f911-42cd-a955-2a5988d5e3f4}</UniqueIdentifier>
     </Filter>
     <Filter Include="源文件\client">
       <UniqueIdentifier>{b5683006-31f2-44ee-ae83-c1207547d57a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\common\rtp">
-      <UniqueIdentifier>{c8cc0554-7f02-490d-9f2d-591dc9ec569d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\common\StringParse">
-      <UniqueIdentifier>{1e919799-53a4-437b-b632-f98849b31d30}</UniqueIdentifier>
     </Filter>
     <Filter Include="源文件\Analyzer">
       <UniqueIdentifier>{09b9736c-b7a9-4e80-804c-0be5c268234c}</UniqueIdentifier>
@@ -54,29 +51,11 @@
     <ClInclude Include="..\Include\RTSP\RTSPUrl.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="common\wwwAuthenticate.h">
-      <Filter>源文件\common</Filter>
-    </ClInclude>
     <ClInclude Include="common\rtspSession.h">
       <Filter>源文件\common</Filter>
     </ClInclude>
     <ClInclude Include="common\udpPortAlloc.h">
       <Filter>源文件\common</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rtp\rtcp.h">
-      <Filter>源文件\common\rtp</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rtp\rtpovertcpSession.h">
-      <Filter>源文件\common\rtp</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rtp\rtpoverudpSession.h">
-      <Filter>源文件\common\rtp</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rtp\rtpSession.h">
-      <Filter>源文件\common\rtp</Filter>
-    </ClInclude>
-    <ClInclude Include="common\StringParse\rtspHeaderRange.h">
-      <Filter>源文件\common\StringParse</Filter>
     </ClInclude>
     <ClInclude Include="common\StringParse\rtspHeaderSdp.h">
       <Filter>源文件\common\StringParse</Filter>
@@ -87,22 +66,10 @@
     <ClInclude Include="common\StringParse\strDup.h">
       <Filter>源文件\common\StringParse</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\RTSP\RTPAnalyzer.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rtp\rtpsort.h">
-      <Filter>源文件\common\rtp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\RTSP\RTPPackage.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Analyzer\h265frame.h">
       <Filter>源文件\Analyzer</Filter>
     </ClInclude>
     <ClInclude Include="Analyzer\irtpAnalyzer.h">
-      <Filter>源文件\Analyzer</Filter>
-    </ClInclude>
-    <ClInclude Include="Analyzer\rtcpAnalyzer.h">
       <Filter>源文件\Analyzer</Filter>
     </ClInclude>
     <ClInclude Include="Analyzer\rtpAnalyzerStructs.h">
@@ -120,6 +87,45 @@
     <ClInclude Include="Analyzer\spsParse.h">
       <Filter>源文件\Analyzer</Filter>
     </ClInclude>
+    <ClInclude Include="..\Include\RTSP\RTSPStatistics.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="common\rtspDefine.h">
+      <Filter>源文件\common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\rtcpSession.h">
+      <Filter>源文件\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\RTSP\RTSPHandler.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="common\mediaSession.h">
+      <Filter>源文件\common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\mediaSessionOverTcp.h">
+      <Filter>源文件\common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\mediaSessionOverUdp.h">
+      <Filter>源文件\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\RTSP\RTCPPackage.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\RTSP\RTPFrame.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Analyzer\RTPAnalyzer.h">
+      <Filter>源文件\Analyzer</Filter>
+    </ClInclude>
+    <ClInclude Include="Analyzer\rtpMjpegAnalyzer.h">
+      <Filter>源文件\Analyzer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\RTSP\RTPAnalyzer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\RTSP\RTPPackage.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Include\RTSP\Version.tpl">
@@ -136,17 +142,8 @@
     <ClCompile Include="common\RTSPUrl.cpp">
       <Filter>源文件\common</Filter>
     </ClCompile>
-    <ClCompile Include="client\RTSPClient.cpp">
-      <Filter>源文件\client</Filter>
-    </ClCompile>
     <ClCompile Include="server\RTSPServerSession.cpp">
       <Filter>源文件\service</Filter>
-    </ClCompile>
-    <ClCompile Include="common\rtp\rtcp.cpp">
-      <Filter>源文件\common\rtp</Filter>
-    </ClCompile>
-    <ClCompile Include="common\StringParse\rtspHeaderRange.cpp">
-      <Filter>源文件\common\StringParse</Filter>
     </ClCompile>
     <ClCompile Include="common\StringParse\rtspHeaderSdp.cpp">
       <Filter>源文件\common\StringParse</Filter>
@@ -166,9 +163,6 @@
     <ClCompile Include="Analyzer\h265frame.cpp">
       <Filter>源文件\Analyzer</Filter>
     </ClCompile>
-    <ClCompile Include="Analyzer\rtcpAnalyzer.cpp">
-      <Filter>源文件\Analyzer</Filter>
-    </ClCompile>
     <ClCompile Include="Analyzer\rtpH264Analyzer.cpp">
       <Filter>源文件\Analyzer</Filter>
     </ClCompile>
@@ -176,6 +170,27 @@
       <Filter>源文件\Analyzer</Filter>
     </ClCompile>
     <ClCompile Include="Analyzer\rtpNoneAnalyzer.cpp">
+      <Filter>源文件\Analyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="common\RTSPStatistics.cpp">
+      <Filter>源文件\common</Filter>
+    </ClCompile>
+    <ClCompile Include="client\RTSPClientSession.cpp">
+      <Filter>源文件\client</Filter>
+    </ClCompile>
+    <ClCompile Include="common\RTCPPackage.cpp">
+      <Filter>源文件\common</Filter>
+    </ClCompile>
+    <ClCompile Include="Analyzer\RTPFrame.cpp">
+      <Filter>源文件\Analyzer</Filter>
+    </ClCompile>
+    <ClCompile Include="common\RTSPStructs.cpp">
+      <Filter>源文件\common</Filter>
+    </ClCompile>
+    <ClCompile Include="common\StringParse\sps.cpp">
+      <Filter>源文件\common</Filter>
+    </ClCompile>
+    <ClCompile Include="Analyzer\rtpMjpegAnalyzer.cpp">
       <Filter>源文件\Analyzer</Filter>
     </ClCompile>
   </ItemGroup>

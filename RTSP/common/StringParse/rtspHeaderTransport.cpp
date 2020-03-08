@@ -88,19 +88,19 @@ std::string rtsp_header_build_transport(const TRANSPORT_INFO& transport)
 		{
 		case 'r':
 		case 'R':
-			if (11 == n && 0 == strncasecmp("RTP/AVP/UDP", p, 11))
+			if (11 == n && 0 == String::strncasecmp("RTP/AVP/UDP", p, 11))
 			{
 				t->transport = TRANSPORT_INFO::TRANSPORT_RTP_UDP;
 			}
-			else if (11 == n && 0 == strncasecmp("RTP/AVP/TCP", p, 11))
+			else if (11 == n && 0 == String::strncasecmp("RTP/AVP/TCP", p, 11))
 			{
 				t->transport = TRANSPORT_INFO::TRANSPORT_RTP_TCP;
 			}
-			else if (11 == n && 0 == strncasecmp("RAW/RAW/UDP", p, 11))
+			else if (11 == n && 0 == String::strncasecmp("RAW/RAW/UDP", p, 11))
 			{
 				t->transport = TRANSPORT_INFO::TRANSPORT_RAW;
 			}
-			else if (7 == n && 0 == strncasecmp("RTP/AVP", p, 7))
+			else if (7 == n && 0 == String::strncasecmp("RTP/AVP", p, 7))
 			{
 				t->transport = TRANSPORT_INFO::TRANSPORT_RTP_UDP;
 			}
@@ -108,7 +108,7 @@ std::string rtsp_header_build_transport(const TRANSPORT_INFO& transport)
 
 		case 'u':
 		case 'U':
-			if (7 == n && 0 == strncasecmp("unicast", p, 7))
+			if (7 == n && 0 == String::strncasecmp("unicast", p, 7))
 			{
 			//	t->multicast = TRANSPORT_INFO::MULTICAST_UNICAST;
 			}
@@ -116,11 +116,11 @@ std::string rtsp_header_build_transport(const TRANSPORT_INFO& transport)
 
 		case 'm':
 		case 'M':
-			if (9 == n && 0 == strncasecmp("multicast", p, 9))
+			if (9 == n && 0 == String::strncasecmp("multicast", p, 9))
 			{
 			//	t->multicast = TRANSPORT_INFO::MULTICAST_MULTICAST;
 			}
-			else if (n > 5 && 0 == strncasecmp("mode=", p, 5))
+			else if (n > 5 && 0 == String::strncasecmp("mode=", p, 5))
 			{
 				/*if ((11 == n && 0 == strcasecmp("\"PLAY\"", p + 5)) || (9 == n && 0 == strcasecmp("PLAY", p + 5)))
 					t->mode = TRANSPORT_INFO::MODE_PLAY;
@@ -131,7 +131,7 @@ std::string rtsp_header_build_transport(const TRANSPORT_INFO& transport)
 
 		case 'd':
 		case 'D':
-			if (n >= 12 && 0 == strncasecmp("destination=", p, 12))
+			if (n >= 12 && 0 == String::strncasecmp("destination=", p, 12))
 			{
 				//t->destination = std::string(p + 12, n - 12);
 			}
@@ -139,11 +139,11 @@ std::string rtsp_header_build_transport(const TRANSPORT_INFO& transport)
 
 		case 's':
 		case 'S':
-			if (n >= 7 && 0 == strncasecmp("source=", p, 7))
+			if (n >= 7 && 0 == String::strncasecmp("source=", p, 7))
 			{
 				//t->source = std::string(p + 7, n - 7);
 			}
-			else if (13 == n && 0 == strncasecmp("ssrc=", p, 5))
+			else if (13 == n && 0 == String::strncasecmp("ssrc=", p, 5))
 			{
 				// unicast only
 		//		assert(0 == t->multicast);
@@ -162,7 +162,7 @@ std::string rtsp_header_build_transport(const TRANSPORT_INFO& transport)
 			break;
 
 		case 'a':
-			if (6 == n && 0 == strcasecmp("append", p))
+			if (6 == n && 0 == String::strcasecmp("append", p))
 			{
 				//t->append = 1;
 			}

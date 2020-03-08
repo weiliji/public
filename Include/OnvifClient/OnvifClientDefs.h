@@ -13,11 +13,11 @@ namespace OnvifClientDefs {
 //设备信息
 struct Info
 {
-	std::string Manufacturer;		//工厂信息
-	std::string Model;				//设备信息
-	std::string FirmwareVersion;	//固件版本
-	std::string SerialNumber;		//序列号
-	std::string HardwareId;			//硬件标识
+	std::string manufacturer;		//工厂信息
+	std::string model;				//设备信息
+	std::string firmwareVersion;	//固件版本
+	std::string serialNumber;		//序列号
+	std::string hardwareId;			//硬件标识
 //	std::string Name;				//设备名称
 };
 
@@ -25,32 +25,27 @@ struct Info
 struct Capabilities
 {
 	struct _Medis{
-		URL xaddr;
-		BOOL RTPMulticast;
-		BOOL RTP_TCP;
-		BOOL RTP_RTSP_TCP;
-		BOOL Support;
-
-		_Medis():RTPMulticast(false),RTP_TCP(false),RTP_RTSP_TCP(false),Support(false){}
-	}Media;
+		URL		xaddr;
+		bool	rtpMulticast = false;
+		bool	rtp_tcp = false;
+		bool	rtp_rtsp_tcp = false;
+		bool	support = false;
+	}media;
 	struct _PTZ{
 		URL		xaddr;
-		BOOL        Support;
-
-		_PTZ():Support(false){}
-	}PTZ;
+		bool    support = false;
+	}ptz;
 	struct _Events {
 		URL		xaddr;
-		BOOL        Support;
+		bool    support = false;
+	}events;
 
-		_Events() :Support(false) {}
-	}Events;
-	struct _Mmessage {
-		URL		xaddr;
-		BOOL        Support;
-
-		_Mmessage():Support(false){}
-	}Mmessage;
+	struct _Device {
+		struct _IO {
+			std::vector<int>	alarminput;
+			std::vector<int>	alarmoutput;
+		}io;
+	}device;
 } ;
 
 //暂时不解析GetScopes，太复杂，目前没需求
@@ -59,22 +54,16 @@ typedef struct {
 }Scopes;
 
 struct _VideoSource {
-	int  width, height, x, y;
+	int  width = 0;
+	int	 height = 0;
+	int  x = 0;
+	int  y = 0;;
 
-	int  use_count;
+	int  use_count = 0;
 	std::string token;
 	std::string stream_name;
 	std::string source_token;
-
-	_VideoSource():width(0),height(0),x(0),y(0),use_count(0){}
 };
-
-typedef enum {
-	VIDEO_ENCODING_JPEG = 0,
-	VIDEO_ENCODING_MPEG4 = 1,
-	VIDEO_ENCODING_H264 = 2,
-	VIDEO_ENCODING_UNKNOWN = 3,
-}VIDEO_ENCODING;
 
 typedef enum {
 	H264_PROFILE_Baseline = 0,
@@ -85,40 +74,58 @@ typedef enum {
 
 struct _VideoEncoder
 {
-	float quality;
-	int  width;
-	int  height;
-	int  use_count;
-	int  session_timeout;
+	float quality = 0;
+	int  width = 0;
+	int  height = 0;
+	int  use_count = 0;
+	int  session_timeout = 0;
 
 	std::string name;
 	std::string token;
 
-	VIDEO_ENCODING  encoding;
+	CodeID  encoding = CodeID_Unknown;
 
-	int  framerate_limit;
-	int  encoding_interval;
-	int  bitrate_limit;
+	int  framerate_limit = 0;
+	int  encoding_interval = 0;
+	int  bitrate_limit = 0;
 
 	/* H264Configuration */
-	int  gov_len;
+	int  gov_len = 0;
 	H264_PROFILE  h264_profile;
-
-	_VideoEncoder():quality(0),width(0),height(0),use_count(0),session_timeout(0),framerate_limit(0),encoding_interval(0),bitrate_limit(0),gov_len(0){}
 } ;
+
+struct _AudioSource
+{
+	int  use_count = 0;
+	std::string token;
+	std::string stream_name;
+	std::string source_token;
+};
+
+struct _AudioEncoder
+{
+	int  use_count = 0;
+	int  session_timeout = 0;
+
+	std::string name;
+	std::string token;
+
+	CodeID  encoding = CodeID_Unknown;
+
+	int  bitrate = 0;
+	int  sample_rate = 0;
+};
 
 struct _Range
 {
-	float min;
-	float max;
-
-	_Range() { min = max = 0; }
+	float min = 0;
+	float max = 0;
 };
 
 struct PTZConfig
 {
-	int  use_count;
-	int  def_timeout;
+	int  use_count = 0;
+	int  def_timeout = 0;
 
 	std::string name;
 	std::string token;
@@ -126,23 +133,19 @@ struct PTZConfig
 
 	struct _Speed
 	{
-		int pan_tilt_x;
-		int pan_tilt_y;
-		int zoom;
-
-		_Speed():pan_tilt_x(0),pan_tilt_y(0),zoom(0){}
+		int pan_tilt_x = 0;
+		int pan_tilt_y = 0;
+		int zoom = 0;
 	} def_speed;
 
 	_Range pantilt_x;
 	_Range pantilt_y;
 	_Range zoom;
-
-	PTZConfig():use_count(0),def_timeout(0){}
 } ;
 
 struct ConfigurationOptions
 {
-	int used;
+	int used = 0;
 
 	_Range absolute_pantilt_x;
 	_Range absolute_pantilt_y;
@@ -159,22 +162,20 @@ struct ConfigurationOptions
 	_Range pantilt_speed;
 	_Range zoom_speed;
 	_Range timeout;
-
-	ConfigurationOptions():used(0){}
 };
 
 //配置信息
 struct ProfileInfo {
-	shared_ptr<_VideoSource> VideoSource;
-	shared_ptr<_VideoEncoder> VideoEncoder;
-	shared_ptr<PTZConfig> PTZConfig;
+	shared_ptr<_VideoSource>	videoSource;
+	shared_ptr<_VideoEncoder>	videoEncoder;
+	shared_ptr<_AudioSource>	audioSource;
+	shared_ptr<_AudioEncoder>	audioEncoder;
+	shared_ptr<PTZConfig>		ptzConfig;
 
 
 	std::string name;
 	std::string token;
-	bool fixed;
-
-	ProfileInfo():fixed(false){}
+	bool fixed = false;
 };
 
 struct Profiles {
@@ -185,9 +186,7 @@ struct NetworkInterfaces {
 	std::string		name;
 	std::string		macaddr;
 	std::string		ipaddr;
-	bool			dhcp;
-
-	NetworkInterfaces():dhcp(false){}
+	bool			dhcp = false;
 };
 typedef struct {
 
@@ -198,13 +197,11 @@ struct PTZCtrl
 	enum {
 		PTZ_CTRL_PAN  =  0,
 		PTZ_CTRL_ZOOM =  1,
-	}ctrlType;
-	double           panTiltX;
-	double           panTiltY;
-	float           zoom;
-	int				duration;
-
-	PTZCtrl():panTiltX(0),panTiltY(0),zoom(0),duration(0){}
+	}ctrlType = PTZ_CTRL_PAN;
+	double           panTiltX = 0;
+	double           panTiltY = 0;
+	float           zoom = 0;
+	int				duration = 0;
 } ;
 
 
@@ -241,14 +238,17 @@ struct EventInfos
 
 struct DiscoveryInfo
 {
-	std::string		name;
-	std::string		mac;
-	std::vector<std::string> addrs;
+	std::string				 name;
+	std::string				 mac;
+	std::string				 model;
+	std::string				 addr;
+	uint32_t				 port = 0;
+	std::string				 manufacturer;		//工厂信息
 };
 
 struct PresetInfo
 {
-	std::string token;
+	uint32_t token;
 	std::string name;
 };
 
@@ -256,6 +256,55 @@ struct PresetInfos
 {
 	std::vector<PresetInfo> infos;
 };
+
+struct ImageSettingInfo
+{
+    uint32_t brightness = 0;
+    uint32_t colorSaturation = 0;
+    uint32_t contrast = 0;
+    uint32_t sharpness = 0;
+    struct Exposure
+    {
+        std::string mode;
+        uint32_t minIris = 0;
+        uint32_t maxIris = 0;
+        uint32_t iris = 0;
+    } exposure;
+
+    struct Focus
+    {
+        std::string mode;
+        float defaultSpeed = 0;
+    } focus;
+};
+
+struct ImageOptions
+{
+	struct Brightness
+	{
+		uint32_t min;
+		uint32_t max;
+	}brightness;
+
+	struct ColorSaturation
+	{
+		uint32_t min;
+		uint32_t max;
+	}colorSaturation;
+
+	struct Contrast
+	{
+		uint32_t min;
+		uint32_t max;
+	}contrast;
+
+	struct Sharpness
+	{
+		uint32_t min;
+		uint32_t max;
+	}sharpness;
+};
+
 
 }
 }

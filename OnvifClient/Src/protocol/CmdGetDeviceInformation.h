@@ -12,32 +12,32 @@ public:
 
 	virtual std::string build(const URL& URL)
 	{
-		XMLObject::Child& getdeviceinfo = body().addChild("GetDeviceInformation");
-		getdeviceinfo.attribute("xmlns", "http://www.onvif.org/ver10/device/wsdl");
+		XML::Child& getdeviceinfo = body().addChild("GetDeviceInformation");
+		getdeviceinfo.addAttribute("xmlns", "http://www.onvif.org/ver10/device/wsdl");
 
 		return CmdObject::build(URL);
 	}
 	OnvifClientDefs::Info devinfo;
 
-	virtual bool parse(const XMLObject::Child& body)
+	virtual bool parse(const XML::Child& body)
 	{
-		const XMLObject::Child& response = body.getChild("GetDeviceInformationResponse");
+		const XML::Child& response = body.getChild("GetDeviceInformationResponse");
 		if (response.isEmpty()) return false;
 
-		const XMLObject::Child& manu = response.getChild("Manufacturer");
-		if (!manu.isEmpty()) devinfo.Manufacturer = manu.data().readString();
+		const XML::Child& manu = response.getChild("Manufacturer");
+		if (!manu.isEmpty()) devinfo.manufacturer = manu.data().readString();
 
-		const XMLObject::Child& model = response.getChild("Model");
-		if (!model.isEmpty()) devinfo.Model = model.data().readString();
+		const XML::Child& model = response.getChild("Model");
+		if (!model.isEmpty()) devinfo.model = model.data().readString();
 
-		const XMLObject::Child& fireware = response.getChild("FirmwareVersion");
-		if (!fireware.isEmpty()) devinfo.FirmwareVersion = fireware.data().readString();
+		const XML::Child& fireware = response.getChild("FirmwareVersion");
+		if (!fireware.isEmpty()) devinfo.firmwareVersion = fireware.data().readString();
 
-		const XMLObject::Child& sn = response.getChild("SerialNumber");
-		if (!sn.isEmpty()) devinfo.SerialNumber = sn.data().readString();
+		const XML::Child& sn = response.getChild("SerialNumber");
+		if (!sn.isEmpty()) devinfo.serialNumber = sn.data().readString();
 
-		const XMLObject::Child& hardware = response.getChild("HardwareId");
-		if (!hardware.isEmpty()) devinfo.HardwareId = hardware.data().readString();
+		const XML::Child& hardware = response.getChild("HardwareId");
+		if (!hardware.isEmpty()) devinfo.hardwareId = hardware.data().readString();
 
 		return true;
 	}

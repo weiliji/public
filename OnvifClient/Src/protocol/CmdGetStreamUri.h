@@ -13,20 +13,20 @@ public:
 
 	virtual std::string build(const URL& URL)
 	{
-		XMLObject::Child& getstreamuri = body().addChild("GetStreamUri");
+		XML::Child& getstreamuri = body().addChild("GetStreamUri");
 
-		getstreamuri.attribute("xmlns", "http://www.onvif.org/ver10/media/wsdl");
+		getstreamuri.addAttribute("xmlns", "http://www.onvif.org/ver10/media/wsdl");
 
 		getstreamuri.addChild("ProfileToken", token);
 
 
-		XMLObject::Child& streamsetup = getstreamuri.addChild("StreamSetup");
+		XML::Child& streamsetup = getstreamuri.addChild("StreamSetup");
 
-		XMLObject::Child& stream = streamsetup.addChild("Stream","RTP-Unicast");
-		stream.attribute("xmlns","http://www.onvif.org/ver10/schema");
+		XML::Child& stream = streamsetup.addChild("Stream","RTP-Unicast");
+		stream.addAttribute("xmlns","http://www.onvif.org/ver10/schema");
 		
-		XMLObject::Child& transport = streamsetup.addChild("Transport");
-		transport.attribute("xmlns", "http://www.onvif.org/ver10/schema");
+		XML::Child& transport = streamsetup.addChild("Transport");
+		transport.addAttribute("xmlns", "http://www.onvif.org/ver10/schema");
 
 		transport.addChild("Protocol","RTSP");
 
@@ -34,12 +34,12 @@ public:
 	}
 
 	OnvifClientDefs::StreamUrl streamurl;
-	virtual bool parse(const XMLObject::Child& body)
+	virtual bool parse(const XML::Child& body)
 	{
-		const XMLObject::Child& resp = body.getChild("GetStreamUriResponse");
+		const XML::Child& resp = body.getChild("GetStreamUriResponse");
 		if (!resp) return false;
 
-		streamurl.url = resp.getChild("MediaUri").getChild("Uri").data();
+		streamurl.url = resp.getChild("MediaUri").getChild("Uri").data().readString();
 
 		if (streamurl.url == "") return false;
 

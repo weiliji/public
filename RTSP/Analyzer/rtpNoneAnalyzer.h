@@ -7,16 +7,19 @@
 class RtpNoneAnalyzer : public IRtpAnalyzer
 {
 public:
-	RtpNoneAnalyzer(const CBFreamCallBack& callback, FrameType type);
+	RtpNoneAnalyzer(const CBFreamCallBack& callback, FrameType type, CodeID code);
 	~RtpNoneAnalyzer(void);
 
-	int InputData(const RTPHEADER& rtpheader, const char* pBuf, unsigned short nBufLen);
+	int InputData(const shared_ptr<STREAM_TRANS_INFO>& transinfo, const shared_ptr<RTPPackage>& rtp);
 private:
+	shared_ptr<RTPFrame>	m_frame;
+
 	CBFreamCallBack m_pFramCallBack;
 
-	char*			m_pVideoBuf;
-	int				m_nVideoBufLen;
+//	String			m_pVideoBuf;
+//	int				m_nVideoBufLen;
 	
+	CodeID			m_codeid;
 	FrameType		m_nFreamType;
 	uint16_t		m_nLastSeq;
 	bool			m_lossstatus;

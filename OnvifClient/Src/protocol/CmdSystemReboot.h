@@ -13,15 +13,15 @@ public:
 
 	virtual std::string build(const URL& URL)
 	{
-		XMLObject::Child& sysreboot = body().addChild("SystemReboot");
+		XML::Child& sysreboot = body().addChild("SystemReboot");
 
-		sysreboot.attribute("xmlns", "http://www.onvif.org/ver10/device/wsdl");
+		sysreboot.addAttribute("xmlns", "http://www.onvif.org/ver10/device/wsdl");
 
 		return CmdObject::build(URL);
 	}
-	virtual bool parse(const XMLObject::Child& body)
+	virtual bool parse(const XML::Child& body)
 	{
-		XMLObject::Child respchild = body.getChild("SystemRebootResponse");
+		XML::Child respchild = body.getChild("SystemRebootResponse");
 		if (respchild.isEmpty()) return false;
 
 		return true;

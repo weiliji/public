@@ -36,7 +36,7 @@
  * Force inclusion of SVID stuff since we need it if we're compiling in
  * gcc-wall wall mode
  */
-#define _SVID_SOURCE
+//#define _SVID_SOURCE
 
 #ifdef _WIN32
 #define _WIN32_WINNT 0x0500
@@ -99,8 +99,14 @@
 #define THREAD_LOCAL static
 #endif
 
-#ifndef LOCK_EX
+#if 1 //ifndef LOCK_EX
 /* flock() replacement */
+
+#undef LOCK_EX
+#undef LOCK_SH
+#undef LOCK_UN
+#undef LOCK_NB
+
 #define LOCK_EX 1
 #define LOCK_SH 2
 #define LOCK_UN 3
@@ -108,60 +114,61 @@
 
 static int flock(int fd, int op)
 {
-    int rc = 0;
+	int rc = 0;
 
 #if defined(F_SETLK) && defined(F_SETLKW)
-    struct flock fl = {0};
+	struct flock fl = {0};
 
-    switch (op & (LOCK_EX|LOCK_SH|LOCK_UN)) {
-    case LOCK_EX:
-        fl.l_type = F_WRLCK;
-        break;
+	switch (op & (LOCK_EX | LOCK_SH | LOCK_UN))
+	{
+	case LOCK_EX:
+		fl.l_type = F_WRLCK;
+		break;
 
-    case LOCK_SH:
-        fl.l_type = F_RDLCK;
-        break;
+	case LOCK_SH:
+		fl.l_type = F_RDLCK;
+		break;
 
-    case LOCK_UN:
-        fl.l_type = F_UNLCK;
-        break;
+	case LOCK_UN:
+		fl.l_type = F_UNLCK;
+		break;
 
-    default:
-        errno = EINVAL;
-        return -1;
-    }
+	default:
+		errno = EINVAL;
+		return -1;
+	}
 
-    fl.l_whence = SEEK_SET;
-    rc = fcntl (fd, op & LOCK_NB ? F_SETLK : F_SETLKW, &fl);
+	fl.l_whence = SEEK_SET;
+	rc = fcntl(fd, op & LOCK_NB ? F_SETLK : F_SETLKW, &fl);
 
-    if (rc && (errno == EAGAIN))
-        errno = EWOULDBLOCK;
+	if (rc && (errno == EAGAIN))
+		errno = EWOULDBLOCK;
 #endif /* defined(F_SETLK) && defined(F_SETLKW)  */
 
-    return rc;
+	return rc;
 }
 
 #endif /* LOCK_EX */
 
 #ifdef _WIN32
-static void gettimeofday (struct timeval *tv, void *dummy)
+static void gettimeofday(struct timeval *tv, void *dummy)
 {
-	FILETIME	ftime;
-	uint64_t	n;
+	FILETIME ftime;
+	uint64_t n;
 
-	GetSystemTimeAsFileTime (&ftime);
-	n = (((uint64_t) ftime.dwHighDateTime << 32)
-	     + (uint64_t) ftime.dwLowDateTime);
-	if (n) {
+	GetSystemTimeAsFileTime(&ftime);
+	n = (((uint64_t)ftime.dwHighDateTime << 32) + (uint64_t)ftime.dwLowDateTime);
+	if (n)
+	{
 		n /= 10;
-		n -= ((369 * 365 + 89) * (uint64_t) 86400) * 1000000;
+		n -= ((369 * 365 + 89) * (uint64_t)86400) * 1000000;
 	}
 
 	tv->tv_sec = n / 1000000;
 	tv->tv_usec = n % 1000000;
 }
 
-static int getuid (void)
+static int getuid(void)
 {
 	return 1;
 }
@@ -178,12 +185,12 @@ static int getuid (void)
 static int get_node_id(unsigned char *node_id)
 {
 #ifdef HAVE_NET_IF_H
-	int		sd;
-	struct ifreq	ifr, *ifrp;
-	struct ifconf	ifc;
+	int sd;
+	struct ifreq ifr, *ifrp;
+	struct ifconf ifc;
 	char buf[1024];
-	int		n, i;
-	unsigned char	*a;
+	int n, i;
+	unsigned char *a;
 #ifdef HAVE_NET_IF_DL_H
 	struct sockaddr_dl *sdlp;
 #endif
@@ -195,42 +202,45 @@ static int get_node_id(unsigned char *node_id)
  * just sizeof(struct ifreq)
  */
 #ifdef HAVE_SA_LEN
-#define ifreq_size(i) max(sizeof(struct ifreq),\
-     sizeof((i).ifr_name)+(i).ifr_addr.sa_len)
+#define ifreq_size(i) max(sizeof(struct ifreq), \
+						  sizeof((i).ifr_name) + (i).ifr_addr.sa_len)
 #else
 #define ifreq_size(i) sizeof(struct ifreq)
 #endif /* HAVE_SA_LEN */
 
 	sd = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
-	if (sd < 0) {
+	if (sd < 0)
+	{
 		return -1;
 	}
 	memset(buf, 0, sizeof(buf));
 	ifc.ifc_len = sizeof(buf);
 	ifc.ifc_buf = buf;
-	if (ioctl (sd, SIOCGIFCONF, (char *)&ifc) < 0) {
+	if (ioctl(sd, SIOCGIFCONF, (char *)&ifc) < 0)
+	{
 		close(sd);
 		return -1;
 	}
 	n = ifc.ifc_len;
-	for (i = 0; i < n; i+= ifreq_size(*ifrp) ) {
-		ifrp = (struct ifreq *)((char *) ifc.ifc_buf+i);
+	for (i = 0; i < n; i += ifreq_size(*ifrp))
+	{
+		ifrp = (struct ifreq *)((char *)ifc.ifc_buf + i);
 		strncpy(ifr.ifr_name, ifrp->ifr_name, IFNAMSIZ);
 #ifdef SIOCGIFHWADDR
 		if (ioctl(sd, SIOCGIFHWADDR, &ifr) < 0)
 			continue;
-		a = (unsigned char *) &ifr.ifr_hwaddr.sa_data;
+		a = (unsigned char *)&ifr.ifr_hwaddr.sa_data;
 #else
 #ifdef SIOCGENADDR
 		if (ioctl(sd, SIOCGENADDR, &ifr) < 0)
 			continue;
-		a = (unsigned char *) ifr.ifr_enaddr;
+		a = (unsigned char *)ifr.ifr_enaddr;
 #else
 #ifdef HAVE_NET_IF_DL_H
-		sdlp = (struct sockaddr_dl *) &ifrp->ifr_addr;
+		sdlp = (struct sockaddr_dl *)&ifrp->ifr_addr;
 		if ((sdlp->sdl_family != AF_LINK) || (sdlp->sdl_alen != 6))
 			continue;
-		a = (unsigned char *) &sdlp->sdl_data[sdlp->sdl_nlen];
+		a = (unsigned char *)&sdlp->sdl_data[sdlp->sdl_nlen];
 #else
 		/*
 		 * XXX we don't have a way of getting the hardware
@@ -243,7 +253,8 @@ static int get_node_id(unsigned char *node_id)
 #endif /* SIOCGIFHWADDR */
 		if (!a[0] && !a[1] && !a[2] && !a[3] && !a[4] && !a[5])
 			continue;
-		if (node_id) {
+		if (node_id)
+		{
 			memcpy(node_id, a, 6);
 			close(sd);
 			return 1;
@@ -264,26 +275,29 @@ static int get_node_id(unsigned char *node_id)
  * pseudorandom value is returned in @ret_clock_seq), otherwise return 0.
  */
 static int get_clock(uint32_t *clock_high, uint32_t *clock_low,
-		     uint16_t *ret_clock_seq, int *num)
+					 uint16_t *ret_clock_seq, int *num)
 {
-	THREAD_LOCAL int		adjustment = 0;
-	THREAD_LOCAL struct timeval	last = {0, 0};
-	THREAD_LOCAL int		state_fd = -2;
-	THREAD_LOCAL FILE		*state_f;
-	THREAD_LOCAL uint16_t		clock_seq;
-	struct timeval			tv;
-	uint64_t			clock_reg;
-	mode_t				save_umask;
-	int				len;
-	int				ret = 0;
+	THREAD_LOCAL int adjustment = 0;
+	THREAD_LOCAL struct timeval last = {0, 0};
+	THREAD_LOCAL int state_fd = -2;
+	THREAD_LOCAL FILE *state_f;
+	THREAD_LOCAL uint16_t clock_seq;
+	struct timeval tv;
+	uint64_t clock_reg;
+	mode_t save_umask;
+	int len;
+	int ret = 0;
 
-	if (state_fd == -2) {
+	if (state_fd == -2)
+	{
 		save_umask = umask(0);
-		state_fd = open(LIBUUID_CLOCK_FILE, O_RDWR|O_CREAT|O_CLOEXEC, 0660);
-		(void) umask(save_umask);
-		if (state_fd != -1) {
+		state_fd = open(LIBUUID_CLOCK_FILE, O_RDWR | O_CREAT | O_CLOEXEC, 0660);
+		(void)umask(save_umask);
+		if (state_fd != -1)
+		{
 			state_f = fdopen(state_fd, "r+" UL_CLOEXECSTR);
-			if (!state_f) {
+			if (!state_f)
+			{
 				close(state_fd);
 				state_fd = -1;
 				ret = -1;
@@ -292,9 +306,11 @@ static int get_clock(uint32_t *clock_high, uint32_t *clock_low,
 		else
 			ret = -1;
 	}
-	if (state_fd >= 0) {
+	if (state_fd >= 0)
+	{
 		rewind(state_f);
-		while (flock(state_fd, LOCK_EX) < 0) {
+		while (flock(state_fd, LOCK_EX) < 0)
+		{
 			if ((errno == EAGAIN) || (errno == EINTR))
 				continue;
 			fclose(state_f);
@@ -304,13 +320,15 @@ static int get_clock(uint32_t *clock_high, uint32_t *clock_low,
 			break;
 		}
 	}
-	if (state_fd >= 0) {
+	if (state_fd >= 0)
+	{
 		unsigned int cl;
 		unsigned long tv1, tv2;
 		int a;
 
 		if (fscanf(state_f, "clock: %04x tv: %lu %lu adj: %d\n",
-			   &cl, &tv1, &tv2, &a) == 4) {
+				   &cl, &tv1, &tv2, &a) == 4)
+		{
 			clock_seq = cl & 0x3FFF;
 			last.tv_sec = tv1;
 			last.tv_usec = tv2;
@@ -318,7 +336,8 @@ static int get_clock(uint32_t *clock_high, uint32_t *clock_low,
 		}
 	}
 
-	if ((last.tv_sec == 0) && (last.tv_usec == 0)) {
+	if ((last.tv_sec == 0) && (last.tv_usec == 0))
+	{
 		random_get_bytes(&clock_seq, sizeof(clock_seq));
 		clock_seq &= 0x3FFF;
 		gettimeofday(&last, 0);
@@ -328,26 +347,32 @@ static int get_clock(uint32_t *clock_high, uint32_t *clock_low,
 try_again:
 	gettimeofday(&tv, 0);
 	if ((tv.tv_sec < last.tv_sec) ||
-	    ((tv.tv_sec == last.tv_sec) &&
-	     (tv.tv_usec < last.tv_usec))) {
-		clock_seq = (clock_seq+1) & 0x3FFF;
+		((tv.tv_sec == last.tv_sec) &&
+		 (tv.tv_usec < last.tv_usec)))
+	{
+		clock_seq = (clock_seq + 1) & 0x3FFF;
 		adjustment = 0;
 		last = tv;
-	} else if ((tv.tv_sec == last.tv_sec) &&
-	    (tv.tv_usec == last.tv_usec)) {
+	}
+	else if ((tv.tv_sec == last.tv_sec) &&
+			 (tv.tv_usec == last.tv_usec))
+	{
 		if (adjustment >= MAX_ADJUSTMENT)
 			goto try_again;
 		adjustment++;
-	} else {
+	}
+	else
+	{
 		adjustment = 0;
 		last = tv;
 	}
 
-	clock_reg = tv.tv_usec*10 + adjustment;
-	clock_reg += ((uint64_t) tv.tv_sec)*10000000;
-	clock_reg += (((uint64_t) 0x01B21DD2) << 32) + 0x13814000;
+	clock_reg = tv.tv_usec * 10 + adjustment;
+	clock_reg += ((uint64_t)tv.tv_sec) * 10000000;
+	clock_reg += (((uint64_t)0x01B21DD2) << 32) + 0x13814000;
 
-	if (num && (*num > 1)) {
+	if (num && (*num > 1))
+	{
 		adjustment += *num - 1;
 		last.tv_usec += adjustment / 10;
 		adjustment = adjustment % 10;
@@ -355,13 +380,15 @@ try_again:
 		last.tv_usec = last.tv_usec % 1000000;
 	}
 
-	if (state_fd >= 0) {
+	if (state_fd >= 0)
+	{
 		rewind(state_f);
 		len = fprintf(state_f,
-			      "clock: %04x tv: %016lu %08lu adj: %08d\n",
-			      clock_seq, last.tv_sec, last.tv_usec, adjustment);
+					  "clock: %04x tv: %016lu %08lu adj: %08d\n",
+					  clock_seq, last.tv_sec, (unsigned long)last.tv_usec, adjustment);
 		fflush(state_f);
-		if (ftruncate(state_fd, len) < 0) {
+		if (ftruncate(state_fd, len) < 0)
+		{
 			fprintf(state_f, "                   \n");
 			fflush(state_f);
 		}
@@ -396,14 +423,15 @@ static int get_uuid_via_daemon(int op, uuid_t out, int *num)
 	srv_addr.sun_family = AF_UNIX;
 	strcpy(srv_addr.sun_path, UUIDD_SOCKET_PATH);
 
-	if (connect(s, (const struct sockaddr *) &srv_addr,
-		    sizeof(struct sockaddr_un)) < 0)
+	if (connect(s, (const struct sockaddr *)&srv_addr,
+				sizeof(struct sockaddr_un)) < 0)
 		goto fail;
 
 	op_buf[0] = op;
 	op_len = 1;
-	if (op == UUIDD_OP_BULK_TIME_UUID) {
-		memcpy(op_buf+1, num, sizeof(*num));
+	if (op == UUIDD_OP_BULK_TIME_UUID)
+	{
+		memcpy(op_buf + 1, num, sizeof(*num));
 		op_len += sizeof(*num);
 		expected += sizeof(*num);
 	}
@@ -412,7 +440,7 @@ static int get_uuid_via_daemon(int op, uuid_t out, int *num)
 	if (ret < 1)
 		goto fail;
 
-	ret = read_all(s, (char *) &reply_len, sizeof(reply_len));
+	ret = read_all(s, (char *)&reply_len, sizeof(reply_len));
 	if (ret < 0)
 		goto fail;
 
@@ -422,7 +450,7 @@ static int get_uuid_via_daemon(int op, uuid_t out, int *num)
 	ret = read_all(s, op_buf, reply_len);
 
 	if (op == UUIDD_OP_BULK_TIME_UUID)
-		memcpy(op_buf+16, num, sizeof(int));
+		memcpy(op_buf + 16, num, sizeof(int));
 
 	memcpy(out, op_buf, 16);
 
@@ -446,11 +474,13 @@ int __uuid_generate_time(uuid_t out, int *num)
 	static unsigned char node_id[6];
 	static int has_init = 0;
 	struct uuid uu;
-	uint32_t	clock_mid;
+	uint32_t clock_mid;
 	int ret;
 
-	if (!has_init) {
-		if (get_node_id(node_id) <= 0) {
+	if (!has_init)
+	{
+		if (get_node_id(node_id) <= 0)
+		{
 			random_get_bytes(node_id, 6);
 			/*
 			 * Set multicast bit, to prevent conflicts
@@ -463,7 +493,7 @@ int __uuid_generate_time(uuid_t out, int *num)
 	}
 	ret = get_clock(&clock_mid, &uu.time_low, &uu.clock_seq, num);
 	uu.clock_seq |= 0x8000;
-	uu.time_mid = (uint16_t) clock_mid;
+	uu.time_mid = (uint16_t)clock_mid;
 	uu.time_hi_and_version = ((clock_mid >> 16) & 0x0FFF) | 0x1000;
 	memcpy(uu.node, node_id, 6);
 	uuid_pack(&uu, out);
@@ -478,22 +508,26 @@ int __uuid_generate_time(uuid_t out, int *num)
  * If neither of these is possible (e.g. because of insufficient permissions), it generates
  * the UUID anyway, but returns -1. Otherwise, returns 0.
  */
-static int uuid_generate_time_generic(uuid_t out) {
+static int uuid_generate_time_generic(uuid_t out)
+{
 #ifdef HAVE_TLS
-	THREAD_LOCAL int		num = 0;
-	THREAD_LOCAL struct uuid	uu;
-	THREAD_LOCAL time_t		last_time = 0;
-	time_t				now;
+	THREAD_LOCAL int num = 0;
+	THREAD_LOCAL struct uuid uu;
+	THREAD_LOCAL time_t last_time = 0;
+	time_t now;
 
-	if (num > 0) {
+	if (num > 0)
+	{
 		now = time(0);
-		if (now > last_time+1)
+		if (now > last_time + 1)
 			num = 0;
 	}
-	if (num <= 0) {
+	if (num <= 0)
+	{
 		num = 1000;
 		if (get_uuid_via_daemon(UUIDD_OP_BULK_TIME_UUID,
-					out, &num) == 0) {
+								out, &num) == 0)
+		{
 			last_time = time(0);
 			uuid_unpack(out, &uu);
 			num--;
@@ -501,9 +535,11 @@ static int uuid_generate_time_generic(uuid_t out) {
 		}
 		num = 0;
 	}
-	if (num > 0) {
+	if (num > 0)
+	{
 		uu.time_low++;
-		if (uu.time_low == 0) {
+		if (uu.time_low == 0)
+		{
 			uu.time_mid++;
 			if (uu.time_mid == 0)
 				uu.time_hi_and_version++;
@@ -530,16 +566,14 @@ void uuid_generate_time(uuid_t out)
 	(void)uuid_generate_time_generic(out);
 }
 
-
 int uuid_generate_time_safe(uuid_t out)
 {
 	return uuid_generate_time_generic(out);
 }
 
-
 void __uuid_generate_random(uuid_t out, int *num)
 {
-	uuid_t	buf;
+	uuid_t buf;
 	struct uuid uu;
 	int i, n;
 
@@ -548,13 +582,13 @@ void __uuid_generate_random(uuid_t out, int *num)
 	else
 		n = *num;
 
-	for (i = 0; i < n; i++) {
+	for (i = 0; i < n; i++)
+	{
 		random_get_bytes(buf, sizeof(buf));
 		uuid_unpack(buf, &uu);
 
 		uu.clock_seq = (uu.clock_seq & 0x3FFF) | 0x8000;
-		uu.time_hi_and_version = (uu.time_hi_and_version & 0x0FFF)
-			| 0x4000;
+		uu.time_hi_and_version = (uu.time_hi_and_version & 0x0FFF) | 0x4000;
 		uuid_pack(&uu, out);
 		out += sizeof(uuid_t);
 	}
@@ -562,7 +596,7 @@ void __uuid_generate_random(uuid_t out, int *num)
 
 void uuid_generate_random(uuid_t out)
 {
-	int	num = 1;
+	int num = 1;
 	/* No real reason to use the daemon for random uuid's -- yet */
 
 	__uuid_generate_random(out, &num);
@@ -578,7 +612,6 @@ static int have_random_source(void)
 
 	return (!stat("/dev/random", &s) || !stat("/dev/urandom", &s));
 }
-
 
 /*
  * This is the generic front-end to uuid_generate_random and

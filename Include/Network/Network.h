@@ -8,12 +8,20 @@
 #ifndef __PublicNETWORK_H__
 #define __PublicNETWORK_H__
 #include "Network/Defs.h"
-#include "Network/NetAddr.h"
-#include "Network/Socket.h"
-#include "Network/TcpClient.h"
-#include "Network/TcpServer.h"
-#include "Network/Udp.h"
-#include "Network/Strand.h"
+
+#include "Network/Socket/TcpClient.h"
+#include "Network/Socket/TcpServer.h"
+#include "Network/Socket/Udp.h"
+#include "Network/Socket/RawSocket.h"
+#include "Network/Socket/SSLSocket.h"
+
+#include "Network/Email/Client.h"
+
+#include "Network/HTTP/Client.h"
+#include "Network/HTTP/Server.h"
+#include "Network/HTTP/Serialization.h"
+
+#include "Network/ntp/ntp.h"
 
 namespace Public{
 namespace Network{

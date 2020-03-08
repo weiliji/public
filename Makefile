@@ -10,35 +10,35 @@
 		sharedebug static staticlib staticdebug lib
 -include .platform
 
-#浜ゅ弶缂栬瘧鐜璁剧疆
+#交叉编译环境设置
 #export CROSS=arm-linux-gnueabihf-
 
-#缂栬瘧鏂囦欢 鍒楄〃
+#编译文件 列表
 ifneq ($(strip ${DISAPP}), YES)
 	SubFile += Base/Base.mk 
-	SubFile += Excel/Excel.mk 
 	SubFile += Network/Network.mk 
-	SubFile += sqlite3/sqlite3.mk	
-	SubFile += JSON/JSON.mk	
-	SubFile += HTTP/HTTP.mk
-	SubFile += Log/Log.mk	
-	SubFile += zip/zip.mk	
 	SubFile += RTSP/RTSP.mk
+	SubFile += OnvifClient/OnvifClient.mk
+	SubFile += MSProtocol/MSProtocol.mk
+	SubFile += MSMQ/MSMQ.mk
+#	SubFile += MSPlayer/MSPlayer.mk
 	SubFile += test/test.mk
 endif
 
-#璁剧疆鎵撳寘鍔熻兘
+#设置打包功能
 PacketFile = 
 
 
-#宸ヤ綔鐩綍璁剧疆
+#工作目录设置
 CURRPATH = $(shell pwd)
 export PRJ_PATH = ${CURRPATH}
-export PRJ_LIBDIR = ${PRJ_PATH}/Lib/
+export PRJ_BINDIR = ${PRJ_PATH}/Bin/
+export PRJ_LIBDIR = ${PRJ_PATH}/Bin/
 export PRJ_INCDIR = ${PRJ_PATH}/Include/
 export PRJ_COMPILEDIR=${PRJ_PATH}/__Compile/
+export PRJ_OUTPUTDIR = $(PRJ_BINDIR)/$(PLATFORM)
 
-#鏄惁闈欓粯瀹夎妯″紡
+#是否静默安装模式
 ifeq ($(strip ${ENABLESILIENT}), YES)
 	SILENT=-s
 else
@@ -46,13 +46,17 @@ else
 endif
 
 
-#鐢熷瓨缂栬瘧鐜
+#生存编译环境
 CURRPLATFROM = x86
+ifeq ($(strip $(shell uname)),Darwin)
+CURRPLATFROM = ios
+endif
+
 ifneq (${CROSS}, )
 	CURRPLATFROM=${subst - ,,${CROSS} }
 endif
 
-#缂栬瘧鐜
+#编译环境
 export PLATFORM = ${CURRPLATFROM}
 
 

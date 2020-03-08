@@ -33,7 +33,7 @@ public:
 	/// param[in] type    线程池工作模式
 	/// param[in] maxDiapathcerSize 当type == Type_Manager，dispathcer池最大存放个数
 	/// param[in] liveTime 线程执行后空闲存活时间/0表示执行后自动关闭，< 0表示一直空闲一直挂起  单位秒
-	ThreadPool(uint32_t threadnum);
+	ThreadPool(uint32_t threadnum,Thread::Priority pri = Thread::priorDefault);
 	~ThreadPool(); 
 
 	///线程池执行新函数接口

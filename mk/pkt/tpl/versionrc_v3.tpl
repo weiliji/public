@@ -1,16 +1,33 @@
-#define APSTUDIO_READONLY_SYMBOLS 
-#include "afxres.h"
-#undef APSTUDIO_READONLY_SYMBOLS 
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS) 
-LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED 
-#ifdef APSTUDIO_INVOKED 
+// Microsoft Visual C++ generated resource script.
+//
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "winres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 中文(简体，中国) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
 1 TEXTINCLUDE 
 BEGIN 
 END 
  
 2 TEXTINCLUDE 
 BEGIN 
-    "#include ""afxres.h""\r\n" 
+    "#include ""winres.h""\r\n"
     "\0" 
 END 
 3 TEXTINCLUDE  
@@ -21,8 +38,8 @@ END
 #endif 
  
 VS_VERSION_INFO VERSIONINFO 
- FILEVERSION {major},{minor},{build}
- PRODUCTVERSION {major},{minor},{build}
+ FILEVERSION {major},{minor},{oem},{build}
+ PRODUCTVERSION {major},{minor},{oem},{build}
  FILEFLAGSMASK 0x3fL 
 #ifdef _DEBUG 
  FILEFLAGS 0x1L 
@@ -37,14 +54,14 @@ BEGIN
     BEGIN 
         BLOCK "080404b0" 
         BEGIN 
-            VALUE "CompanyName", "讯美科技股份有限公司" 
-            VALUE "FileVersion", "{major}.{minor}.{build}" 
+            VALUE "CompanyName", "{companyname}" 
+            VALUE "FileVersion", "{productversion}" 
             VALUE "InternalName", "{filename}" 
-            VALUE "LegalCopyright", "Public Copyright(C) 1998-{year}" 
+            VALUE "LegalCopyright", "Copyright(C) {companyname} @{startyear}-{nowyear}" 
             VALUE "OriginalFilename", "{filename}" 
-            VALUE "ProductName", "{productname}" 
-            VALUE "ProductVersion", "{major}.{minor}.{build}" 
-            VALUE "FileDescription", "{productname} {major}.{minor}.{build} {versionalias}" 
+            VALUE "ProductName", "{filename}" 
+            VALUE "ProductVersion", "{productversion}" 
+            VALUE "FileDescription", "{filename} {productversion}" 
         END 
     END 
     BLOCK "VarFileInfo" 

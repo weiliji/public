@@ -24,9 +24,9 @@ public:
 
 	virtual std::string build(const URL& URL)
 	{
-		XMLObject::Child& getcapabilities = body().addChild("GetCapabilities");
+		XML::Child& getcapabilities = body().addChild("GetCapabilities");
 
-		getcapabilities.attribute("xmlns","http://www.onvif.org/ver10/device/wsdl");
+		getcapabilities.addAttribute("xmlns","http://www.onvif.org/ver10/device/wsdl");
 
 		//add category
 		getcapabilities.addChild("Category",get_cap_str());
@@ -35,77 +35,99 @@ public:
 		return CmdObject::build(URL);
 	}
 	OnvifClientDefs::Capabilities capabilities;
-	virtual bool parse(const XMLObject::Child& p_xml)
+	virtual bool parse(const XML::Child& p_xml)
 	{
-		const XMLObject::Child& resp = p_xml.getChild("GetCapabilitiesResponse");
+		const XML::Child& resp = p_xml.getChild("GetCapabilitiesResponse");
 		if (!resp) return false;
 
-		const XMLObject::Child& cap = resp.getChild("Capabilities");
+		const XML::Child& cap = resp.getChild("Capabilities");
 		if (!cap) return false;
 
-		const XMLObject::Child& media = cap.getChild("Media");
-		if(media) capabilities.Media.Support = parseMedia(media);
+		const XML::Child& media = cap.getChild("Media");
+		if(media) capabilities.media.support = parseMedia(media);
 		
-		const XMLObject::Child& ptz = cap.getChild("PTZ");
-		if(ptz) capabilities.PTZ.Support = parsePtz(ptz);
+		const XML::Child& ptz = cap.getChild("PTZ");
+		if(ptz) capabilities.ptz.support = parsePtz(ptz);
 		
-		const XMLObject::Child& events = cap.getChild("Events");
-		if (events) capabilities.Events.Support = parseEvents(events);
+		const XML::Child& events = cap.getChild("Events");
+		if (events) capabilities.events.support = parseEvents(events);
+
+		const XML::Child& device = cap.getChild("Device");
+		if (device) parseDevice(device);
 
 		return true;
 	}
 private:
-	virtual bool parseMedia(const XMLObject::Child& body)
+	virtual bool parseMedia(const XML::Child& body)
 	{
-		const XMLObject::Child& xaddr = body.getChild("XAddr");
+		const XML::Child& xaddr = body.getChild("XAddr");
 		if (xaddr)
 		{
-			capabilities.Media.xaddr = xaddr.data();
+			capabilities.media.xaddr = xaddr.data();
 		}
 		else
 		{
-			return FALSE;
+			return false;
 		}
 
-		const XMLObject::Child& cap = body.getChild("StreamingCapabilities");
-		if (!cap) return FALSE;
+		const XML::Child& cap = body.getChild("StreamingCapabilities");
+		if (!cap) return false;
 		
-		const XMLObject::Child& rtpmult = cap.getChild("RTPMulticast");
+		const XML::Child& rtpmult = cap.getChild("RTPMulticast");
 		if (rtpmult)
 		{
-			capabilities.Media.RTPMulticast = rtpmult.data().readBool();
+			capabilities.media.rtpMulticast = rtpmult.data().readBool();
 		}
-		const XMLObject::Child& rtptcp = cap.getChild("RTP_TCP");
+		const XML::Child& rtptcp = cap.getChild("RTP_TCP");
 		if (rtptcp)
 		{
-			capabilities.Media.RTP_TCP = rtptcp.data().readBool();
+			capabilities.media.rtp_tcp = rtptcp.data().readBool();
 		}
-		const XMLObject::Child& rtsp = cap.getChild("RTP_RTSP_TCP");
+		const XML::Child& rtsp = cap.getChild("RTP_RTSP_TCP");
 		if (rtsp)
 		{
-			capabilities.Media.RTP_RTSP_TCP = rtsp.data().readBool();
+			capabilities.media.rtp_rtsp_tcp = rtsp.data().readBool();
 		}
 
 		return true;
 	}
 
 
-	bool parsePtz(const XMLObject::Child& ptz)
+	bool parsePtz(const XML::Child& ptz)
 	{
-		const XMLObject::Child& xaddr = ptz.getChild("XAddr");
+		const XML::Child& xaddr = ptz.getChild("XAddr");
 		if (!xaddr) return false;
 
-		capabilities.PTZ.xaddr = xaddr.data();
+		capabilities.ptz.xaddr = xaddr.data();
 
 		return true;
 	}
 
-	bool parseEvents(const XMLObject::Child& p_events)
+	bool parseEvents(const XML::Child& p_events)
 	{
-		const XMLObject::Child& xaddr = p_events.getChild("XAddr");
+		const XML::Child& xaddr = p_events.getChild("XAddr");
 		if (!xaddr) return false;
 
-		capabilities.Events.xaddr = xaddr.data();
+		capabilities.events.xaddr = xaddr.data();
+
+		return true;
+	}
+
+	bool parseDevice(const XML::Child& p_device)
+	{
+		XML::Child io = p_device.getChild("IO");
+		if (!io) return false;
+
+
+		for(XML::ChildIterator iter = io.child("InputConnectors");iter;iter++)
+		{
+			capabilities.device.io.alarminput.push_back(iter->data());
+		}
+
+		for(XML::ChildIterator iter = io.child("RelayOutputs");iter;iter++)
+		{
+			capabilities.device.io.alarmoutput.push_back(iter->data());
+		}
 
 		return true;
 	}

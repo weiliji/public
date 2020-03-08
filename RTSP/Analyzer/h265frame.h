@@ -31,24 +31,28 @@
 #include <stdint.h>
 #include <iostream>
 #include <string.h>
+#include "RTSP/RTSP.h"
+#include "Base/Base.h"
+using namespace Public::Base;
+using namespace Public::RTSP;
 
 #define AV_RB16(x) ((((const uint8_t*)(x))[0] << 8)|((const uint8_t*)(x))[1])
 
 class H265Frame
 {
 public:
-  unsigned char m_firstfrag;
-  unsigned char m_lastfrag;
-  unsigned int m_buflen;
-  unsigned char *m_buf;
+	shared_ptr<RTPFrame>	m_frame;
+	int m_firstfrag = 0;
+	int	m_lastfrag = 0;
 public:
   H265Frame();
   ~H265Frame();
-  int handleHevcFrame(uint16_t seq,uint32_t timestamp,const uint8_t *buf, int len);
+  int handleHevcFrame(const shared_ptr<STREAM_TRANS_INFO>& transinfo, const shared_ptr<RTPPackage>& rtp);
+  void resetBuffer();
 private:
-  int handleHevcRtpPackage(uint16_t seq,uint32_t timestamp,const uint8_t *buf, int len,uint8_t *outbuf,int *outlen);
-  void handleFragPackage(const uint8_t *buf, int len,int start_bit,const uint8_t *nal_header,int nal_header_len,uint8_t *outbuf,int *outlen);
-  int handleAggregatedPacket(const uint8_t *buf, int len,uint8_t *outbuf, int *outlen);
+  int handleHevcRtpPackage(uint32_t timestamp,const uint8_t *rtpbuf, int rtplen);
+  void handleFragPackage(const uint8_t *rtpbuf, int rtplen,int start_bit,const uint8_t *nal_header,int nal_header_len);
+  int handleAggregatedPacket(const uint8_t *rtpbuf, int rtplen);
 };
 
 #endif /* __H265FRAME_H__ */

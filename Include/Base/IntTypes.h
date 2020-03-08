@@ -16,7 +16,8 @@
 
 typedef int socklen_t;
 
-#if _MSC_VER > 1500 //VGS2008
+//#if _MSC_VER > 1500 //VS2008
+#ifdef WIN32
 #   include <stdint.h>
 #else
 #ifndef int8_t
@@ -65,7 +66,7 @@ typedef unsigned __int64	uint64_t;
 #include <list>
 #include <deque>
 #include <sstream>
-
+#include <functional>
 
 
 using namespace std;
@@ -82,9 +83,37 @@ public:
 	IMutexInterface(){}
 	virtual ~IMutexInterface(){}
 
-	virtual bool enter() {return false;}
+	virtual bool tryEnter() = 0;
+	virtual bool enter() = 0;
 	virtual bool leave() = 0;
 };
+class BASE_API IRWMutexInterface
+{
+public:
+	IRWMutexInterface() {}
+	virtual ~IRWMutexInterface() {}
+	
+	/// 进入临界区。
+	/// \retval true 	成功
+	/// \retval false 失败
+	virtual bool enterRead() = 0;
+
+	/// 离开临界区。
+	/// \retval true 	成功
+	/// \retval false 失败
+	virtual bool leaveRead() = 0;
+
+	/// 进入临界区。
+	/// \retval true 	成功
+	/// \retval false 失败
+	virtual bool enterWrite() = 0;
+
+	/// 离开临界区。
+	/// \retval true 	成功
+	/// \retval false 失败
+	virtual bool leaveWrite() = 0;
+};
+
 
 //内存释放分配接口
 class BASE_API IMempoolInterface

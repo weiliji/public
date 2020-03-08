@@ -4,66 +4,172 @@
     <ClInclude Include="..\Include\Network\Defs.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\Network\NetAddr.h">
-      <Filter>Include</Filter>
-    </ClInclude>
     <ClInclude Include="..\Include\Network\Network.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\Network\Socket.h">
-      <Filter>Include</Filter>
+    <ClInclude Include="..\Include\Network\Socket\NetAddr.h">
+      <Filter>Include\Socket</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\Network\TcpClient.h">
-      <Filter>Include</Filter>
+    <ClInclude Include="..\Include\Network\Socket\RawSocket.h">
+      <Filter>Include\Socket</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\Network\TcpServer.h">
-      <Filter>Include</Filter>
+    <ClInclude Include="..\Include\Network\Socket\Socket.h">
+      <Filter>Include\Socket</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\Network\Udp.h">
-      <Filter>Include</Filter>
+    <ClInclude Include="..\Include\Network\Socket\SSLSocket.h">
+      <Filter>Include\Socket</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\Network\Strand.h">
-      <Filter>Include</Filter>
+    <ClInclude Include="..\Include\Network\Socket\TcpClient.h">
+      <Filter>Include\Socket</Filter>
     </ClInclude>
-    <ClInclude Include="Src\IOWorker.h" />
-    <ClInclude Include="Src\aio\common\_pool.h">
-      <Filter>aio\common</Filter>
+    <ClInclude Include="..\Include\Network\Socket\TcpServer.h">
+      <Filter>Include\Socket</Filter>
     </ClInclude>
-    <ClInclude Include="Src\aio\common\_userthread.h">
-      <Filter>aio\common</Filter>
+    <ClInclude Include="..\Include\Network\Socket\Udp.h">
+      <Filter>Include\Socket</Filter>
     </ClInclude>
-    <ClInclude Include="Src\aio\win32\_winevent.h">
-      <Filter>aio\win32</Filter>
+    <ClInclude Include="Src\Socket\IOWorker.h">
+      <Filter>Socket</Filter>
     </ClInclude>
-    <ClInclude Include="Src\aio\win32\_winsocket.h">
-      <Filter>aio\win32</Filter>
+    <ClInclude Include="..\Include\Network\Email\Client.h">
+      <Filter>Include\Email</Filter>
     </ClInclude>
-    <ClInclude Include="Src\aio\ioserver.h">
-      <Filter>aio</Filter>
+    <ClInclude Include="..\Include\Network\Email\Message.h">
+      <Filter>Include\Email</Filter>
     </ClInclude>
-    <ClInclude Include="Src\aio\asocket.h">
-      <Filter>aio</Filter>
+    <ClInclude Include="..\Include\Network\Email\Address.h">
+      <Filter>Include\Email</Filter>
     </ClInclude>
-    <ClInclude Include="Src\aio\win32\_winiocp.h">
-      <Filter>aio\win32</Filter>
+    <ClInclude Include="Src\Email\mailio\base64.hpp">
+      <Filter>Email\mailio</Filter>
     </ClInclude>
-    <ClInclude Include="Src\aio\linux\_linuxepoll.h">
-      <Filter>aio\linux</Filter>
+    <ClInclude Include="Src\Email\mailio\binary.hpp">
+      <Filter>Email\mailio</Filter>
     </ClInclude>
-    <ClInclude Include="Src\aio\linux\_linuxevent.h">
-      <Filter>aio\linux</Filter>
+    <ClInclude Include="Src\Email\mailio\bit7.hpp">
+      <Filter>Email\mailio</Filter>
     </ClInclude>
-    <ClInclude Include="Src\aio\linux\_linuxsocket.h">
-      <Filter>aio\linux</Filter>
+    <ClInclude Include="Src\Email\mailio\bit8.hpp">
+      <Filter>Email\mailio</Filter>
     </ClInclude>
-    <ClInclude Include="Src\aio\common\_event.h">
-      <Filter>aio\common</Filter>
+    <ClInclude Include="Src\Email\mailio\codec.hpp">
+      <Filter>Email\mailio</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\Include\Network\Version.tpl">
-      <Filter>Include</Filter>
-    </None>
+    <ClInclude Include="Src\Email\mailio\dialog.hpp">
+      <Filter>Email\mailio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Email\mailio\email.hpp">
+      <Filter>Email\mailio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Email\mailio\export.hpp">
+      <Filter>Email\mailio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Email\mailio\imap.hpp">
+      <Filter>Email\mailio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Email\mailio\mailboxes.hpp">
+      <Filter>Email\mailio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Email\mailio\mime.hpp">
+      <Filter>Email\mailio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Email\mailio\optional.hpp">
+      <Filter>Email\mailio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Email\mailio\pop3.hpp">
+      <Filter>Email\mailio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Email\mailio\q_codec.hpp">
+      <Filter>Email\mailio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Email\mailio\quoted_printable.hpp">
+      <Filter>Email\mailio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Email\mailio\smtp.hpp">
+      <Filter>Email\mailio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Email\mailio\mailmessage.hpp">
+      <Filter>Email\mailio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Network\Ftp\Client.h">
+      <Filter>Include\Ftp</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Ftp\ftplib.h">
+      <Filter>Ftp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Network\HTTP\Client.h">
+      <Filter>Include\HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Network\HTTP\Public.h">
+      <Filter>Include\HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Network\HTTP\Server.h">
+      <Filter>Include\HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HTTP\HTTPCache.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HTTP\HTTPCommunication.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HTTP\HTTPDefine.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HTTP\HTTPErroCode.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HTTP\WebSocketProtocol.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Network\HTTP\Serialization.h">
+      <Filter>Include\HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Network\ntp\ntp.h">
+      <Filter>Include\ntp</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ntp\ntpProtocol.h">
+      <Filter>ntp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Network\Socket\Strand.h">
+      <Filter>Include\Socket</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Socket\aio\ioserver.h" />
+    <ClInclude Include="Src\Socket\aio\_poll.h">
+      <Filter>Socket\aio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Socket\aio\_proactor_event.h">
+      <Filter>Socket\aio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Socket\aio\_proactor_iocp.h">
+      <Filter>Socket\aio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Socket\aio\_proactor_socket.h">
+      <Filter>Socket\aio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Socket\aio\_reactor_epoll.h">
+      <Filter>Socket\aio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Socket\aio\_reactor_event.h">
+      <Filter>Socket\aio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Socket\aio\_reactor_poll.h">
+      <Filter>Socket\aio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Socket\aio\_reactor_socket.h">
+      <Filter>Socket\aio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Socket\aio\asocket.h">
+      <Filter>Socket\aio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Socket\aio\_reactor_kqueue.h">
+      <Filter>Socket\aio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Socket\aio\_reactor_resource.h">
+      <Filter>Socket\aio</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Socket\aio\_awaken.h">
+      <Filter>Socket\aio</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Include">
@@ -72,17 +178,41 @@
     <Filter Include="资源文件">
       <UniqueIdentifier>{7f3d9aca-feec-438c-85c4-9666574c25f6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="aio">
-      <UniqueIdentifier>{f34f0081-feeb-4734-a98f-d5526b384149}</UniqueIdentifier>
+    <Filter Include="Include\Socket">
+      <UniqueIdentifier>{954245fd-a872-4699-a1e2-982d7800fd82}</UniqueIdentifier>
     </Filter>
-    <Filter Include="aio\common">
-      <UniqueIdentifier>{80dfcf53-7ab9-48b6-ae69-a6bcc35854b1}</UniqueIdentifier>
+    <Filter Include="Socket">
+      <UniqueIdentifier>{9f378c92-fedd-4933-a67c-bb3f6c434248}</UniqueIdentifier>
     </Filter>
-    <Filter Include="aio\win32">
-      <UniqueIdentifier>{72a53451-aabc-48c8-b839-d2e65f023e34}</UniqueIdentifier>
+    <Filter Include="Socket\aio">
+      <UniqueIdentifier>{05e5cb0c-8401-4709-8212-b2d0cf2a4109}</UniqueIdentifier>
     </Filter>
-    <Filter Include="aio\linux">
-      <UniqueIdentifier>{4334623e-fdd2-48a5-bf22-3b1ce0453aca}</UniqueIdentifier>
+    <Filter Include="Include\Email">
+      <UniqueIdentifier>{88ad2b26-e459-4437-b23d-3067bb09b757}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Email">
+      <UniqueIdentifier>{f1d9a56a-1b80-4a07-8f86-5b94e9eb217a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Email\mailio">
+      <UniqueIdentifier>{782bcb65-9908-465e-9ab5-94a88fbfab32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Ftp">
+      <UniqueIdentifier>{a201196a-f8a8-4c9f-b098-496fce377733}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ftp">
+      <UniqueIdentifier>{f1c264bd-5da0-4e8b-bfcb-72553d347e38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\HTTP">
+      <UniqueIdentifier>{f82166f2-de8a-444b-9f6b-d90703ef5fcb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HTTP">
+      <UniqueIdentifier>{cb2da064-3c27-4994-946e-1c21c04b1c2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\ntp">
+      <UniqueIdentifier>{afa95e5a-ee1b-4457-8e7d-456e1d302578}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ntp">
+      <UniqueIdentifier>{8a32eb21-d998-492e-a597-df8b9d00947a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -91,15 +221,136 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\NetAddr.cpp" />
-    <ClCompile Include="Src\TcpServer.cpp" />
-    <ClCompile Include="Src\TcpClient.cpp" />
-    <ClCompile Include="Src\aio\asocket.cpp">
-      <Filter>aio</Filter>
+    <None Include="..\Include\Network\Version.tpl">
+      <Filter>Include</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Src\Socket\IOWorker.cpp">
+      <Filter>Socket</Filter>
     </ClCompile>
-    <ClCompile Include="Src\IOWorker.cpp" />
-    <ClCompile Include="Src\Udp.cpp" />
-    <ClCompile Include="Src\Strand.cpp" />
+    <ClCompile Include="Src\Socket\NetAddr.cpp">
+      <Filter>Socket</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Socket\RawSocket.cpp">
+      <Filter>Socket</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Socket\SSLSocket.cpp">
+      <Filter>Socket</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Socket\TcpClient.cpp">
+      <Filter>Socket</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Socket\TcpServer.cpp">
+      <Filter>Socket</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Socket\Udp.cpp">
+      <Filter>Socket</Filter>
+    </ClCompile>
     <ClCompile Include="Src\Network.cpp" />
+    <ClCompile Include="Src\Email\mailio\base64.cpp">
+      <Filter>Email\mailio</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Email\mailio\binary.cpp">
+      <Filter>Email\mailio</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Email\mailio\bit7.cpp">
+      <Filter>Email\mailio</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Email\mailio\bit8.cpp">
+      <Filter>Email\mailio</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Email\mailio\codec.cpp">
+      <Filter>Email\mailio</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Email\mailio\dialog.cpp">
+      <Filter>Email\mailio</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Email\mailio\imap.cpp">
+      <Filter>Email\mailio</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Email\mailio\mailboxes.cpp">
+      <Filter>Email\mailio</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Email\mailio\mime.cpp">
+      <Filter>Email\mailio</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Email\mailio\pop3.cpp">
+      <Filter>Email\mailio</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Email\mailio\q_codec.cpp">
+      <Filter>Email\mailio</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Email\mailio\quoted_printable.cpp">
+      <Filter>Email\mailio</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Email\mailio\smtp.cpp">
+      <Filter>Email\mailio</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Email\EmailAddress.cpp">
+      <Filter>Email</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Email\EmailClient.cpp">
+      <Filter>Email</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Email\EmailMessage.cpp">
+      <Filter>Email</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Email\mailio\mailiomessage.cpp">
+      <Filter>Email\mailio</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Ftp\ftpClient.cpp">
+      <Filter>Ftp</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Ftp\ftplib.c">
+      <Filter>Ftp</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\HTTP\ChunkData.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\HTTP\HTTPClient.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\HTTP\HTTPClientAsync.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\HTTP\HTTPClientPublic.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\HTTP\HTTPPublic.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\HTTP\HTTPServer.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\HTTP\HTTPServerPublic.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\HTTP\HTTPServerSession.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\HTTP\WebSocketClient.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\HTTP\WebSocketSession.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\HTTP\Serialization.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ntp\ntp.cpp">
+      <Filter>ntp</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Socket\Strand.cpp">
+      <Filter>Socket</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Socket\aio\asocket.cpp">
+      <Filter>Socket\aio</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Src\Email\mailio\github.txt">
+      <Filter>Email\mailio</Filter>
+    </Text>
   </ItemGroup>
 </Project>

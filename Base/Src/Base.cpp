@@ -12,6 +12,7 @@
 #endif
 
 #include "Base/Base.h"
+#include "Base/SaveLog.h"
 #include "../version.inl"
 
 namespace Public {
@@ -37,7 +38,7 @@ void BaseSystem::autoExitDelayer(uint64_t delaySecond /* = 30 */)
 	char systemPath[256] = { 0 };
 	GetSystemDirectory(systemPath, 256);	
 
-	std::deque<std::string> execargv = { "/c" ,tmpStr };
+	std::vector<std::string> execargv = { "/c" ,tmpStr };
 
 	Process::createProcess((std::string(systemPath)+PATH_SEPARATOR+std::string("cmd.exe")).c_str(), execargv);
 
@@ -50,7 +51,7 @@ void BaseSystem::autoExitDelayer(uint64_t delaySecond /* = 30 */)
 		processId
 	);
 
-	std::deque<std::string> execargv;
+	std::vector<std::string> execargv;
 	execargv.push_back("-c");
 	execargv.push_back(tmpStr);
 
@@ -148,7 +149,34 @@ void BaseSystem::init(const closeEventCallback& _closeEvent,void* userdata)
 
 void BaseSystem::uninit()
 {
-	
+	stopSaveLog();
+}
+
+
+static shared_ptr<Log> savelog;
+
+void printlog(const shared_ptr<LogPrintInfo>& info)
+{
+	shared_ptr<Log> logptr = savelog;
+	if (logptr)
+	{
+		logptr->print(info);
+	}
+}
+
+void BaseSystem::startSaveLog(const std::string& appName, const std::string& logpath, LOG_Level logLevel)
+{
+	savelog = make_shared<Log>();
+	savelog->init(appName, logpath, logLevel);
+
+	setlogprinter(savelog.get(), printlog);
+}
+
+void BaseSystem::stopSaveLog()
+{
+	cleanlogprinter(savelog.get());
+
+	savelog = NULL;
 }
 
 } // namespace Base

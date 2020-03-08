@@ -1,0 +1,13 @@
+#pragma once 
+#include "MSProtoDevice.pb.h" 
+#include "MSProtoDeviceConfig.pb.h" 
+#include "MSProtoDeviceControl.pb.h" 
+#include "MSProtoEvent.pb.h" 
+#include "MSProtoHeader.h" 
+#include "MSProtoMessage.pb.h" 
+#include "MSProtoPublic.pb.h" 
+#include "MSProtoResource.pb.h" 
+#include "MSProtoServer.pb.h" 
+#include "MSProtoStorage.pb.h" 
+#include "MSProtoSystem.pb.h" 
+#include "MSProtoUser.pb.h" 

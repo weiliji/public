@@ -38,9 +38,9 @@ LIB_OBJD_DBG	+= $(patsubst %.o, %.c.d.$(DEBUG_SUFFIX), $(LIB_C_OBJS))
 
 
 
-APP_SRCS_CPP	=	$(foreach dir,$(APP_SRCS_PATH),$(wildcard $(dir)/*.cpp))
-APP_SRCS_CPP	+=	$(foreach dir,$(APP_SRCS_PATH),$(wildcard $(dir)/*.cxx))
-APP_SRCS_C	=	$(foreach dir,$(APP_SRCS_PATH),$(wildcard $(dir)/*.c))
+APP_SRCS_CPP	=	$(foreach dir,$(SRCS_PATH),$(wildcard $(dir)/*.cpp))
+APP_SRCS_CPP	+=	$(foreach dir,$(SRCS_PATH),$(wildcard $(dir)/*.cxx))
+APP_SRCS_C	=	$(foreach dir,$(SRCS_PATH),$(wildcard $(dir)/*.c))
 APP_CPP_OBJS = $(patsubst %.cpp,${COMPILE_PATH}/%.o,$(APP_SRCS_CPP))
 APP_C_OBJS = $(patsubst %.c,${COMPILE_PATH}/%.o,$(APP_SRCS_C))
 APP_OBJS	=	${APP_CPP_OBJS} ${APP_C_OBJS}
@@ -199,10 +199,10 @@ $(LIB_TARGET_DBG): $(LIB_OBJS_DBG)
 
 $(SHARDLIB_TARGET): $(LIB_C_OBJS) $(LIB_OBJS) 
 ifneq ($(strip ${LIB_OBJS}), )
-	$(CPP) -shared ${CFLAGS} $(CFLAGS_NDBG) $(CPPFLAGS) -o $@ $^ $(LIBS) $(LDLIBS) $(SHARDLIB_TARGETLINK)
+	$(CPP) ${BUILDSHARED} ${CFLAGS} $(CFLAGS_NDBG) $(CPPFLAGS) -o $@ $^ $(LIBS) $(LDLIBS) $(SHARDLIB_TARGETLINK)
 	$(STRIP) $@
 else
-	$(CC) -shared ${CFLAGS} $(CFLAGS_NDBG)  -o $@ $^ $(LIBS) $(LDLIBS) $(SHARDLIB_TARGETLINK)
+	$(CC) ${BUILDSHARED} ${CFLAGS} $(CFLAGS_NDBG)  -o $@ $^ $(LIBS) $(LDLIBS) $(SHARDLIB_TARGETLINK)
 	$(STRIP) $@
 endif
 
@@ -210,9 +210,9 @@ endif
 	
 $(SHARDLIB_TARGET_DBG): $(LIB_C_OBJS_DBG) $(LIB_OBJS_DBG)
 ifneq ($(strip ${LIB_OBJS_DBG}), )
-	$(CPP) -shared ${CFLAGS} $(CFLAGS_DBG) $(CPPFLAGS) -o $@ $^ $(LIBS_DBG) $(LDLIBS_DBG) $(SHARDLIB_TARGETLINK_DBG)
+	$(CPP) ${BUILDSHARED} ${CFLAGS} $(CFLAGS_DBG) $(CPPFLAGS) -o $@ $^ $(LIBS_DBG) $(LDLIBS_DBG) $(SHARDLIB_TARGETLINK_DBG)
 else
-	$(CC) -shared ${CFLAGS} $(CFLAGS_DBG) -o $@ $^ $(LIBS_DBG) $(LDLIBS_DBG) $(SHARDLIB_TARGETLINK_DBG)
+	$(CC) ${BUILDSHARED} ${CFLAGS} $(CFLAGS_DBG) -o $@ $^ $(LIBS_DBG) $(LDLIBS_DBG) $(SHARDLIB_TARGETLINK_DBG)
 endif
 	
 	
@@ -282,19 +282,19 @@ ${COMPILE_PATH}/%.cc.d.$(DEBUG_SUFFIX):%.cxx
 
 $(APP_TARGET):$(APP_OBJS) $(LIB_TARGET) $(LIBS) 
 ifneq ($(strip ${APP_CPP_OBJS}), )
-	$(CPP) ${LDFLAGS} $(APP_OBJS) -Xlinker --start-group ${LIBS} $(LIB_TARGET) ${LDLIBS} -Xlinker --end-group -o $@
+	$(CPP) ${LDFLAGS} $(APP_OBJS) ${XLINKSTARTGROUP} ${LIBS} $(LIB_TARGET) ${LDLIBS} ${XLINKSTOPGROUP} -o $@
 	$(STRIP) $@
 else
-	$(CC) ${LDFLAGS} $(APP_OBJS) -Xlinker --start-group ${LIBS} $(LIB_TARGET) ${LDLIBS} -Xlinker --end-group -o $@
+	$(CC) ${LDFLAGS} $(APP_OBJS) ${XLINKSTARTGROUP} ${LIBS} $(LIB_TARGET) ${LDLIBS} ${XLINKSTOPGROUP} -o $@
 	$(STRIP) $@
 endif
 
 	
 $(APP_TARGET_DBG):$(APP_OBJS_DBG) $(LIB_TARGET_DBG) $(LIBS_DBG)	
 ifneq ($(strip ${APP_CPP_OBJS}), )
-	$(CPP) ${LDFLAGS} $(APP_OBJS_DBG) -Xlinker --start-group  $(LIB_TARGET_DBG) $(LIBS_DBG)	$(LDLIBS_DBG) -Xlinker --end-group -o $@
+	$(CPP) ${LDFLAGS} $(APP_OBJS_DBG) ${XLINKSTARTGROUP}  $(LIB_TARGET_DBG) $(LIBS_DBG)	$(LDLIBS_DBG) ${XLINKSTOPGROUP} -o $@
 else
-	$(CC) ${LDFLAGS} $(APP_OBJS_DBG) -Xlinker --start-group  $(LIB_TARGET_DBG) $(LIBS_DBG)	$(LDLIBS_DBG) -Xlinker --end-group -o $@
+	$(CC) ${LDFLAGS} $(APP_OBJS_DBG) ${XLINKSTARTGROUP}  $(LIB_TARGET_DBG) $(LIBS_DBG)	$(LDLIBS_DBG) ${XLINKSTOPGROUP} -o $@
 endif
 
 

@@ -6,8 +6,8 @@
 //	$Id: File.h 252 2013-12-18 04:40:28Z  $
 //
 
-#ifndef __BASE_FILEFIND_H__
-#define __BASE_FILEFIND_H__
+#ifndef __BASE_REGEX_H__
+#define __BASE_REGEX_H__
 
 #include <string>
 #ifdef WIN32

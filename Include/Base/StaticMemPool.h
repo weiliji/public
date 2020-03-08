@@ -12,7 +12,8 @@ class BASE_API StaticMemPool:public IMempoolInterface
 {
 	struct StaticMemPoolInternal;
 public:
-	StaticMemPool(char* bufferStartAddr,int bufferSize,IMutexInterface* locker,bool create,uint32_t chunksize = DefaultMemChunkSize);
+	//sharedheader 共享分析相关头数据
+	StaticMemPool(char* bufferStartAddr,int bufferSize,IMutexInterface* locker,bool create,bool sharedheader = false,uint32_t chunksize = DefaultMemChunkSize);
 	~StaticMemPool();
 
 	void* Malloc(uint32_t size,uint32_t& realsize);

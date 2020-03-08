@@ -1,8 +1,6 @@
 #pragma  once
 #include "Base/Base.h"
-#include "XML/XML.h"
 using namespace Public::Base;
-using namespace Public::XML;
 
 class GSop_Envelop
 {
@@ -17,6 +15,7 @@ public:
 		{
 			std::string  username;
 			std::string	 password;
+			Time		 createTime = Time::getCurrentTime();
 		}security;
 
 		std::string action;
@@ -30,16 +29,14 @@ public:
 	Header& header() { return _header; }
 
 
-	XMLObject::Child& envelop()
+	XML::Child& envelop()
 	{
-		return xml.getRoot();
+		return xml.body().getChild(GSOP_ENVELOP_NAME);
 	}
 
-	XMLObject::Child& body() 
+	XML::Child& body() 
 	{
-		XMLObject::Child& bodychild = xml.getRoot().getChild(GSOP_BODY_NAME);		
-
-		return bodychild;
+		return envelop().getChild(GSOP_BODY_NAME);
 	}
 
 	std::string buildGSopProtocol()
@@ -53,7 +50,7 @@ public:
 	{
 		if (!xml.parseBuffer(httpbody)) return false;
 
-		if (xml.getRootName() != GSOP_ENVELOP_NAME) return false;
+		if (xml.body().getChild(GSOP_ENVELOP_NAME).isEmpty()) return false;
 
 		if (body().isEmpty()) return false;
 
@@ -66,22 +63,22 @@ public:
 #define GSOP_BODY_FNAME			"s:" GSOP_BODY_NAME
 
 		{
-	
-			XMLObject::Child envelop(GSOP_ENVELOP_FNAME);
-			envelop.attribute("xmlns:s", "http://www.w3.org/2003/05/soap-envelope");
+			XML::Child envelop(GSOP_ENVELOP_FNAME);
+			envelop.addAttribute("xmlns:s", "http://www.w3.org/2003/05/soap-envelope");
+			envelop.addAttribute("xmlns:a", "http://www.w3.org/2005/08/addressing");
 
-			xml.setRoot(envelop);
+			xml.body().addChild(envelop);
 		}
 		{
-			xml.getRoot().addChild(GSOP_HEADER_FNAME);
+			envelop().addChild(GSOP_HEADER_FNAME);
 		}
 
 		{
-			XMLObject::Child newbody(GSOP_BODY_FNAME);
-			newbody.attribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-			newbody.attribute("xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
+			XML::Child newbody(GSOP_BODY_FNAME);
+			newbody.addAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+			newbody.addAttribute("xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
 
-			xml.getRoot().addChild(newbody);
+			envelop().addChild(newbody);
 		}
 
 		return true;
@@ -89,80 +86,81 @@ public:
 private:
 	void buildHeader()
 	{
-		XMLObject::Child& header = xml.getRoot().getChild(GSOP_HEADER_NAME);
-		if (_header.security.username.length() > 0 && _header.security.password.length() > 0)
-		{
-			buildSecurity(header);
-		}
+		XML::Child& header = envelop().getChild(GSOP_HEADER_NAME);
 		if (_header.action.length() > 0)
 		{
-			XMLObject::Child action("a:Action", _header.action);
-			action.attribute("s:mustUnderstand", "1");
+			XML::Child action("a:Action", _header.action);
+			action.addAttribute("s:mustUnderstand", "1");
 
 			header.addChild(action);
 		}
 		if (_header.messageID.length() > 0)
 		{
-			XMLObject::Child messageid("a:MessageID", _header.messageID);
+			XML::Child messageid("a:MessageID", _header.messageID);
 
 			header.addChild(messageid);
 		}
 		if (_header.replyTo.length() > 0)
 		{
-			XMLObject::Child replayto("a:ReplyTo");
+			XML::Child replayto("a:ReplyTo");
 			{
-				XMLObject::Child addr("a:Address", _header.replyTo);
+				XML::Child addr("a:Address", _header.replyTo);
 
 				replayto.addChild(addr);
 			}
 
 			header.addChild(replayto);
 		}
+		if (_header.security.username.length() > 0 && _header.security.password.length() > 0)
+		{
+			buildSecurity(header);
+		}
 		if (_header.to.length() > 0)
 		{
-			XMLObject::Child to("a:To", _header.to);
-			to.attribute("s:mustUnderstand", "1");
+			XML::Child to("a:To", _header.to);
+			to.addAttribute("s:mustUnderstand", "1");
 
 			header.addChild(to);
 		}
 	}
-	void buildSecurity(XMLObject::Child& header)
+	void buildSecurity(XML::Child& header)
 	{
-		XMLObject::Child usernametoken("UsernameToken");
+		XML::Child usernametoken("UsernameToken");
 		{
-			std::string noneBase64, passwdBase64, createTime;
+			std::string noneBase64, passwdBase64;
+			std::string createTime = onvif_build_datetime(_header.security.createTime);
 
 			buildUserAuthenInfo(noneBase64, passwdBase64, createTime, _header.security.password);
 
 			{
-				XMLObject::Child username("Username", _header.security.username);
+				XML::Child username("Username", _header.security.username);
 
 				usernametoken.addChild(username);
 			}
 			{
-				XMLObject::Child password("Password", passwdBase64);
-				password.attribute("Type", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordDigest");
+				XML::Child password("Password", passwdBase64);
+				password.addAttribute("Type", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordDigest");
 
 				usernametoken.addChild(password);
 			}
 			{
-				XMLObject::Child nonce("Nonce", noneBase64);
-				nonce.attribute("EncodingType", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary");
+				XML::Child nonce("Nonce", noneBase64);
+				nonce.addAttribute("EncodingType", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary");
 
 				usernametoken.addChild(nonce);
 			}
 			{
-				XMLObject::Child created("Created", createTime);
-				created.attribute("xmlns", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
+				XML::Child created("Created", createTime);
+				created.addAttribute("xmlns", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
 
 				usernametoken.addChild(created);
 			}
 		}
 
-		XMLObject::Child security("Security");
+		XML::Child security("Security");
 		{
-			security.attribute("s:mustUnderstand", "1");
-			security.attribute("xmlns", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd");
+			security.addAttribute("s:mustUnderstand", "1");
+			security.addAttribute("xmlns", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd");
 		}
 		security.addChild(usernametoken);
 
@@ -172,9 +170,6 @@ private:
 	{
 		std::string noneString = onvif_calc_nonce();
 		noneBase64 = Base64::encode(noneString);
-
-
-		createTime = onvif_build_datetime();
 
 		std::string basetmp = onvif_calc_digest(createTime, noneString, password);
 		passwdBase64 = Base64::encode(basetmp);
@@ -206,16 +201,19 @@ private:
 		return sha1.report(Sha1::REPORT_BIN);
 	}
 public:
-	static std::string onvif_build_datetime()
+	static std::string onvif_build_datetime(const Time& time = 0)
 	{
 		char buf[32] = { 0 };
 
-		Time nowtime = Time::getCurrentTime();
+		Time nowtime = time;
+		if(nowtime.makeTime() == 0)
+			nowtime = Time::getCurrentTime();
+		
 		snprintf_x(buf, 32, "%04d-%02d-%02dT%02d:%02d:%02dZ", nowtime.year, nowtime.month, nowtime.day, nowtime.hour, nowtime.minute, nowtime.second);
 
 		return buf;
 	}
 private:
-	XMLObject			xml;
+	XML			xml;
 	Header				_header;
 };

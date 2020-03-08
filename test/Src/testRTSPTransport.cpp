@@ -1,7 +1,7 @@
 #include "RTSP/RTSP.h"
 using namespace Public::RTSP;
 
-#if 1
+#if 0
 class RTSPServerSessiontmp;
 class RTSPClintessiontmp;
 
@@ -111,11 +111,11 @@ public:
 	{
 		int a = 0;
 	}
-	virtual void onMediaPackageCallback(const shared_ptr<STREAM_TRANS_INFO> mediainfo, const RTPPackage& rtppackage)
+	virtual void onMediaPackageCallback(const shared_ptr<STREAM_TRANS_INFO> transport, const RTPPackage& rtppackage)
 	{
 		std::map< RTSPServerSession*, shared_ptr< RTSPServerSessiontmp> > sendlist;
 		
-		if (strcasecmp(mediainfo->streaminfo.szMediaName.c_str(), "video") != 0) return;
+		if (strcasecmp(transport->streaminfo.szMediaName.c_str(), "video") != 0) return;
 
 		{
 			Guard locker(clientmutex);

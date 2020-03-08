@@ -13,6 +13,11 @@
 namespace Public{
 namespace Base {
 
+#define IP_ADD_MEMBERSHIP_V2	12
+
+#define LOCALHOSTIP		"127.0.0.1"
+#define LOCALHOSTSTR	"Localhost"
+
 ///主机相关的类
 class BASE_API Host
 {
@@ -38,6 +43,7 @@ public:
 		}FormatType;
 		uint64_t		TotalSize;
 		uint64_t		FreeSize;
+		bool			IsSystemDisk;	//是否系统盘
 	};
 	typedef enum {
 		SocketType_TCP,
@@ -46,16 +52,18 @@ public:
 
 	struct IPInfo
 	{
-		std::string Ip;
-		std::string Netmask;
-		std::string Gateway;
+		std::string ip;
+		std::string netmask;
+		std::string gateway;
 	};
 
 	struct NetworkInfo :public IPInfo
 	{
-		std::string AdapterName;
-		std::string Description;
-		std::string Mac;
+		NetworkInfo() {}
+
+		std::string adapterName;
+		std::string description;
+		std::string	mac;
 	};
 public:
 	///获取一个可用的端口号 10000开始 失败返回0
@@ -66,7 +74,7 @@ public:
 
 	///检测端口是否被占用
 	///type 在某协议下判断端口是否可用
-	static bool checkPortIsNotUsed(uint16_t port,SocketType type = SocketType_TCP);
+	//static bool checkPortIsNotUsed(uint16_t port,SocketType type = SocketType_TCP);
 
 	///获取CPU 核数
 	static int getProcessorNum();
@@ -76,6 +84,9 @@ public:
 
 	///获取cpu使用率 0 ~ 100 
 //	static uint16_t getCPUUsage();
+
+	//获取系统所安装的目录
+	static std::string getSystemDisk();
 
 	///获取磁盘信息
 	/// num 磁盘总数
@@ -88,6 +99,7 @@ public:
 	///获取网络负载
 //	static bool getNetwordLoad(uint64_t& inbps,uint64_t& outbps);
 
+	static std::map<std::string, NetworkInfo> getNetworkInfos();
 	static bool getNetworkInfos(std::map<std::string, NetworkInfo>& infos,std::string& defaultMac);
 
 	static bool setIPInfo(const NetworkInfo& info,const std::string& adapterName = "");

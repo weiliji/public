@@ -1,0 +1,9 @@
+#pragma  once
+#include "Message.h"
+#include "Connection.h"
+#include "TopicDefine.h"
+#include "MSDefine.h"
+#include "MSDispatcher.h"
+#include "MSMQServer.h"
+#include "MSMQClient.h"
+#include "MSStreamUrl.h"

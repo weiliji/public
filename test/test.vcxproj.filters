@@ -22,5 +22,19 @@
     <ClCompile Include="Src\testSocket.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Src\UnLockWindow.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\testFile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\testStorage.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Src\UnLockWindow.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

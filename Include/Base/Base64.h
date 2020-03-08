@@ -30,6 +30,35 @@ public:
 	static std::string decode(const std::string& src);
 };
 
+class BASE_API Base32
+{
+public:
+	/// Base32 编码
+	/// \param [in] src 编码前的数据缓存
+	/// \reval 返回编码后的文本字节
+	static std::string encode(const std::string& src);
+
+	/// Base32 解码
+	/// \param [in] src 解码后的数据缓存
+	/// \reval 返回解码后的数据字节
+	static std::string decode(const std::string& src);
+};
+
+class BASE_API Base16
+{
+public:
+	/// Base16 编码
+	/// \param [in] src 编码前的数据缓存
+	/// \reval 返回编码后的文本字节
+	static std::string encode(const std::string& src);
+
+	/// Base16 解码
+	/// \param [in] src 解码后的数据缓存
+	/// \reval 返回解码后的数据字节
+	static std::string decode(const std::string& src);
+};
+
+
 } // namespace Base
 } // namespace Public
 

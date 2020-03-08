@@ -23,7 +23,7 @@
 
 #else
 
-typedef unsigned long SOCKET;
+typedef int SOCKET;
 
 
 #define NETWORK_API

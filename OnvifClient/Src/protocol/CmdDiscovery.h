@@ -14,7 +14,7 @@ public:
 	virtual std::string build(const URL& URL)
 	{
 		{
-			envelop().attribute("xmlns:a", "http://schemas.xmlsoap.org/ws/2004/08/addressing");
+			envelop().addAttribute("xmlns:a", "http://schemas.xmlsoap.org/ws/2004/08/addressing");
 			body().removeAttribute("xmlns:xsi");
 			body().removeAttribute("xmlns:xsd");
 		}	
@@ -27,46 +27,33 @@ public:
 
 			
 
-		XMLObject::Child& probe = body().addChild("Probe");
-		probe.attribute("xmlns","http://schemas.xmlsoap.org/ws/2005/04/discovery");
+		XML::Child& probe = body().addChild("Probe");
+		probe.addAttribute("xmlns","http://schemas.xmlsoap.org/ws/2005/04/discovery");
 
-		XMLObject::Child& types = probe.addChild("d:Types","dp0:NetworkVideoTransmitter");
-		types.attribute("xmlns:d","http://schemas.xmlsoap.org/ws/2005/04/discovery");
-		types.attribute("xmlns:dp0", "http://www.onvif.org/ver10/network/wsdl");
+		XML::Child& types = probe.addChild("d:Types","dp0:NetworkVideoTransmitter");
+		types.addAttribute("xmlns:d","http://schemas.xmlsoap.org/ws/2005/04/discovery");
+		types.addAttribute("xmlns:dp0", "http://www.onvif.org/ver10/network/wsdl");
 
 		return CmdObject::build(URL);
 	}
 
-	std::string parseMacAddr(const std::string& macstr)
-	{
-		int mac[6] = {0,};
-
-		char macaddrstr[64] = { 0 };
-		if (sscanf(macstr.c_str(), "%02d%02d%02d%02d%02d%02d", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) == 6)
-		{
-			sprintf(macaddrstr, "%02d-%02d-%02d-%02d-%02d-%02d", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-		}
-
-		return macaddrstr;
-	}
-
 	shared_ptr<OnvifClientDefs::DiscoveryInfo>	info;
-	virtual bool parse(const XMLObject::Child& body)
+	virtual bool parse(const XML::Child& body)
 	{
 		info = make_shared<OnvifClientDefs::DiscoveryInfo>();
 
-		const XMLObject::Child& probeval = body.getChild("ProbeMatches").getChild("ProbeMatch");
+		const XML::Child& probeval = body.getChild("ProbeMatches").getChild("ProbeMatch");
 		if (probeval.isEmpty()) return false;
 
-		const XMLObject::Child& typeval = probeval.getChild("Types");
+		const XML::Child& typeval = probeval.getChild("Types");
 		if (typeval.isEmpty()) return false;
 
-		if (String::indexOfByCase(typeval.data(), " tds:Device") == -1)
+		if (String::indexOfByCase(typeval.data(), " tds:Device") == (size_t)-1)
 		{
 			return false;
 		}
 
-		const XMLObject::Child& scopesval = probeval.getChild("Scopes");
+		const XML::Child& scopesval = probeval.getChild("Scopes");
 		if (scopesval.isEmpty()) return false;
 
 		//parse name
@@ -74,25 +61,50 @@ public:
 			std::vector<std::string> scopevals = String::split(scopesval.data(), " ");
 			for (size_t i = 0; i < scopevals.size(); i++)
 			{
-				const char* nameflag = "onvif://www.onvif.org/name/";
-
-				size_t pos = String::indexOfByCase(scopevals[i], nameflag);
-				if (pos != -1)
 				{
-					info->name = scopevals[i].c_str() + strlen(nameflag);
-				}
+					const char* nameflag = "onvif://www.onvif.org/name/";
 
-				const char* macflag = "onvif://www.onvif.org/macaddress/";
+					size_t pos = String::indexOfByCase(scopevals[i], nameflag);
+					if (pos != (size_t)-1)
+					{
+						info->name = URLEncoding::decode(scopevals[i].c_str() + pos + strlen(nameflag));
+					}
+				}
 				
-				pos = String::indexOfByCase(scopevals[i], macflag);
-				if (pos != -1)
 				{
-					info->name = parseMacAddr(scopevals[i].c_str() + strlen(macflag));
+					const char* macflag = "onvif://www.onvif.org/macaddress/";
+
+					size_t pos = String::indexOfByCase(scopevals[i], macflag);
+					if (pos != (size_t)-1)
+					{
+						info->mac = parseMacAddr(scopevals[i].c_str() + pos + strlen(macflag));
+					}
 				}
+				
+				{
+					const char* modelflag = "onvif://www.onvif.org/model/";
+
+					size_t pos = String::indexOfByCase(scopevals[i], modelflag);
+					if (pos != (size_t)-1)
+					{
+						info->model = URLEncoding::decode(scopevals[i].c_str() + pos + strlen(modelflag));
+					}
+				}
+
+                if(info->model == "")
+                {
+                    const char* modelflag = "onvif://www.onvif.org/hardware/";
+
+                    size_t pos = String::indexOfByCase(scopevals[i], modelflag);
+                    if (pos != (size_t)-1)
+                    {
+                        info->model = URLEncoding::decode(scopevals[i].c_str() + pos + strlen(modelflag));
+                    }
+                }
 			}
 		}
 
-		const XMLObject::Child& addrval = probeval.getChild("XAddrs");
+		const XML::Child& addrval = probeval.getChild("XAddrs");
 		if (addrval.isEmpty()) return false;
 
 		{
@@ -101,14 +113,13 @@ public:
 			{
 				URL url(addrvals[i]);
 
-				std::string addr = url.getHost();
-
-				info->addrs.push_back(addr);
+				info->addr= url.getHostname();
+				info->port = url.getPort();
+				break;
 			}
 		}
 
-
-		return info->addrs.size() > 0;
+		return info->addr.length() > 0;
 	}
 };
 

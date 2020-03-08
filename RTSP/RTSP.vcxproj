@@ -22,30 +22,29 @@
     <ProjectGuid>{81032761-EE72-45BD-B4FF-07BFF8137A81}</ProjectGuid>
     <RootNamespace>RtspClient</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <PlatformToolset>v141_xp</PlatformToolset>
+    <PlatformToolset>v140_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140_xp</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -65,11 +64,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Lib\win32\$(ProjectName)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Bin\win32</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\__Compile\win32\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Lib\win32\$(ProjectName)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Bin\win32</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\__Compile\win32\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
@@ -89,16 +88,17 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>$(ProjectName)_debug</TargetName>
     <TargetExt>.dll</TargetExt>
+    <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>$(ProjectName)_debug</TargetName>
     <TargetExt>.dll</TargetExt>
-    <OutDir>$(SolutionDir)\Lib\$(Platform)\$(ProjectName)\</OutDir>
+    <OutDir>$(SolutionDir)\Bin\win64</OutDir>
     <IntDir>$(SolutionDir)\__Compile\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>$(SolutionDir)\__Compile\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)\Lib\$(Platform)\$(ProjectName)\</OutDir>
+    <OutDir>$(SolutionDir)\Bin\win64</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -110,16 +110,18 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Include;$(SolutionDir)\..\public\Include</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;Base_debug.lib;Network_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalLibraryDirectories>$(SolutionDir)\Lib\win32</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\Bin\win32</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -134,36 +136,38 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\Include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;Base/Base_debug.lib;Network/Network_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;Base_debug.lib;Network_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>$(SolutionDir)\Lib\$(Platform)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\Bin\win64</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;RTSP_EXPORTS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;RTSP_EXPORTS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Include;$(SolutionDir)\..\public\Include</AdditionalIncludeDirectories>
+      <SDLCheck>true</SDLCheck>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;Base/Base.lib;Network/Network.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;Base.lib;Network.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>Debug</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalLibraryDirectories>$(SolutionDir)\Lib\win32</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\Bin\win32</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -179,59 +183,65 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\Include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;Base/Base.lib;Network/Network.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;Base.lib;Network.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <AdditionalLibraryDirectories>$(SolutionDir)\Lib\$(Platform)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\Bin\win64</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\RTSP\Defs.h" />
+    <ClInclude Include="..\Include\RTSP\RTCPPackage.h" />
     <ClInclude Include="..\Include\RTSP\RTPAnalyzer.h" />
+    <ClInclude Include="..\Include\RTSP\RTPFrame.h" />
     <ClInclude Include="..\Include\RTSP\RTPPackage.h" />
     <ClInclude Include="..\Include\RTSP\RTSP.h" />
     <ClInclude Include="..\Include\RTSP\RTSPClient.h" />
+    <ClInclude Include="..\Include\RTSP\RTSPHandler.h" />
     <ClInclude Include="..\Include\RTSP\RTSPServer.h" />
+    <ClInclude Include="..\Include\RTSP\RTSPStatistics.h" />
     <ClInclude Include="..\Include\RTSP\RTSPStructs.h" />
     <ClInclude Include="..\Include\RTSP\RTSPUrl.h" />
     <ClCompile Include="Analyzer\h265frame.cpp" />
-    <ClCompile Include="Analyzer\rtcpAnalyzer.cpp" />
+    <ClCompile Include="Analyzer\RTPFrame.cpp" />
     <ClCompile Include="Analyzer\rtpH264Analyzer.cpp" />
     <ClCompile Include="Analyzer\rtpH265Analyzer.cpp" />
+    <ClCompile Include="Analyzer\rtpMjpegAnalyzer.cpp" />
     <ClCompile Include="Analyzer\rtpNoneAnalyzer.cpp" />
     <ClCompile Include="Analyzer\_RTPAnalyzer.cpp" />
     <ClCompile Include="Analyzer\_RTPBuilder.cpp" />
-    <ClCompile Include="client\RTSPClient.cpp" />
+    <ClCompile Include="client\RTSPClientSession.cpp" />
     <ClInclude Include="Analyzer\h265frame.h" />
     <ClInclude Include="Analyzer\irtpAnalyzer.h" />
-    <ClInclude Include="Analyzer\rtcpAnalyzer.h" />
+    <ClInclude Include="Analyzer\RTPAnalyzer.h" />
     <ClInclude Include="Analyzer\rtpAnalyzerStructs.h" />
     <ClInclude Include="Analyzer\rtpH264Analyzer.h" />
     <ClInclude Include="Analyzer\rtpH265Analyzer.h" />
+    <ClInclude Include="Analyzer\rtpMjpegAnalyzer.h" />
     <ClInclude Include="Analyzer\rtpNoneAnalyzer.h" />
     <ClInclude Include="Analyzer\spsParse.h" />
-    <ClInclude Include="common\rtp\rtcp.h" />
-    <ClInclude Include="common\rtp\rtpovertcpSession.h" />
-    <ClInclude Include="common\rtp\rtpoverudpSession.h" />
-    <ClInclude Include="common\rtp\rtpSession.h" />
-    <ClInclude Include="common\rtp\rtpsort.h" />
-    <ClInclude Include="common\StringParse\rtspHeaderRange.h" />
+    <ClInclude Include="common\rtcpSession.h" />
+    <ClInclude Include="common\mediaSession.h" />
+    <ClInclude Include="common\mediaSessionOverTcp.h" />
+    <ClInclude Include="common\mediaSessionOverUdp.h" />
+    <ClInclude Include="common\rtspDefine.h" />
     <ClInclude Include="common\StringParse\rtspHeaderSdp.h" />
     <ClInclude Include="common\StringParse\rtspHeaderTransport.h" />
     <ClInclude Include="common\StringParse\strDup.h" />
     <ClInclude Include="common\udpPortAlloc.h" />
     <ClInclude Include="common\rtspSession.h" />
-    <ClInclude Include="common\wwwAuthenticate.h" />
     <ClInclude Include="common\rtspProtocol.h" />
+    <ClCompile Include="common\RTCPPackage.cpp" />
     <ClCompile Include="common\RTPPackage.cpp" />
-    <ClCompile Include="common\rtp\rtcp.cpp" />
-    <ClCompile Include="common\StringParse\rtspHeaderRange.cpp" />
+    <ClCompile Include="common\RTSPStatistics.cpp" />
+    <ClCompile Include="common\RTSPStructs.cpp" />
     <ClCompile Include="common\StringParse\rtspHeaderSdp.cpp" />
     <ClCompile Include="common\StringParse\rtspHeaderTransport.cpp" />
+    <ClCompile Include="common\StringParse\sps.cpp" />
     <ClCompile Include="server\RTSPServerSession.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -243,6 +253,5 @@
     <ClCompile Include="server\RTSPServer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <Import Project="$(ProjectDir)packages-depend.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>

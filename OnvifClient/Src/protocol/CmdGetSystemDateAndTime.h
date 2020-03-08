@@ -13,24 +13,22 @@ public:
 
 	virtual std::string build(const URL& URL)
 	{
-		XMLObject::Child& getsystemdatetime = body().addChild("GetSystemDateAndTime");
+		XML::Child& getsystemdatetime = body().addChild("GetSystemDateAndTime");
 
-		getsystemdatetime.attribute("xmlns", "http://www.onvif.org/ver10/device/wsdl");
+		getsystemdatetime.addAttribute("xmlns", "http://www.onvif.org/ver10/device/wsdl");
 		
 		return CmdObject::build(URL);
 	}
 	Time time;
-	virtual bool parse(const XMLObject::Child& body)
+	virtual bool parse(const XML::Child& body)
 	{
-		time.breakTime(Time::getCurrentTime().makeTime());
-
-		const XMLObject::Child & resp = body.getChild("GetSystemDateAndTimeResponse");
+		const XML::Child & resp = body.getChild("GetSystemDateAndTimeResponse");
 		if (!resp) return false;
 
-		const XMLObject::Child& systemdate = resp.getChild("SystemDateAndTime");
+		const XML::Child& systemdate = resp.getChild("SystemDateAndTime");
 		if (!systemdate) return false;
 
-		const XMLObject::Child& utcdate = systemdate.getChild("UTCDateTime");
+		const XML::Child& utcdate = systemdate.getChild("UTCDateTime");
 		if (!utcdate) return false;
 		
 		time.hour = utcdate.getChild("Time").getChild("Hour").data().readInt();

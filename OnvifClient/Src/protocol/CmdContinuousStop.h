@@ -13,8 +13,8 @@ public:
 
 	virtual std::string build(const URL& URL)
 	{
-		XMLObject::Child& stop = body().addChild("Stop");
-		stop.attribute("xmlns", "http://www.onvif.org/ver20/ptz/wsdl");
+		XML::Child& stop = body().addChild("Stop");
+		stop.addAttribute("xmlns", "http://www.onvif.org/ver20/ptz/wsdl");
 		
 
 		//add token
@@ -27,9 +27,9 @@ public:
 		
 		return CmdObject::build(URL);
 	}
-	virtual bool parse(const XMLObject::Child& body) 
+	virtual bool parse(const XML::Child& body) 
 	{
-		const XMLObject::Child& respchild = body.getChild("StopResponse");
+		const XML::Child& respchild = body.getChild("StopResponse");
 
 		return !respchild.isEmpty();
 	}

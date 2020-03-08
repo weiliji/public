@@ -11,15 +11,12 @@
 
 # 生成库的设置
 # 定义库的文件目录
-   SRCS_PATH =  Src Src/Expression Src/uuid
+   SRCS_PATH =  Src Src/Base Src/Expression Src/uuid Src/regex Src/Excel Src/Excel/libxls Src/Excel/xlslib Src/Excel/sqlite3 Src/zip Src/zip/miniZip Src/XML Src/XML/tinyxml
 	
 # 库的名称
    SHARDLIB_NAME = 
    STATICLIB_NAME = Base
 
-# 应用程序选项
-# 应用程序的代码路径
-   APP_SRCS_PATH = 
 
 # 应用程序名称
    APP_NAME = 
@@ -29,6 +26,8 @@
 
 
 # 应用程序依赖的库(除了本身的编译的库)
+#  LIBS = /usr/lib/libiconv.dylib
+#  LIBS_DBG = /usr/lib/libiconv.dylib
   LIBS = 
   LIBS_DBG = 
 

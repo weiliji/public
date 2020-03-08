@@ -2,14 +2,15 @@
 #define _LIMITCPU_H__
 #include "Base/Defs.h"
 
-namespace Public {
-namespace Base {
-
+namespace Public
+{
+namespace Base
+{
 class BASE_API CPU
 {
 	CPU();
-public:
 
+public:
 	~CPU();
 
 	// 获取cpu核心数
@@ -20,11 +21,8 @@ public:
 	// 按比例限制cpu运行
 	// scale 比例，比如限制 4/1的cpu
 	static bool limit(unsigned int scale);
-private:
-	static unsigned int CountSetBits(unsigned long bitMask);
 };
-
-}
-}
+} // namespace Base
+} // namespace Public
 
 #endif

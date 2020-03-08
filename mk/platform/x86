@@ -45,13 +45,28 @@ GCPP_VERSION_MINOR = $(shell $(CPP) -dumpversion | cut -f2-2 -d.)
 GCPP_VERSION_BUILD = $(shell $(CPP) -dumpversion | cut -f3-3 -d.)
 
 ifeq ($(strip ${GCPP_VERSION_MAJOR}), 5)
-        CPPFLAGS += -std=c++11
+        CPPFLAGS += -std=c++11 -DGCCSUPORTC11
 endif
 
-CFLAGS += -DPLATFORM_X86 -D_REENTRANT 
+XLINKSTARTGROUP = -Xlinker --start-group
+XLINKSTOPGROUP = -Xlinker --end-group
+BUILDSHARED = -shared
+STATICLIBSUFFIXNAME = .a
+SHARDLIBSUFFIXNAME = .so
+
+ifeq ($(PLATFORM),ios)
+		CPPFLAGS += -std=c++11 -DGCCSUPORTC11 -Wc++11-extensions -Wwritable-strings
+		XLINKSTARTGROUP = 
+		XLINKSTOPGROUP = 
+		BUILDSHARED = -dynamiclib
+		SHARDLIBSUFFIXNAME = .dylib
+		STRIP = @echo 
+endif
+
+
+CFLAGS += -D_REENTRANT -fPIC
 CFLAGS_NDBG = -g -Os -O1 -DNDEBUG
 CFLAGS_DBG = -g -DDEBUG
-
 
 LDFLAGS +=
 AFLAGS += -crs

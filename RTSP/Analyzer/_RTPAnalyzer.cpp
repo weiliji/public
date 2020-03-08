@@ -3,26 +3,27 @@
 #include "rtpH264Analyzer.h"
 #include "rtpH265Analyzer.h"
 #include "rtpNoneAnalyzer.h"
+#include "rtpMjpegAnalyzer.h"
 #include "spsParse.h"
 
 using namespace  Public::RTSP;
 
 struct RTPAnalyzer::RTPAnalyzerInternal
 {
-	shared_ptr<IRtpAnalyzer> analyze;
-	FrameCallback			 framcallback;
-	shared_ptr<STREAM_TRANS_INFO>	transportinfo;
+	shared_ptr<IRtpAnalyzer>		videoanalyze;
 
-	void createAnalyze()
+	shared_ptr<IRtpAnalyzer>		audioanalyze;
+
+	FrameCallback					framcallback;
+	
+
+	shared_ptr<IRtpAnalyzer> createAnalyze(const shared_ptr<STREAM_TRANS_INFO>& transportinfo)
 	{
-		if (transportinfo == NULL || !framcallback)
-		{
-			return;
-		}
+		shared_ptr<IRtpAnalyzer> analyze;
 
-		if (strcasecmp(transportinfo->streaminfo.szMediaName.c_str(), "video") == 0)
+		if (transportinfo->streaminfo.frametype == FrameType_Video)
 		{
-			if (String::indexOfByCase(transportinfo->streaminfo.szCodec, "h264") != (size_t)-1)
+			if (transportinfo->streaminfo.codeId == CodeID_Video_H264)
 			{
 				int nWidth = 0;
 				int nHeight = 0;
@@ -32,55 +33,75 @@ struct RTPAnalyzer::RTPAnalyzerInternal
 				int frameRate = 0;
 
 				//解析sps信息，获取视频尺寸
-				DecodeSpsPpsInfo(transportinfo->streaminfo.szSpsPps, nWidth, nHeight, spsbuffer, ppsbuffer, frameRate);
+				DecodeSpsPpsInfo(transportinfo->streaminfo.sprop_parameter_sets, nWidth, nHeight, spsbuffer, ppsbuffer, frameRate);
 
 				analyze = make_shared<RtpH264Analyzer>(framcallback, spsbuffer, ppsbuffer);
 			}
-			else if (String::indexOfByCase(transportinfo->streaminfo.szCodec, "h265") != (size_t)-1)
+			else if (transportinfo->streaminfo.codeId == CodeID_Video_H265)
 			{
 				analyze = make_shared<RtpH265Analyzer>(framcallback);
 			}
+            else if (transportinfo->streaminfo.codeId == CodeID_Video_JPEG)
+            {
+                analyze = make_shared<rtpMjpegAnalyzer>(framcallback);
+            }
 		}
-
 		if (analyze == NULL)
 		{
-			FrameType type = FrameType_AUDIO_FRAME;
-			if (strcasecmp(transportinfo->streaminfo.szMediaName.c_str(), "video") == 0) type = FrameType_VIDEO_FRAME;
-			else if (strcasecmp(transportinfo->streaminfo.szMediaName.c_str(), "audio") == 0) type = FrameType_AUDIO_FRAME;
-			else return;
-
-			analyze = make_shared<RtpNoneAnalyzer>(framcallback, type);
+			analyze = make_shared<RtpNoneAnalyzer>(framcallback, transportinfo->streaminfo.frametype, transportinfo->streaminfo.codeId);
 		}
+
+		return analyze;
+	}
+
+	shared_ptr<IRtpAnalyzer> getAnalyzeAndCreate(const shared_ptr<STREAM_TRANS_INFO>& transportinfo)
+	{
+		if (transportinfo->streaminfo.frametype == FrameType_Video)
+		{
+			if (videoanalyze == NULL)	videoanalyze = createAnalyze(transportinfo);
+			
+			return videoanalyze;
+		}
+		else if (transportinfo->streaminfo.frametype == FrameType_Audio)
+		{
+			if (audioanalyze == NULL) audioanalyze = createAnalyze(transportinfo);
+			
+			return audioanalyze;
+		}
+
+		return shared_ptr<IRtpAnalyzer>();
 	}
 };
-RTPAnalyzer::RTPAnalyzer(const shared_ptr<STREAM_TRANS_INFO>& transportinfo, const FrameCallback& framcallback)
+RTPAnalyzer::RTPAnalyzer(const FrameCallback& framcallback)
 {
 	internal = new RTPAnalyzerInternal;
 	internal->framcallback = framcallback;
-
-	internal->createAnalyze();
 }
 RTPAnalyzer::~RTPAnalyzer()
 {
 	SAFE_DELETE(internal);
 }
 
-bool RTPAnalyzer::inputRtpPacket(const RTPPackage& rtppackage)
+bool RTPAnalyzer::inputRtpPacket(const shared_ptr<STREAM_TRANS_INFO>& transportinfo, const shared_ptr<RTPPackage>& rtppackage)
 {
-	const RTPHEADER* rtpheader = rtppackage.header();
-	const char* bufferaddr = rtppackage.data();
-	uint32_t bufferlen = rtppackage.datalen();
+	shared_ptr<IRtpAnalyzer> analyzer = internal->getAnalyzeAndCreate(transportinfo);
+	if (analyzer == NULL || rtppackage == NULL)
+	{
+		return false;
+	}
+	
 
-	if (internal->analyze == NULL || rtpheader  == NULL||bufferaddr == NULL || bufferlen <= 0) return false;
-
-	if (internal->analyze->InputData(*rtpheader, bufferaddr, bufferlen) != 0) return false;
+	if (analyzer->InputData(transportinfo,rtppackage) != 0)
+	{
+		analyzer = NULL;
+	}
 
 	return true;
 }
 bool RTPAnalyzer::reset()
 {
-	internal->analyze = NULL;
-	internal->createAnalyze();
+	internal->videoanalyze = NULL;
+	internal->audioanalyze = NULL;
 
 	return true;
 }

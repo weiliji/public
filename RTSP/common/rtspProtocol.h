@@ -1,374 +1,443 @@
 #pragma once
-#include "HTTP/HTTPParse.h"
-#include "rtp/rtpSession.h"
-using namespace Public::HTTP;
+#include "rtspDefine.h"
+
 using namespace Public::RTSP;
 
-#define RTPOVERTCPMAGIC		'$'
-#define RTSPCMDFLAG			"RTSP/1.0"
-
-#define RTSPCONENTTYPESDP	"application/sdp"
-
-#define MAXRTPPACKGESIZE	57344 //1024*56
-
-class RTSPProtocol:public HTTPParse
+class RTSPProtocol : public HTTP::Parser
 {
+#define MAXRTPPACKGESIZE 1024 * 1024 * 2
+#define PROTOCOLTIMEOUT 5 * 60 * 1000
+#define MAXMTUSIZE 1500
+protected:
+	virtual void onRecvCommandCallback(const shared_ptr<RTSPCommandInfo> &cmd) = 0;
+	virtual void onRecvMediaCallback(const String &data, const INTERLEAVEDFRAME &frame, uint32_t offset, uint32_t bufferlen) = 0;
+	virtual void onNetworkErrorCallback() = 0;
 public:
-	struct TCPInterleaved
+	RTSPProtocol(bool server) : HTTP::Parser(server)
 	{
-		int dataChannel;
-		int contrlChannel;
-	};
-public:
-	typedef Function<void(const shared_ptr<RTSPCommandInfo>&)> CommandCallback;
-	typedef Function<void()> DisconnectCallback;
-
-public:
-	RTSPProtocol(const shared_ptr<Socket>& sock, const CommandCallback& cmdcallback, const DisconnectCallback& disconnectCallback,bool server)
-		:HTTPParse(server), m_isSending(false)
-	{
-		m_sock = sock;
-		m_cmdcallback = cmdcallback;
-		
-		m_disconnect = disconnectCallback;
-		m_prevalivetime = Time::getCurrentMilliSecond();
-		m_bodylen = 0;
-		m_haveFindHeaderStart = false;
-
-		char* recvbuffer = m_recvBuffer.alloc(MAXRTPPACKGESIZE);
-
-		m_sock->setSocketBuffer(1024 * 1024 * 4, 1024 * 1024 * 4);
-		m_sock->setDisconnectCallback(Socket::DisconnectedCallback(&RTSPProtocol::onSocketDisconnectCallback, this));
-		m_sock->async_recv(recvbuffer, MAXRTPPACKGESIZE, Socket::ReceivedCallback(&RTSPProtocol::onSocketRecvCallback, this));
+		currstatu = NetStatus_connected;
 	}
 	~RTSPProtocol()
 	{
-		m_sock->disconnect();
-		m_sock = NULL;
+		stop();
 	}
 
-	uint64_t prevalivetime() const { return m_prevalivetime; }
-
-	void sendProtocolData(const std::string& cmdstr)
+	virtual ErrorInfo start(const shared_ptr<Socket> &_sock, const char *buffer, uint32_t len)
 	{
-		if (cmdstr.length() == 0) return;
+		sock = _sock;
+		currstatu = sock->getStatus();
+		prevalivetime = Time::getCurrentMilliSecond();
 
-		logdebug("\r\n%s",cmdstr.c_str());
+		recvBufferSize = MAXRTPPACKGESIZE;
+		recvBufferAddr = recvBuffer.alloc(recvBufferSize + 100);
+		recvBufferLen = 0;
 
-		Guard locker(m_mutex);
-		m_sendList.push_back(shared_ptr<SendPackgeInfo>(new SendPackgeInfo(cmdstr)));
+		_sock->setSocketBuffer(1024 * 1024 * 2, 1024 * 1024 * 2);
+		_sock->setDisconnectCallback(Socket::DisconnectedCallback(&RTSPProtocol::onSocketDisconnectCallback, this));
 
+		if (buffer != NULL && len > 0)
+		{
+			uint32_t needsize = min(MAXRTPPACKGESIZE, (int)len);
+			memcpy(recvBufferAddr, buffer, needsize);
+
+			onSocketRecvCallback(_sock, recvBufferAddr, needsize);
+		}
+		else
+		{
+			_sock->async_recv(recvBufferAddr, recvBufferSize, Socket::ReceivedCallback(&RTSPProtocol::onSocketRecvCallback, this));
+		}
+
+		return ErrorInfo();
+	}
+
+	virtual ErrorInfo stop()
+	{
+        cmdinfo = NULL;
+		shared_ptr<Socket> socktmp = sock;
+		sock = NULL;
+
+		if (socktmp)
+			socktmp->disconnect();
+
+		return ErrorInfo();
+	}
+
+	//协议是否超时
+	bool protocolIsTimeout()
+	{
+		uint64_t nowtime = Time::getCurrentMilliSecond();
+
+		if (sock && nowtime > prevalivetime && nowtime - prevalivetime >= PROTOCOLTIMEOUT)
+			return true;
+
+		return false;
+	}
+
+	uint32_t getSendListSize() 
+	{
+		Guard locker(mutex);
+
+		return (uint32_t)sendList.size();
+	}
+
+	uint32_t getSendCacheSize()
+	{
+		uint32_t size = 0;
+
+		Guard locker(mutex);
+		for (uint32_t i = 0; i < sendList.size(); i++)
+		{
+			size += sendList[i]->bufferlen();
+		}
+
+		return size;
+	}
+
+	ErrorInfo cleanMediaCacheData()
+	{
+		std::vector<shared_ptr<Socket::SendBuffer>> tmpSendList;
+		Guard locker(mutex);
+		for (uint32_t i = 0; i < sendList.size(); i++)
+		{
+			shared_ptr<SendPackgeInfo> packInfo = dynamic_pointer_cast<SendPackgeInfo>(sendList[i]);
+			if (packInfo == NULL)
+			{
+				assert(0);
+				continue;
+			}
+
+			if (packInfo->type != SendPackgeInfo::PackgeType_RtpData)
+			{
+				tmpSendList.push_back(packInfo);
+			}
+		}
+
+		sendList = tmpSendList;
+
+		return ErrorInfo();
+	}
+
+	ErrorInfo sendProtocolData(const std::list<shared_ptr<SendPackgeInfo>> &sendinfo)
+	{
+		Guard locker(mutex); 
+
+		if (sock == NULL || sock->getStatus() != NetStatus_connected)
+			return ErrorInfo(Error_Code_Network);
+
+		for (std::list<shared_ptr<SendPackgeInfo>>::const_iterator iter = sendinfo.begin(); iter != sendinfo.end(); iter++)
+		{
+			shared_ptr<SendPackgeInfo> info = *iter;
+			if (info == NULL)
+			{
+				continue;
+			}
+				
+			if (info->type == SendPackgeInfo::PackgeType_RtpData && sendList.size() >= 10000)
+			{
+				logdebug("sendMediaData size %d overloop and lost packege", sendList.size());
+				continue;
+			}
+
+			sendList.push_back(info);
+		}
 		_checkSendData();
+
+		return ErrorInfo();
 	}
-	void sendMedia(const shared_ptr<STREAM_TRANS_INFO>& mediainfo, const RTPPackage& rtppackage)
+	NetAddr getOtherAddr()
 	{
-		INTERLEAVEDFRAME frame;
-		frame.magic = RTPOVERTCPMAGIC;
-		frame.channel = mediainfo->transportinfo.rtp.t.dataChannel;
-		frame.rtp_len = htons((uint16_t)(rtppackage.bufferlen()));
+		if (sock == NULL)
+			return NetAddr();
 
-
-		Guard locker(m_mutex);
-		m_sendList.push_back(shared_ptr<SendPackgeInfo>(new SendPackgeInfo(String((const char*)& frame, sizeof(INTERLEAVEDFRAME)))));
-		m_sendList.push_back(shared_ptr<SendPackgeInfo>(new SendPackgeInfo(rtppackage)));
-
-		_checkSendData();
+		return sock->getOtherAddr();
 	}
-	void sendContrlData(const shared_ptr<STREAM_TRANS_INFO>& mediainfo, const char* buffer, uint32_t bufferlen)
+	NetStatus connectStatus() const
 	{
-		INTERLEAVEDFRAME frame;
-		frame.magic = RTPOVERTCPMAGIC;
-		frame.channel = mediainfo->transportinfo.rtp.t.contorlChannel;
-		frame.rtp_len = htons(bufferlen);
+		if (sock == NULL)
+			return NetStatus_disconnected;
 
-
-		Guard locker(m_mutex);
-		m_sendList.push_back(shared_ptr<SendPackgeInfo>(new SendPackgeInfo(std::string((const char*)& frame, sizeof(INTERLEAVEDFRAME)))));
-		m_sendList.push_back(shared_ptr<SendPackgeInfo>(new SendPackgeInfo(std::string(buffer,bufferlen))));
-
-		_checkSendData();
+		return currstatu;
+		//return sock->getStatus();
 	}
-	void setMediaTransportInfo(const shared_ptr<MEDIA_INFO>& _rtspmedia)
-	{
-		m_rtspmedia = _rtspmedia;
-	}
+
 private:
 	void _checkSendData()
 	{
-		if (m_isSending || m_sendList.size() == 0) return;
+		if (isSending || sendList.size() == 0)
+			return;
 
+		std::vector<shared_ptr<Socket::SendBuffer>> sendbuf;
+		std::swap(sendbuf, sendList);
+		sendList.clear();
 
-		std::deque<Socket::SBuf> sendbuf;
-		for (std::list<shared_ptr<SendPackgeInfo> >::iterator iter = m_sendList.begin(); iter != m_sendList.end(); iter++)
+		isSending = true;
+
+		prevalivetime = Time::getCurrentMilliSecond();
+
+		shared_ptr<Socket> tmpSocket = sock;
+		if (tmpSocket)
 		{
-			sendbuf.push_back(Socket::SBuf((*iter)->buffer + (*iter)->sendpos, (*iter)->len - (*iter)->sendpos));
+			tmpSocket->async_send(sendbuf, Socket::SendedCallback3(&RTSPProtocol::onSocketSendCallback, this));
+		}
+	}
+	void onSocketSendCallback(const weak_ptr<Socket> &sock, const std::vector<shared_ptr<Socket::SendBuffer>> &)
+	{
+		Guard locker(mutex);
+
+		isSending = false;
+
+		_checkSendData();
+	}
+	void onSocketDisconnectCallback(const weak_ptr<Socket> &, const std::string &)
+	{
+		onNetworkErrorCallback();
+		currstatu = NetStatus_disconnected;
+	}
+
+	bool _parseCommandBody(const char *&buffertmp, uint32_t &bufferlen)
+	{
+        shared_ptr<RTSPCommandInfo> tmpCmdInfo = cmdinfo;
+        if (tmpCmdInfo == NULL)
+        {
+            return false;
+        }
+
+		if (bodylen > tmpCmdInfo->body.length())
+		{
+			uint32_t needlen = bodylen - (uint32_t)tmpCmdInfo->body.length();
+
+			//数据不够
+			if (bufferlen < needlen)
+				return false;
+
+            tmpCmdInfo->body += std::string(buffertmp, needlen);
+
+			buffertmp += needlen;
+			bufferlen -= needlen;
 		}
 
-		m_isSending = true;
-
-		m_prevalivetime = Time::getCurrentMilliSecond();
-
-		m_sock->async_send(sendbuf, Socket::SendedCallback(&RTSPProtocol::onSocketSendCallback, this));
-	}
-	void onSocketSendCallback(const weak_ptr<Socket>& sock, const char* buffer, int len)
-	{
-		if (len <= 0) return;
-
-		Guard locker(m_mutex);
-		for (std::list<shared_ptr<SendPackgeInfo> >::iterator iter = m_sendList.begin(); iter != m_sendList.end() && len > 0;)
 		{
-			uint32_t currpagesendlen = min((uint32_t)len, (*iter)->len - (*iter)->sendpos);
+			onRecvCommandCallback(tmpCmdInfo);
 
-			len -= currpagesendlen;
+            cmdinfo = NULL;
+            tmpCmdInfo = NULL;
+			bodylen = 0;
+			haveFindHeaderStart = false;
+		}
 
-			(*iter)->sendpos += currpagesendlen;
+		return true;
+	}
+	bool _parseCommand(const char *&buffertmp, uint32_t &bufferlen)
+	{
+		uint32_t usedlen = 0;
+		shared_ptr<HTTP::Header> header = HTTP::Parser::parse(buffertmp, bufferlen, usedlen);
 
-			if ((*iter)->sendpos == (*iter)->len)
+		buffertmp += usedlen;
+		bufferlen -= usedlen;
+
+		if (header == NULL)
+			return false;
+
+		
+        shared_ptr<RTSPCommandInfo> tmpCmdInfo = make_shared<RTSPCommandInfo>();
+        tmpCmdInfo->method = header->method;
+        tmpCmdInfo->url = header->url;
+        tmpCmdInfo->verinfo.protocol = header->verinfo.protocol;
+        tmpCmdInfo->verinfo.version = header->verinfo.version;
+        tmpCmdInfo->statuscode = header->statuscode;
+        tmpCmdInfo->statusmsg = header->statusmsg;
+        tmpCmdInfo->headers = std::move(header->headers);
+
+        tmpCmdInfo->cseq = tmpCmdInfo->header("CSeq").readInt();
+
+		bodylen = tmpCmdInfo->header(Content_Length).readInt();
+
+        cmdinfo = tmpCmdInfo;
+
+		return _parseCommandBody(buffertmp, bufferlen);
+	}
+	bool _parseMedia(const char *&buffertmp, uint32_t &bufferlen)
+	{
+		if (bufferlen < sizeof(INTERLEAVEDFRAME))
+			return false;
+
+		INTERLEAVEDFRAME *frame = (INTERLEAVEDFRAME *)buffertmp;
+
+		uint32_t datalen = ntohs(frame->rtp_len);
+
+		if (datalen <= 0 /*|| datalen >= MAXMTUSIZE*/)
+		{
+			buffertmp += 1;
+			bufferlen -= 1;
+
+		//	assert(0);
+
+			return true;
+		}
+
+		if (datalen + sizeof(INTERLEAVEDFRAME) > bufferlen)
+		{
+
+			return false;
+		}
+
+		{
+			uint32_t leavelen = bufferlen - datalen - sizeof(INTERLEAVEDFRAME);
+			const char *leavebuf = buffertmp + datalen + sizeof(INTERLEAVEDFRAME);
+
+			if (leavelen > 0 && !isCanShowChar(*leavebuf) && *leavebuf != RTPOVERTCPMAGIC)
 			{
-				m_sendList.erase(iter++);
+				//assert(0);
 			}
-			else
+		}
+
+
+		onRecvMediaCallback(recvBuffer, *frame, (uint32_t)(buffertmp + sizeof(INTERLEAVEDFRAME) - recvBuffer.c_str()), datalen);
+
+		buffertmp += datalen + sizeof(INTERLEAVEDFRAME);
+		bufferlen -= datalen + sizeof(INTERLEAVEDFRAME);
+
+		return true;
+	}
+	bool _findCommandStart(const char *&buffertmp, uint32_t &bufferlen)
+	{
+		static std::string rtspcmdflag = "rtsp";
+		const char *addrtmp = NULL;
+		uint32_t lentmp = 0;
+
+		while (bufferlen >= 4)
+		{
+			//找到media的开始了
+			if (*buffertmp == RTPOVERTCPMAGIC)
+				return true;
+
+			//b不是可现实字符，不是
+			if (!isCanShowChar(*buffertmp))
+			{
+				buffertmp++;
+				bufferlen--;
+
+			//	assert(0);
+
+				addrtmp = buffertmp;
+				lentmp = bufferlen;
+
+				continue;
+			}
+
+			if (addrtmp == NULL)
+			{
+				addrtmp = buffertmp;
+				lentmp = bufferlen;
+			}
+
+			if (String::strncasecmp(buffertmp, rtspcmdflag.c_str(), 4) == 0)
+			{
+				haveFindHeaderStart = true;
+				break;
+			}
+
+			bufferlen -= 1;
+			buffertmp += 1;
+		}
+
+		if (addrtmp != NULL)
+		{
+			buffertmp = addrtmp;
+			bufferlen = lentmp;
+		}
+
+		return haveFindHeaderStart;
+	}
+	void onSocketRecvCallback(const weak_ptr<Socket> &, const char *buffer, int len)
+	{
+		prevalivetime = Time::getCurrentMilliSecond();
+		if (len <= 0)
+		{
+			//assert(0);
+			return;
+		}
+
+		assert(buffer == recvBufferAddr + recvBufferLen);
+		assert(recvBufferLen + len <= recvBufferSize);
+
+		recvBufferLen += len;
+
+		const char *buffertmp = recvBufferAddr;
+		uint32_t bufferlen = recvBufferLen;
+
+	//	printf("onSocketRecvCallback recvlen %p %d %p %d\r\n",buffertmp,bufferlen,buffer,len);
+
+		while (bufferlen > sizeof(INTERLEAVEDFRAME))
+		{
+			if (cmdinfo != NULL && !_parseCommandBody(buffertmp, bufferlen))
+			{
+				break;
+			}
+			else if (haveFindHeaderStart && !_parseCommand(buffertmp, bufferlen))
+			{
+				break;
+			}
+			else if (*buffertmp == RTPOVERTCPMAGIC && !_parseMedia(buffertmp, bufferlen))
+			{
+				break;
+			}
+			else if (!_findCommandStart(buffertmp, bufferlen))
 			{
 				break;
 			}
 		}
 
-		m_isSending = false;
+		recvBufferSize -= (uint32_t)(buffertmp - recvBufferAddr);
+		recvBufferAddr = (char *)buffertmp;
+		recvBufferLen = bufferlen;
 
-		_checkSendData();
-	}
-	void onSocketDisconnectCallback(const weak_ptr<Socket>&, const std::string&)
-	{
-		m_disconnect();
-	}
-	void onSocketRecvCallback(const weak_ptr<Socket>& sock, const char* buffer, int len)
-	{
-		m_prevalivetime = Time::getCurrentMilliSecond();
-		if (len <= 0)
+		//当接收可用空间小于MTU时，重新分配一块空间进行接收
+		//不能使用现空间，因为现空间的rtp包在复用
+		if (recvBufferSize - recvBufferLen < MAXMTUSIZE)
 		{
-			assert(0);
-			return;
+			String newbuffer;
+			recvBufferSize = MAXRTPPACKGESIZE + recvBufferLen;
+			recvBufferAddr = newbuffer.alloc(recvBufferSize + 100);
+			if (bufferlen > 0)
+			{
+				memcpy(recvBufferAddr, buffertmp, bufferlen);
+			}
+			recvBufferLen = bufferlen;
+
+			recvBuffer = newbuffer;
 		}
 
-		if (buffer != m_recvBuffer.c_str() + m_recvBuffer.length())
-		{
-			assert(0);
-		}
-
-		if (m_recvBuffer.length() + len > MAXRTPPACKGESIZE)
-		{
-			assert(0);
-		}
-
-		m_recvBuffer.resize(m_recvBuffer.length() + len);
-
-		const char* bufferstartaddr = m_recvBuffer.c_str();
-		const char* buffertmp = bufferstartaddr;
-		uint32_t bufferlen = (uint32_t)m_recvBuffer.length();
-
-		while (bufferlen > 0)
-		{
-			if (m_cmdinfo != NULL)
-			{
-				if (m_bodylen > m_cmdinfo->body.length())
-				{
-					uint32_t needlen = m_bodylen - (uint32_t)m_cmdinfo->body.length();
-
-					//数据不够
-					if (bufferlen < needlen) break;
-
-					m_cmdinfo->body +=std::string(buffertmp,needlen);
-
-					buffertmp += needlen;
-					bufferlen -= needlen;
-				}
-				
-				{
-					m_cmdcallback(m_cmdinfo);
-					m_cmdinfo = NULL;
-					m_bodylen = 0;
-					m_haveFindHeaderStart = false;
-				}
-				
-			}
-			else if (m_cmdinfo == NULL && m_haveFindHeaderStart)
-			{
-				uint32_t usedlen = 0;
-				shared_ptr<HTTPHeader> header = HTTPParse::parse(buffertmp,bufferlen,usedlen);
-								
-				if (header != NULL)
-				{
-					logdebug("\r\n%s", std::string(buffertmp,usedlen).c_str());
-
-					m_cmdinfo = make_shared<RTSPCommandInfo>();
-					m_cmdinfo->method = header->method;
-					m_cmdinfo->url = header->url;
-					m_cmdinfo->verinfo.protocol = header->verinfo.protocol;
-					m_cmdinfo->verinfo.version = header->verinfo.version;
-					m_cmdinfo->statuscode = header->statuscode;
-					m_cmdinfo->statusmsg = header->statusmsg;
-					m_cmdinfo->headers = std::move(header->headers);
-
-					m_cmdinfo->cseq = m_cmdinfo->header("CSeq").readInt();
-
-					m_bodylen = m_cmdinfo->header(Content_Length).readInt();
-
-					if (m_bodylen == 0)
-					{
-						m_cmdcallback(m_cmdinfo);
-						m_cmdinfo = NULL;
-						m_bodylen = 0;
-						m_haveFindHeaderStart = false;
-					}
-				}
-				
-				buffertmp += usedlen;
-				bufferlen -= usedlen;
-			}
-			else if (*buffertmp == RTPOVERTCPMAGIC)
-			{
-				if (bufferlen < sizeof(INTERLEAVEDFRAME)) break;
-
-				INTERLEAVEDFRAME* frame = (INTERLEAVEDFRAME*)buffertmp;
-				
-				uint32_t datalen = ntohs(frame->rtp_len);
-				
-				if (datalen <= 0 || datalen >= 0xffff)
-				{
-					//跳过数据
-					
-					buffertmp += 1;
-					bufferlen -= 1;
-
-					continue;
-				}
-
-				if (datalen + sizeof(INTERLEAVEDFRAME) > bufferlen)
-				{
-					break;
-				}
-
-				if (m_rtspmedia)
-				{
-					for (std::list<shared_ptr<STREAM_TRANS_INFO> >::iterator iter = m_rtspmedia->infos.begin(); iter != m_rtspmedia->infos.end(); iter++)
-					{
-						shared_ptr<STREAM_TRANS_INFO> transportinfo = *iter;
-						if(transportinfo->transportinfo.transport != TRANSPORT_INFO::TRANSPORT_RTP_TCP) continue;
-						shared_ptr<RTPSession> rtpsession = transportinfo->rtpsession;
-						if(rtpsession == NULL) continue;
-
-						if (frame->channel == transportinfo->transportinfo.rtp.t.dataChannel)
-						{
-							RTPPackage rtppackage(m_recvBuffer, (uint32_t)(buffertmp - bufferstartaddr + sizeof(INTERLEAVEDFRAME)), (uint32_t)datalen);
-
-							const RTPHEADER* rtpheader = rtppackage.header();
-							if (rtpheader == NULL || rtpheader->v != RTP_VERSION)
-							{
-							//	assert(0);
-								break;
-							}
-
-							rtpsession->rtpovertcpMediaCallback(transportinfo, rtppackage);
-							break;
-						}
-						else if (frame->channel == transportinfo->transportinfo.rtp.t.contorlChannel)
-						{
-							rtpsession->rtpovertcpContorlCallback(transportinfo, buffertmp + sizeof(INTERLEAVEDFRAME),datalen);
-							break;
-						}
-					}
-				}
-
-				buffertmp += datalen + sizeof(INTERLEAVEDFRAME);
-				bufferlen -= datalen + sizeof(INTERLEAVEDFRAME);
-			}
-			else if(!m_haveFindHeaderStart)
-			{
-				uint32_t ret = checkIsRTSPCommandStart(buffertmp,bufferlen);
-				if (ret == 0)
-				{
-					buffertmp += 1;
-					bufferlen -= 1;
-
-					continue;
-				}
-				else if (ret == 1)
-				{
-					break;
-				}
-				else
-				{
-					m_haveFindHeaderStart = true;
-				}
-			}
-			else
-			{
-				assert(0);
-			}
-		}
-
-		String newbuffer;
-		char* bufferaddr = newbuffer.alloc(MAXRTPPACKGESIZE);
-
-		if (bufferlen > 0)
-		{
-			memcpy(bufferaddr, buffertmp, bufferlen);
-			newbuffer.resize(bufferlen);
-		}
-
-		m_recvBuffer = newbuffer;
-		
-		shared_ptr<Socket> socktmp = sock.lock();
+		shared_ptr<Socket> socktmp = sock;
 		if (socktmp != NULL)
 		{
-			socktmp->async_recv(bufferaddr + bufferlen, MAXRTPPACKGESIZE - bufferlen,Socket::ReceivedCallback(&RTSPProtocol::onSocketRecvCallback, this));
+			int ret = socktmp->async_recv(recvBufferAddr + recvBufferLen, recvBufferSize - recvBufferLen, Socket::ReceivedCallback(&RTSPProtocol::onSocketRecvCallback, this));
+		//	printf("async_recv %p %d %d\r\n", recvBufferAddr + recvBufferLen, recvBufferLen,recvBufferSize - recvBufferLen);
+			(void)ret;
 		}
-	}
-	// return 0 not cmonnand,return 1 not sure need wait,return 2 is command
-	uint32_t checkIsRTSPCommandStart(const char* buffertmp,uint32_t bufferlen)
-	{
-		static std::string rtspcmdflag = "rtsp";
-
-		while (bufferlen >= 4)
-		{
-			//b不是可现实字符，不是
-			if (!isCanShowChar(*buffertmp)) return 0;
-
-			if (strncasecmp(buffertmp, rtspcmdflag.c_str(), 4) == 0) return 2;
-			
-			bufferlen -= 1;
-			buffertmp += 1;
-		}
-		return 1;
 	}
 	//判断是否是显示字符
 	bool isCanShowChar(char ch)
 	{
 		return ((ch >= 0x20 && ch < 0x7f) || ch == '\r' || ch == '\n');
 	}
-public:
-	shared_ptr<Socket>			m_sock;
+
 private:
-	CommandCallback				m_cmdcallback;
-	DisconnectCallback			m_disconnect;
+	shared_ptr<Socket> sock;
+	String recvBuffer;
+	char *recvBufferAddr = NULL;
+	uint32_t recvBufferSize = 0;
+	uint32_t recvBufferLen = 0;
 
-	String						m_recvBuffer;
+	std::vector<shared_ptr<Socket::SendBuffer>> sendList;
+	bool isSending = false;
 
+	Mutex mutex;
 
-	std::list<shared_ptr<SendPackgeInfo> >m_sendList;
-	bool						m_isSending;
+	uint64_t prevalivetime;
+	NetStatus currstatu = NetStatus_disconnected;
 
-
-	Mutex						m_mutex;
-
-	uint64_t					m_prevalivetime;
-
-
-	bool						m_haveFindHeaderStart;
-	shared_ptr<RTSPCommandInfo>	m_cmdinfo;
-	uint32_t					m_bodylen;
-	
-	shared_ptr<MEDIA_INFO>		m_rtspmedia;
+	bool haveFindHeaderStart = false;
+	shared_ptr<RTSPCommandInfo> cmdinfo;
+	uint32_t bodylen = 0;
 };
-
-

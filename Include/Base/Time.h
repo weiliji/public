@@ -21,17 +21,18 @@ namespace Base {
 
 
 /// 时间结构体
-typedef struct
+struct BASE_API SystemTime
 {
-	int  year;		///< 年。
-	int  month;		///< 月，January = 1, February = 2, and so on.
-	int  day;		///< 日。
-	int  wday;		///< 星期，Sunday = 0, Monday = 1, and so on
-	int  hour;		///< 时。
-	int  minute;	///< 分。
-	int  second;	///< 秒。
-	int  timeZone;	 //表示本地时间与UTC时间的差、单位分钟，如中国+08:00区 为 +480
-}SystemTime;
+	int  year = 0;		///< 年。
+	int  month = 0;		///< 月，January = 1, February = 2, and so on.
+	int  day = 0;		///< 日。
+	int  wday = 0;		///< 星期，Sunday = 0, Monday = 1, and so on
+	int  hour = 0;		///< 时。
+	int  minute = 0;	///< 分。
+	int  second = 0;	///< 秒。
+	int  timeZone = 0;	 //表示本地时间与UTC时间的差、单位分钟，如中国+08:00区 为 +480
+	int	 millisecond = 0;	//毫秒
+};
 
 /// \class Time
 /// \brief 时间类

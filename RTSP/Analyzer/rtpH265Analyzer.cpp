@@ -20,15 +20,22 @@ RtpH265Analyzer::~RtpH265Analyzer()
 {
 
 }
-int RtpH265Analyzer::InputData(const RTPHEADER& rtpheader, const char* pBuf, unsigned short nBufSize)
+
+int RtpH265Analyzer::InputData(const shared_ptr<STREAM_TRANS_INFO>& transinfo, const shared_ptr<RTPPackage>& rtp)
 {
-	int iGoodFrame = pHevcFrame->handleHevcFrame(ntohs(rtpheader.seq), ntohl(rtpheader.ts), (const uint8_t*)pBuf, nBufSize);
+	int iGoodFrame = pHevcFrame->handleHevcFrame(transinfo,rtp);
 	if (iGoodFrame <= 0)
 	{
 		return 0;
 	}
 
-	m_pFramCallBack(FrameType_VIDEO_FRAME,(char*)pHevcFrame->m_buf, pHevcFrame->m_buflen, ntohl(rtpheader.ts));
+	shared_ptr<RTPFrame> frame = pHevcFrame->m_frame;
+	frame->codeId(CodeID_Video_H265);
+	frame->timestmap(ntohl(rtp->rtpHeader().ts));
+
+	pHevcFrame->resetBuffer();
+
+	m_pFramCallBack(frame);
 	
 	return 0;
 }

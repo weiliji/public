@@ -13,14 +13,14 @@ public:
 
 	virtual std::string build(const URL& URL)
 	{
-		XMLObject::Child& getvideoencoderconf = body().addChild("GetVideoEncoderConfigurations");
+		XML::Child& getvideoencoderconf = body().addChild("GetVideoEncoderConfigurations");
 
-		getvideoencoderconf.attribute("xmlns", "http://www.onvif.org/ver10/media/wsdl");
+		getvideoencoderconf.addAttribute("xmlns", "http://www.onvif.org/ver10/media/wsdl");
 
 		return CmdObject::build(URL);
 	}
 	shared_ptr<OnvifClientDefs::VideoEncoderConfigurations> encoder;
-	virtual bool parse(const XMLObject::Child& body) { return false; }
+	virtual bool parse(const XML::Child& body) { return false; }
 };
 
 

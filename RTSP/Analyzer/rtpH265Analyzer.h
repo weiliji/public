@@ -11,7 +11,7 @@ public:
 	~RtpH265Analyzer(void);
 
 	//virtual
-	virtual int InputData(const RTPHEADER& rtpheader, const char* pBuf, unsigned short nBufLen);
+	virtual int InputData(const shared_ptr<STREAM_TRANS_INFO>& transinfo, const shared_ptr<RTPPackage>& rtp);
 private:
 	shared_ptr<H265Frame> pHevcFrame;
 	CBFreamCallBack		 m_pFramCallBack;

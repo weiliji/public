@@ -97,24 +97,24 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 /// \class GuardReadMutex
 /// \brief 读锁守护者类
-class GuardReadMutex
+class GuardRead
 {
-	GuardReadMutex(GuardReadMutex const&);
-	GuardReadMutex& operator=(GuardReadMutex const&);
+	GuardRead(GuardRead const&);
+	GuardRead& operator=(GuardRead const&);
 
 public:
 	/// 构造函数,自动调用 CRwMutex::EnterReading
 	/// \param mutex [in]互斥量引用,CGuard并不创建互斥量.
-	inline GuardReadMutex(ReadWriteMutex& mutexparam)
+	inline GuardRead(ReadWriteMutex& mutexparam)
 		: mutex(mutexparam)
 	{
-		mutex.enterread();
+		mutex.enterRead();
 	};
 
 	/// 析构函数,自动调用 CReadWriteMutex::leave
-	inline ~GuardReadMutex()
+	inline ~GuardRead()
 	{
-		mutex.leave();
+		mutex.leaveRead();
 	};
 
 private:
@@ -124,24 +124,24 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 /// \class GuardReadMutex
 /// \brief 读写锁守护者类
-class GuardWriteMutex
+class GuardWrite
 {
-	GuardWriteMutex(GuardWriteMutex const&);
-	GuardWriteMutex& operator=(GuardWriteMutex const&);
+	GuardWrite(GuardWrite const&);
+	GuardWrite& operator=(GuardWrite const&);
 
 public:
 	/// 构造函数,自动调用 CReadWriteMutex::EnterWriting
 	/// \param mutex [in]互斥量引用,CGuard并不创建互斥量.
-	inline GuardWriteMutex(ReadWriteMutex& mutexparam)
+	inline GuardWrite(ReadWriteMutex& mutexparam)
 		: mutex(mutexparam)
 	{
-		mutex.enterwrite();
+		mutex.enterWrite();
 	};
 
 	/// 析构函数,自动调用 CReadWriteMutex::leave
-	inline ~GuardWriteMutex()
+	inline ~GuardWrite()
 	{
-		mutex.leave();
+		mutex.leaveWrite();
 	};
 
 private:

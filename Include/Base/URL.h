@@ -78,6 +78,8 @@ public:
 	std::map<std::string, Value> query;
 	const std::map<std::string, Value>& getQuery() const;
 	void setQuery(const std::map<std::string, Value>& queryobj);
+
+    bool valid();
 };
 
 

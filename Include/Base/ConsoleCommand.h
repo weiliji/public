@@ -41,6 +41,8 @@ public:
 	//func : 命令回调函数
 	bool addUserCmd(const std::string& name, const std::string& desc,const ConsoleCmdCallback& func);
 
+	static void runCmd(const std::string& title);
+
 protected:
 	/// 线程执行体,是一个虚函数,派生的线程类中重载此函数,实现各自的行为.
 	virtual void threadProc();

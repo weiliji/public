@@ -17,9 +17,6 @@
    SHARDLIB_NAME = 
    STATICLIB_NAME = sqlite3
 
-# 应用程序选项
-# 应用程序的代码路径
-   APP_SRCS_PATH = 
 
 # 应用程序名称
    APP_NAME = 

@@ -20,25 +20,62 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\Network\Defs.h" />
-    <ClInclude Include="..\Include\Network\NetAddr.h" />
+    <ClInclude Include="..\Include\Network\Email\Client.h" />
+    <ClInclude Include="..\Include\Network\Email\Address.h" />
+    <ClInclude Include="..\Include\Network\Email\Message.h" />
+    <ClInclude Include="..\Include\Network\Ftp\Client.h" />
+    <ClInclude Include="..\Include\Network\HTTP\Client.h" />
+    <ClInclude Include="..\Include\Network\HTTP\Serialization.h" />
+    <ClInclude Include="..\Include\Network\HTTP\Public.h" />
+    <ClInclude Include="..\Include\Network\HTTP\Server.h" />
     <ClInclude Include="..\Include\Network\Network.h" />
-    <ClInclude Include="..\Include\Network\Socket.h" />
-    <ClInclude Include="..\Include\Network\Strand.h" />
-    <ClInclude Include="..\Include\Network\TcpClient.h" />
-    <ClInclude Include="..\Include\Network\TcpServer.h" />
-    <ClInclude Include="..\Include\Network\Udp.h" />
-    <ClInclude Include="Src\aio\asocket.h" />
-    <ClInclude Include="Src\aio\common\_event.h" />
-    <ClInclude Include="Src\aio\common\_pool.h" />
-    <ClInclude Include="Src\aio\common\_userthread.h" />
-    <ClInclude Include="Src\aio\ioserver.h" />
-    <ClInclude Include="Src\aio\linux\_linuxepoll.h" />
-    <ClInclude Include="Src\aio\linux\_linuxevent.h" />
-    <ClInclude Include="Src\aio\linux\_linuxsocket.h" />
-    <ClInclude Include="Src\aio\win32\_winevent.h" />
-    <ClInclude Include="Src\aio\win32\_winsocket.h" />
-    <ClInclude Include="Src\aio\win32\_winiocp.h" />
-    <ClInclude Include="Src\IOWorker.h" />
+    <ClInclude Include="..\Include\Network\ntp\ntp.h" />
+    <ClInclude Include="..\Include\Network\Socket\NetAddr.h" />
+    <ClInclude Include="..\Include\Network\Socket\RawSocket.h" />
+    <ClInclude Include="..\Include\Network\Socket\Socket.h" />
+    <ClInclude Include="..\Include\Network\Socket\SSLSocket.h" />
+    <ClInclude Include="..\Include\Network\Socket\Strand.h" />
+    <ClInclude Include="..\Include\Network\Socket\TcpClient.h" />
+    <ClInclude Include="..\Include\Network\Socket\TcpServer.h" />
+    <ClInclude Include="..\Include\Network\Socket\Udp.h" />
+    <ClInclude Include="Src\Email\mailio\base64.hpp" />
+    <ClInclude Include="Src\Email\mailio\binary.hpp" />
+    <ClInclude Include="Src\Email\mailio\bit7.hpp" />
+    <ClInclude Include="Src\Email\mailio\bit8.hpp" />
+    <ClInclude Include="Src\Email\mailio\codec.hpp" />
+    <ClInclude Include="Src\Email\mailio\dialog.hpp" />
+    <ClInclude Include="Src\Email\mailio\email.hpp" />
+    <ClInclude Include="Src\Email\mailio\export.hpp" />
+    <ClInclude Include="Src\Email\mailio\imap.hpp" />
+    <ClInclude Include="Src\Email\mailio\mailboxes.hpp" />
+    <ClInclude Include="Src\Email\mailio\mailmessage.hpp" />
+    <ClInclude Include="Src\Email\mailio\mime.hpp" />
+    <ClInclude Include="Src\Email\mailio\optional.hpp" />
+    <ClInclude Include="Src\Email\mailio\pop3.hpp" />
+    <ClInclude Include="Src\Email\mailio\quoted_printable.hpp" />
+    <ClInclude Include="Src\Email\mailio\q_codec.hpp" />
+    <ClInclude Include="Src\Email\mailio\smtp.hpp" />
+    <ClInclude Include="Src\Ftp\ftplib.h" />
+    <ClInclude Include="Src\HTTP\HTTPCache.h" />
+    <ClInclude Include="Src\HTTP\HTTPCommunication.h" />
+    <ClInclude Include="Src\HTTP\HTTPDefine.h" />
+    <ClInclude Include="Src\HTTP\HTTPErroCode.h" />
+    <ClInclude Include="Src\HTTP\WebSocketProtocol.h" />
+    <ClInclude Include="Src\ntp\ntpProtocol.h" />
+    <ClInclude Include="Src\Socket\aio\asocket.h" />
+    <ClInclude Include="Src\Socket\aio\ioserver.h" />
+    <ClInclude Include="Src\Socket\aio\_awaken.h" />
+    <ClInclude Include="Src\Socket\aio\_poll.h" />
+    <ClInclude Include="Src\Socket\aio\_proactor_event.h" />
+    <ClInclude Include="Src\Socket\aio\_proactor_iocp.h" />
+    <ClInclude Include="Src\Socket\aio\_proactor_socket.h" />
+    <ClInclude Include="Src\Socket\aio\_reactor_epoll.h" />
+    <ClInclude Include="Src\Socket\aio\_reactor_event.h" />
+    <ClInclude Include="Src\Socket\aio\_reactor_kqueue.h" />
+    <ClInclude Include="Src\Socket\aio\_reactor_poll.h" />
+    <ClInclude Include="Src\Socket\aio\_reactor_resource.h" />
+    <ClInclude Include="Src\Socket\aio\_reactor_socket.h" />
+    <ClInclude Include="Src\Socket\IOWorker.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Version.rc" />
@@ -47,42 +84,77 @@
     <None Include="..\Include\Network\Version.tpl" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\aio\asocket.cpp" />
-    <ClCompile Include="Src\IOWorker.cpp" />
-    <ClCompile Include="Src\NetAddr.cpp" />
+    <ClCompile Include="Src\Email\EmailAddress.cpp" />
+    <ClCompile Include="Src\Email\EmailClient.cpp" />
+    <ClCompile Include="Src\Email\mailio\base64.cpp" />
+    <ClCompile Include="Src\Email\mailio\binary.cpp" />
+    <ClCompile Include="Src\Email\mailio\bit7.cpp" />
+    <ClCompile Include="Src\Email\mailio\bit8.cpp" />
+    <ClCompile Include="Src\Email\mailio\codec.cpp" />
+    <ClCompile Include="Src\Email\mailio\dialog.cpp" />
+    <ClCompile Include="Src\Email\mailio\imap.cpp" />
+    <ClCompile Include="Src\Email\mailio\mailboxes.cpp" />
+    <ClCompile Include="Src\Email\mailio\mailiomessage.cpp" />
+    <ClCompile Include="Src\Email\mailio\mime.cpp" />
+    <ClCompile Include="Src\Email\mailio\pop3.cpp" />
+    <ClCompile Include="Src\Email\mailio\quoted_printable.cpp" />
+    <ClCompile Include="Src\Email\mailio\q_codec.cpp" />
+    <ClCompile Include="Src\Email\mailio\smtp.cpp" />
+    <ClCompile Include="Src\Email\EmailMessage.cpp" />
+    <ClCompile Include="Src\Ftp\ftpClient.cpp" />
+    <ClCompile Include="Src\Ftp\ftplib.c" />
+    <ClCompile Include="Src\HTTP\ChunkData.cpp" />
+    <ClCompile Include="Src\HTTP\HTTPClient.cpp" />
+    <ClCompile Include="Src\HTTP\HTTPClientAsync.cpp" />
+    <ClCompile Include="Src\HTTP\HTTPClientPublic.cpp" />
+    <ClCompile Include="Src\HTTP\HTTPPublic.cpp" />
+    <ClCompile Include="Src\HTTP\HTTPServer.cpp" />
+    <ClCompile Include="Src\HTTP\HTTPServerPublic.cpp" />
+    <ClCompile Include="Src\HTTP\HTTPServerSession.cpp" />
+    <ClCompile Include="Src\HTTP\Serialization.cpp" />
+    <ClCompile Include="Src\HTTP\WebSocketClient.cpp" />
+    <ClCompile Include="Src\HTTP\WebSocketSession.cpp" />
     <ClCompile Include="Src\Network.cpp" />
-    <ClCompile Include="Src\Strand.cpp" />
-    <ClCompile Include="Src\TcpClient.cpp" />
-    <ClCompile Include="Src\TcpServer.cpp" />
-    <ClCompile Include="Src\Udp.cpp" />
+    <ClCompile Include="Src\ntp\ntp.cpp" />
+    <ClCompile Include="Src\Socket\aio\asocket.cpp" />
+    <ClCompile Include="Src\Socket\IOWorker.cpp" />
+    <ClCompile Include="Src\Socket\NetAddr.cpp" />
+    <ClCompile Include="Src\Socket\RawSocket.cpp" />
+    <ClCompile Include="Src\Socket\SSLSocket.cpp" />
+    <ClCompile Include="Src\Socket\Strand.cpp" />
+    <ClCompile Include="Src\Socket\TcpClient.cpp" />
+    <ClCompile Include="Src\Socket\TcpServer.cpp" />
+    <ClCompile Include="Src\Socket\Udp.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Src\Email\mailio\github.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{00D374D2-FF31-4627-BCCE-F597B4769959}</ProjectGuid>
     <RootNamespace>Base</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v141_xp</PlatformToolset>
+    <PlatformToolset>v140_xp</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140_xp</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140_xp</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140_xp</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -117,23 +189,24 @@
     <_ProjectFileVersion>11.0.60610.1</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)\Lib\win32\$(ProjectName)\</OutDir>
+    <OutDir>$(SolutionDir)\Bin\win32</OutDir>
     <IntDir>$(SolutionDir)\__Compile\win32\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(WindowsSDK_IncludePath);$(IncludePath)</IncludePath>
     <TargetName>$(ProjectName)_debug</TargetName>
     <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+    <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(WindowsSDK_IncludePath);$(IncludePath)</IncludePath>
     <TargetName>$(ProjectName)_debug</TargetName>
     <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
-    <OutDir>$(SolutionDir)\Lib\$(Platform)\$(ProjectName)\</OutDir>
+    <OutDir>$(SolutionDir)\Bin\win64</OutDir>
     <IntDir>$(SolutionDir)\__Compile\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)\Lib\win32\$(ProjectName)\</OutDir>
+    <OutDir>$(SolutionDir)\Bin\win32</OutDir>
     <IntDir>$(SolutionDir)\__Compile\win32\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(WindowsSDK_IncludePath);$(IncludePath)</IncludePath>
@@ -143,14 +216,14 @@
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(WindowsSDK_IncludePath);$(IncludePath)</IncludePath>
     <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
-    <OutDir>$(SolutionDir)\Lib\$(Platform)\$(ProjectName)\</OutDir>
+    <OutDir>$(SolutionDir)\Bin\win64</OutDir>
     <IntDir>$(SolutionDir)\__Compile\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Include;$(SolutionDir)\boost\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;_DEBUG;_CRT_SECURE_NO_WARNINGS;NETWORK_DLL_BUILD;BASE_DLL_USE;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Include;$(SolutionDir)\openssl\Include;$(SolutionDir)\..\public\Include;$(SolutionDir)\..\public\openssl\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;_DEBUG;_CRT_SECURE_NO_WARNINGS;NETWORK_DLL_BUILD;BASE_DLL_USE;_WINSOCK_DEPRECATED_NO_WARNINGS;SUPPORT_OPENSSL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -159,12 +232,12 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>iphlpapi.lib;ws2_32.lib;uuid.lib;rpcrt4.lib;mpr.lib;Base/Base_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>iphlpapi.lib;ws2_32.lib;uuid.lib;rpcrt4.lib;mpr.lib;Base_debug.lib;libssl.lib;libcrypto.lib;Crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)_debug.dll</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>false</GenerateMapFile>
       <MapExports>false</MapExports>
-      <AdditionalLibraryDirectories>$(SolutionDir)\Lib\win32;$(SolutionDir)\boost\Lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\Bin\win32;$(SolutionDir)\openssl\Lib\win32\static;$(SolutionDir)\..\public\openssl\Lib\win32\static</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Message>Install文件，自己添加mk\UserInstallConfig.bat文件.使用方法见mk\WinInstall.bat</Message>
@@ -174,7 +247,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Include;$(SolutionDir)\boost\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Include;$(SolutionDir)\openssl\Include;mailio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;_DEBUG;_CRT_SECURE_NO_WARNINGS;NETWORK_DLL_BUILD;BASE_DLL_USE;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -184,12 +257,12 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>iphlpapi.lib;ws2_32.lib;uuid.lib;rpcrt4.lib;mpr.lib;Base/Base_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>iphlpapi.lib;ws2_32.lib;uuid.lib;rpcrt4.lib;mpr.lib;Base_debug.lib;libssl.lib;libcrypto.lib;Crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)_debug.dll</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>false</GenerateMapFile>
       <MapExports>false</MapExports>
-      <AdditionalLibraryDirectories>$(SolutionDir)\Lib\$(Platform);$(SolutionDir)\boost\Lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\Bin\win64;$(SolutionDir)\openssl\Lib\win64\static;$(SolutionDir)\..\public\openssl\Lib\win64\static</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Message>Install文件，自己添加mk\UserInstallConfig.bat文件.使用方法见mk\WinInstall.bat</Message>
@@ -200,23 +273,26 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Include;$(SolutionDir)\boost\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Include;$(SolutionDir)\openssl\Include;$(SolutionDir)\..\public\Include;$(SolutionDir)\..\public\openssl\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeader />
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;NDEBUG;_CRT_SECURE_NO_WARNINGS;NETWORK_DLL_BUILD;BASE_DLL_USE</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;NDEBUG;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS;NETWORK_DLL_BUILD;BASE_DLL_USE</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4099</DisableSpecificWarnings>
+      <SDLCheck>true</SDLCheck>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>iphlpapi.lib;ws2_32.lib;uuid.lib;rpcrt4.lib;mpr.lib;Base/Base.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>iphlpapi.lib;ws2_32.lib;uuid.lib;rpcrt4.lib;mpr.lib;Base.lib;libssl.lib;libcrypto.lib;Crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>Debug</GenerateDebugInformation>
       <GenerateMapFile>false</GenerateMapFile>
       <MapExports>false</MapExports>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <AdditionalLibraryDirectories>$(SolutionDir)\Lib\win32;$(SolutionDir)\boost\Lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
+      <AdditionalLibraryDirectories>$(SolutionDir)\Bin\win32;$(SolutionDir)\openssl\Lib\win32\static;$(SolutionDir)\..\public\openssl\Lib\win32\static</AdditionalLibraryDirectories>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
     <PostBuildEvent>
       <Message>Install文件，自己添加mk\UserInstallConfig.bat文件.使用方法见mk\WinInstall.bat</Message>
@@ -228,23 +304,23 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Include;$(SolutionDir)\boost\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Include;$(SolutionDir)\openssl\Include;mailio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;NDEBUG;_CRT_SECURE_NO_WARNINGS;NETWORK_DLL_BUILD;BASE_DLL_USE</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;NDEBUG;_CRT_SECURE_NO_WARNINGS;NETWORK_DLL_BUILD;BASE_DLL_USE;_WINSOCK_DEPRECATED_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>iphlpapi.lib;ws2_32.lib;uuid.lib;rpcrt4.lib;mpr.lib;Base/Base.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>iphlpapi.lib;ws2_32.lib;uuid.lib;rpcrt4.lib;mpr.lib;Base.lib;libssl.lib;libcrypto.lib;Crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>false</GenerateMapFile>
       <MapExports>false</MapExports>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <AdditionalLibraryDirectories>$(SolutionDir)\Lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\Bin\win64;$(SolutionDir)\openssl\Lib\win64\static;$(SolutionDir)\..\public\openssl\Lib\win64\static</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
     </Link>
     <PostBuildEvent>

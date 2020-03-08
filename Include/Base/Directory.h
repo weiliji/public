@@ -19,7 +19,8 @@ public:
 		std::string		Path;
 		std::string		SuffixName;
 		uint64_t		FileSize;
-		Time			CreatTime;
+		uint64_t		CreatTime;
+		uint64_t		ModifyTime;
 		enum {
 			DirentType_Dir,
 			DirentType_File,
@@ -31,6 +32,8 @@ public:
 	virtual ~Directory();
 
 	bool read(Dirent& dirent);
+
+	uint64_t size() const;
 private:
 	struct DirectoryInternal;
 	DirectoryInternal* internal;

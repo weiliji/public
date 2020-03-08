@@ -13,23 +13,23 @@ public:
 
 	virtual std::string build(const URL& URL)
 	{
-		XMLObject::Child& setsystemdatetime = body().addChild("SetSystemDateAndTime");
+		XML::Child& setsystemdatetime = body().addChild("SetSystemDateAndTime");
 
-		setsystemdatetime.attribute("xmlns", "http://www.onvif.org/ver10/device/wsdl");
+		setsystemdatetime.addAttribute("xmlns", "http://www.onvif.org/ver10/device/wsdl");
 
 		setsystemdatetime.addChild("DateTimeType","Manual");
 		setsystemdatetime.addChild("DaylightSavings", "false");
 
-		XMLObject::Child& utcdatetime = setsystemdatetime.addChild("UTCDateTime");
+		XML::Child& utcdatetime = setsystemdatetime.addChild("UTCDateTime");
 		
-		XMLObject::Child& timev = utcdatetime.addChild("Time");
-		timev.attribute("xmlns","http://www.onvif.org/ver10/schema");
+		XML::Child& timev = utcdatetime.addChild("Time");
+		timev.addAttribute("xmlns","http://www.onvif.org/ver10/schema");
 		timev.addChild("Hour",time.hour);
 		timev.addChild("Minute", time.minute);
 		timev.addChild("Second", time.second);
 
-		XMLObject::Child& datev = utcdatetime.addChild("Date");
-		datev.attribute("xmlns", "http://www.onvif.org/ver10/schema");
+		XML::Child& datev = utcdatetime.addChild("Date");
+		datev.addAttribute("xmlns", "http://www.onvif.org/ver10/schema");
 		datev.addChild("Year", time.year);
 		datev.addChild("Month", time.month);
 		datev.addChild("Day", time.day);
@@ -37,7 +37,7 @@ public:
 
 		return CmdObject::build(URL);
 	}
-	virtual bool parse(const XMLObject::Child& body) { return true; }
+	virtual bool parse(const XML::Child& body) { return true; }
 private:
 	Time time;
 };

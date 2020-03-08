@@ -10,3 +10,5 @@
 #include "RTSPClient.h"
 #include "RTSPServer.h"
 #include "RTSPStructs.h"
+#include "RTSPStatistics.h"
+#include "RTPAnalyzer.h"

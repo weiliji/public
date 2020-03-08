@@ -9,28 +9,25 @@
 #可以自己写一个.platform 用于配置 平台，静态库拷贝的位置, 否则自己指定编译选项，参见.platform
 -include .platform
 
-# 生成库的设置
-# 定义库的文件目录
+# 设置
+# 代码路径
    SRCS_PATH = Src
 	
 # 库的名称
    SHARDLIB_NAME = 
    STATICLIB_NAME = 
 
-# 应用程序选项
-# 应用程序的代码路径
-   APP_SRCS_PATH = test
 
 # 应用程序名称
-   APP_NAME = 
+   APP_NAME = test
 
 # 子目录编译需要的目录
    SUB_INCLUDE = 
 
 
 # 应用程序依赖的库(除了本身的编译的库)
-  LIBS = Base/Base.lib Network/Network.lib RTSP/RTSP.lib
-  LIBS_DBG = Base/Base_debug.lib Network/Network_debug.lib RTSP/RTSP_debug.lib
+  LIBS = ${PRJ_OUTPUTDIR}/libBase.a ${PRJ_OUTPUTDIR}/libNetwork.a ${PRJ_OUTPUTDIR}/libRTSP.a  -lpthread
+  LIBS_DBG = ${PRJ_OUTPUTDIR}/libBase_debug.a ${PRJ_OUTPUTDIR}/libNetwork_debug.a ${PRJ_OUTPUTDIR}/libRTSP_debug.a -lpthread
 
 #这个为第三方自动生成的库，不能修改
 #AutoAddOtherDefineStart

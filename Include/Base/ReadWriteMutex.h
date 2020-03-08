@@ -17,7 +17,7 @@ namespace Base{
 
 /// \class Mutex
 /// \brief 多平台互斥量类
-class BASE_API ReadWriteMutex:public IMutexInterface
+class BASE_API ReadWriteMutex:public IRWMutexInterface
 {
 	ReadWriteMutex(ReadWriteMutex const&);
 	ReadWriteMutex& operator=(ReadWriteMutex const&);
@@ -32,18 +32,23 @@ public:
 	/// 进入临界区。
 	/// \retval true 	成功
 	/// \retval false 失败
-	bool enterread();
-
-	/// 进入临界区。
-	/// \retval true 	成功
-	/// \retval false 失败
-	bool enterwrite();
+	bool enterRead();
 
 	/// 离开临界区。
 	/// \retval true 	成功
 	/// \retval false 失败
-	bool leave();
+	bool leaveRead();
 
+	/// 进入临界区。
+	/// \retval true 	成功
+	/// \retval false 失败
+	bool enterWrite();
+
+	
+	/// 离开临界区。
+	/// \retval true 	成功
+	/// \retval false 失败
+	bool leaveWrite();
 private:
 	struct ReadWriteMutexInternal;
 	ReadWriteMutexInternal* internal;

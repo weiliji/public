@@ -10,9 +10,11 @@
 
 #include "Base/Defs.h"
 #include "Base/CircleBuffer.h"
-#include "Base/OperationResult.h"
+#include "Base/ErrorInfo.h"
+#include "Base/Excel.h"
 #include "Base/AtomicCount.h"
 #include "Base/Base64.h"
+#include "Base/BPlusTreeIO.h"
 #include "Base/ConsoleCommand.h"
 #include "Base/BaseTemplate.h"
 #include "Base/ByteOrder.h"
@@ -21,15 +23,17 @@
 #include "Base/DynamicLib.h"
 #include "Base/DynamicMemPool.h"
 #include "Base/File.h"
+#include "Base/FileFind.h"
 #include "Base/Directory.h"
 #include "Base/Function.h"
 #include "Base/Guard.h"
+#include "Base/JSON.h"
 #include "Base/IntTypes.h"
 #include "Base/LockFreeList.h"
 #include "Base/Math.h"
 #include "Base/Md5.h"
 #include "Base/Mutex.h"
-#include "Base/MsgCenter.h"
+#include "Base/MediaCode.h"
 #include "Base/PrintLog.h"
 #include "Base/Process.h"
 #include "Base/ReadWriteMutex.h"
@@ -61,7 +65,11 @@
 #include "Base/Variant.h"
 #include "Base/URL.h"
 #include "Base/Guid.h"
+#include "Base/Hash.h"
 #include "Base/Host.h"
+#include "Base/wwwAuthenticate.h"
+#include "Base/XML.h"
+#include "Base/zip.h"
 
 /*
 			Public 基础库介绍
@@ -112,6 +120,9 @@
 	Sha1.h				sha1编解码
 	Md5.h				MD5加密
 	URLEncoding.h		URL编解码
+	Excel.h				excel文件读写操作
+	xml.h				XML文件读写操作
+	JSON.h				json内容格式化处理
 
 八：定义
 	URL.h				URL通讯解析
@@ -141,9 +152,15 @@ public:
 	static void  printVersion();
 
 	//初始化Base、并注册一个关闭事件通知回调
-	static void init(const closeEventCallback& closeEvent = NULL,void* userdata = NULL);
+	static void init(const closeEventCallback& closeEvent = closeEventCallback(),void* userdata = NULL);
 	//反初始化Base库
 	static void uninit();
+
+	//启动日志文件存储
+	static void startSaveLog(const std::string& appName, const std::string& logpath = "", LOG_Level logLevel = LOG_Level_DEBUG);
+
+	//停止日志文件存储
+	static void stopSaveLog();
 
 	//主动退出
 	static void consoleCommandClose(CloseEvent cmd);

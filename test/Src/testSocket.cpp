@@ -1,9 +1,10 @@
-#include <winsock2.h>
-#include <mswsock.h>
+
 #include "Network/Network.h"
 using namespace Public::Network;
 
 #if 0
+#include <winsock2.h>
+#include <mswsock.h>
 class NetworkServerInfo
 {
 public:
@@ -245,7 +246,7 @@ void runServerProc(Thread* t,void* param)
 
 	SOCKADDR_IN servAddr;
 	servAddr.sin_family = AF_INET;
-	servAddr.sin_addr.S_un.S_addr = inet_addr("192.168.2.16");
+	servAddr.sin_addr.S_un.S_addr = inet_addr("192.168.10.20");
 	servAddr.sin_port = htons(TESTUDPPORT + (int)param);
 
 	int addrlen = sizeof(servAddr);
@@ -351,7 +352,7 @@ void socketRecvCalblack(const weak_ptr <Socket>& sock,const char* buffer,int len
 }
 
 
-#define MAXIOCPTHREADNUM		1
+#define MAXIOCPTHREADNUM		4
 
 void runClient1()
 {
@@ -488,7 +489,10 @@ void runClient2()
 
 	for (int i = 0; i < MAXIOCPTHREADNUM; i++)
 	{
-		CreateThread(NULL, 0, IOCPThreadProc, 0, 0, NULL);
+		HANDLE t = CreateThread(NULL, 0, (PTHREAD_START_ROUTINE)IOCPThreadProc, 0, 0, NULL);
+
+		DWORD dwCpuMask = 0x1;
+		SetProcessAffinityMask(t, (DWORD_PTR)&dwCpuMask);
 	}
 
 	std::list<shared_ptr<SocketObject> >socklist;
@@ -517,7 +521,7 @@ void runClient2()
 int main(int args,const char* argv[])
 {	
 	if (args == 1) runServer();
-	else runClient1();
+	else runClient2();
 
 	return 0;
 }

@@ -93,6 +93,15 @@
     <ClInclude Include="Src\protocol\CmdContinuousStop.h">
       <Filter>源文件\protocol</Filter>
     </ClInclude>
+    <ClInclude Include="Src\protocol\CmdGetImageSettings.h">
+      <Filter>源文件\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\protocol\CmdSetImageSettings.h">
+      <Filter>源文件\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\protocol\CmdGetImageOptions.h">
+      <Filter>源文件\protocol</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\OnvifClient.cpp">

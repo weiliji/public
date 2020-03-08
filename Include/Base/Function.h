@@ -52,27 +52,6 @@ class _FunctionImpl
 {
 public:
 
-	typedef R(*PTR_FUNCTION)(ARGS ...);
-
-	struct IDENT
-	{
-		void* func;
-		void* obj;
-		bool operator==(const IDENT& other) const
-		{
-			if (func == other.func && obj == other.obj)
-			{
-				return true;
-			}
-			return false;
-		}
-		bool operator<(const IDENT& other) const
-		{
-			if (func < other.func) return true;
-			if (func == other.func && obj < other.obj) return true;
-			return false;
-		}
-	};
 	//function，基础对象
 	struct FUNCTION_OBJECT
 	{
@@ -82,9 +61,10 @@ public:
 		virtual bool empty() const = 0;
 
 		virtual R invoke(ARGS ... a) = 0;
-		virtual IDENT ident() = 0;
 	};
 
+
+	typedef R(*PTR_FUNCTION)(ARGS ...);
 	//函数指针的定义
 	struct FUNCTION_POINTER :public FUNCTION_OBJECT
 	{
@@ -97,13 +77,6 @@ public:
 			if(f == NULL) return INIT_VALUE<R>::Value();
 
 			return f(a ...);
-		}
-		virtual IDENT ident()
-		{
-			IDENT identi;
-			identi.func = (void*)f;
-			identi.obj = NULL;
-			return identi;
 		}
 
 		PTR_FUNCTION f;
@@ -125,30 +98,20 @@ public:
 		virtual R invoke(ARGS ... a)
 		{
 			O* optr = o;
-			shared_ptr<O> ptrtmp = wptr.lock();
+			shared_ptr<O> ptrtmp;
+			if(optr == NULL)
+			{
+				ptrtmp = wptr.lock();
 
-			if (ptrtmp == NULL) ptrtmp = sptr;
-			if (ptrtmp != NULL) optr = ptrtmp.get();
-
+				if (ptrtmp == NULL && sptr != NULL) ptrtmp = sptr;
+				if (ptrtmp != NULL) optr = ptrtmp.get();
+			}
 			if (optr == NULL || f == NULL)
 			{
 				return INIT_VALUE<R>::Value();
 			}
 
 			return (optr->*f)(a ...);
-		}
-		virtual IDENT ident()
-		{
-			IDENT identi;
-			identi.func = &f;
-			identi.obj = o;
-			shared_ptr<O> tmp = wptr.lock();
-			if (tmp == NULL) tmp = sptr;
-			if (tmp != NULL)
-			{
-				identi.obj = tmp.get();
-			}
-			return identi;
 		}
 
 		MEM_FUNCTION	f;
@@ -157,57 +120,83 @@ public:
 		shared_ptr<O>   sptr;
 	};
 
+	typedef std::function<R(ARGS ...)> STD_FUNCTION;
+	struct FUNCTION_STD :public FUNCTION_OBJECT
+	{
+		FUNCTION_STD(STD_FUNCTION _f) :f(_f) {}
+
+		virtual bool empty() const { return !f; }
+
+		virtual R invoke(ARGS ... a)
+		{
+			return f(a ...);
+		}
+
+		STD_FUNCTION f;
+	};
+
 	shared_ptr<FUNCTION_OBJECT> _impl;
 protected:
 	/// 缺省构造函数
 	_FunctionImpl( ){}
-	~_FunctionImpl() {}
+	virtual ~_FunctionImpl() {}
+	
+	bool empty() const
+	{
+		shared_ptr<FUNCTION_OBJECT> tmp = _impl;
+		if (tmp == NULL) return false;
+
+		return !tmp->empty();
+	}
 public:
 	/// 将类的成员函数和类对象的指针绑定并保存。其他类型的函数指针可以=运算符和隐式转换直接完成。
 	template<typename O>
 	void bind(R(O::*f)(ARGS ...), const O * o)
 	{
-		realse();
-
 		if(f == NULL || o == NULL)
 		{
 			return;
 		}
 
-		_impl = shared_ptr<FUNCTION_MEMBER<O> >(new FUNCTION_MEMBER<O>(f,o));
+		_impl = make_shared<FUNCTION_MEMBER<O>>(f,o);
 	}
-
-	void bind(R (*f)(ARGS ...))
+	void bind(const std::function<R(ARGS ...)>& f)
 	{
-		realse();
-
+		if (!f)
+		{
+			return;
+		}
+		_impl = make_shared<FUNCTION_STD>(f);
+	}
+	void bind(PTR_FUNCTION f)
+	{
 		if (f == NULL)
 		{
 			return;
 		}
-		_impl = shared_ptr<FUNCTION_POINTER>(new FUNCTION_POINTER(f));
+		_impl = make_shared<FUNCTION_POINTER>(f);
 	}
 	template<typename O>
 	void bind(R(O::*f)(ARGS ...), const shared_ptr<O>& ptr)
 	{
-		realse();
-
 		if(f == NULL || ptr == NULL)
 		{
 			return;
 		}
-		_impl = shared_ptr<FUNCTION_MEMBER<O> >(new FUNCTION_MEMBER<O>(f, ptr));
+		_impl = make_shared<FUNCTION_MEMBER<O> >(f, ptr);
 	}
 	template<typename O>
 	void bind(R(O::*f)(ARGS ...), const weak_ptr<O>& wptr)
 	{
-		realse();
-
 		if (f == NULL || wptr.lock() == NULL)
 		{
 			return;
 		}
-		_impl = shared_ptr<FUNCTION_MEMBER<O> >(new FUNCTION_MEMBER<O>(f, wptr));
+		_impl = make_shared<FUNCTION_MEMBER<O> >(f, wptr);
+	}
+	void bind(long long ptr) 
+	{
+		_impl = make_shared<FUNCTION_POINTER>((PTR_FUNCTION)ptr);
 	}
 	operator bool() const
 	{
@@ -216,10 +205,12 @@ public:
 
 		return !tmp->empty();
 	}
-
 	bool operator!() const
 	{
-		return !(bool(*this));
+		shared_ptr<FUNCTION_OBJECT> tmp = _impl;
+		if (tmp == NULL) return true;
+
+		return tmp->empty();
 	}	
 
 	/// 重载()运算符，可以以函数对象的形式来调用保存的函数指针。
@@ -234,85 +225,39 @@ public:
 
 		return tmp->invoke(a ...);
 	}
+};
+
+template<typename _Fx>
+struct CompileError
+{
 	
-	void realse()
-	{
-		_impl = NULL;
-	}
 };
 
 template <typename R, typename... ARGS>
-class Function:public _FunctionImpl<R,ARGS ...>
-{
-public:
-	Function() {}
-
-	/// 接受成员函数指针构造函数，将类的成员函数和类对象的指针绑定并保存。
-	/// \param [in] f 类的成员函数
-	/// \param [in] o 类对象的指针
-	template<typename O>
-	Function(R(O::*f)(ARGS ...), const O * o)
-	{
-		bind(f, o);
-	}
-
-	template<typename O>
-	Function(R(O::*f)(ARGS ...), const shared_ptr<O>& ptr)
-	{
-		bind(f, ptr);
-	}
-
-	template<typename O>
-	Function(R(O::*f)(ARGS ...), const weak_ptr<O>& ptr)
-	{
-		bind(f, ptr);
-	}
-
-	/// 接受普通函数指针构造函数，保存普通函数指针。
-	/// \param [in] f 函数指针
-	Function(R(*f)(ARGS ...))
-	{
-		bind(f);
-	}
-	Function(const Function& f)
-	{
-		swap(f);
-	}
-
-	~Function()
-	{
-		realse();
-	}
-	/// 拷贝构造函数
-	/// \param [in] f 源函数指针对象
-	Function& operator=(const Function& f)
-	{
-		swap(f);
-
-		return *this;
-	}
-
-	bool operator<(const Function& tpl) const
-	{
-		shared_ptr<FUNCTION_OBJECT> tmp = _impl;
-		shared_ptr<FUNCTION_OBJECT> tmp1 = tpl._impl;
-		if (tmp == NULL || tmp1 == NULL)
-		{
-			return false;
-		}
-		return tmp->ident() < tmp1->ident();
-	}
-	void swap(const Function& f)
-	{
-		_impl = f._impl;
-	}
-};
+class Function{};
 
 template <typename R, typename... ARGS>
 class Function<R(ARGS...)> :public _FunctionImpl<R, ARGS ...>
 {
+	template<typename _Fx>
+	inline std::function<R(ARGS ...)> toStdFunction(...) 
+	{	
+		CompileError<_Fx> a = 0;
+	}
+
+	template<typename _Fx = std::function<R(ARGS ...)>>
+	inline std::function<R(ARGS ...)> toStdFunction(const std::function<R(ARGS ...)>& f) { return f; }
+
+	template<typename _Fx = long int>
+	inline std::function<R(ARGS ...)> toStdFunction(const long int& f) { return std::function<R(ARGS ...)>((R(*)(ARGS ...))f); }
 public:
 	Function() {}
+
+	Function(const std::function<R(ARGS ...)>& f)
+	{
+		this->bind(f);
+	}
+	
 	
 	/// 接受成员函数指针构造函数，将类的成员函数和类对象的指针绑定并保存。
 	/// \param [in] f 类的成员函数
@@ -320,36 +265,53 @@ public:
 	template<typename O>
 	Function(R(O::*f)(ARGS ...), const O * o)
 	{
-		bind(f, o);
+		this->bind(f, o);
 	}
 
 	template<typename O>
 	Function(R(O::*f)(ARGS ...), const shared_ptr<O>& ptr)
 	{
-		bind(f, ptr);
+		this->bind(f, ptr);
 	}
 
 	template<typename O>
 	Function(R(O::*f)(ARGS ...), const weak_ptr<O>& ptr)
 	{
-		bind(f, ptr);
+		this->bind(f, ptr);
 	}
 
 	/// 接受普通函数指针构造函数，保存普通函数指针。
 	/// \param [in] f 函数指针
 	Function(R(*f)(ARGS ...))
 	{
-		bind(f);
+		this->bind(f);
 	}
 	Function(const Function& f)
 	{
 		swap(f);
 	}
 
+	Function(int ptr)
+	{
+		this->bind((long long)ptr);
+	}
+	
+	Function(void* ptr)
+	{
+		this->bind((R(*)(ARGS ...))ptr);
+	}
+
+	//这个来处理lambd表达式
+	template<class _Fx>
+	Function(const _Fx& fx)
+	{
+		this->bind(toStdFunction<_Fx>(fx));
+	}
+
 	~Function()
 	{
-		realse();
 	}
+
 	/// 拷贝构造函数
 	/// \param [in] f 源函数指针对象
 	Function& operator=(const Function& f)
@@ -358,20 +320,9 @@ public:
 
 		return *this;
 	}
-
-	bool operator<(const Function& tpl) const
-	{
-		shared_ptr<FUNCTION_OBJECT> tmp = _impl;
-		shared_ptr<FUNCTION_OBJECT> tmp1 = tpl._impl;
-		if (tmp == NULL || tmp1 == NULL)
-		{
-			return false;
-		}
-		return tmp->ident() < tmp1->ident();
-	}
 	void swap(const Function& f)
 	{
-		_impl = f._impl;
+		this->_impl = f._impl;
 	}
 };
 

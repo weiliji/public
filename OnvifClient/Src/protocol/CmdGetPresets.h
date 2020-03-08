@@ -15,9 +15,9 @@ public:
 
 	virtual std::string build(const URL& URL)
 	{
-		XMLObject::Child& getpreset = body().addChild("GetPresets");
+		XML::Child& getpreset = body().addChild("GetPresets");
 
-		getpreset.attribute("xmlns","http://www.onvif.org/ver20/ptz/wsdl");
+		getpreset.addAttribute("xmlns","http://www.onvif.org/ver20/ptz/wsdl");
 
 		getpreset.addChild("ProfileToken",token);
 
@@ -26,21 +26,19 @@ public:
 
 	OnvifClientDefs::PresetInfos preset;
 
-	virtual bool parse(const XMLObject::Child& body)
+	virtual bool parse(const XML::Child& body)
 	{
-		XMLObject::Child respchild = body.getChild("GetPresetsResponse");
+		XML::Child respchild = body.getChild("GetPresetsResponse");
 		if (respchild.isEmpty()) return false;
 
-		XMLObject::Child& presetchild = respchild.firstChild("Preset");
-		while (!presetchild.isEmpty())
+		for(XML::ChildIterator iter = respchild.child("Preset");iter;iter++)
 		{
+			const XML::Child& presetchild = *iter;
 			OnvifClientDefs::PresetInfo info;
-			info.token = presetchild.attribute("token");
-			info.name = presetchild.getChild("Name").data();
+			info.token = presetchild.getAttribute("token").readUint32();
+			info.name = presetchild.getChild("Name").data().readString();
 
 			preset.infos.push_back(info);
-
-			presetchild = respchild.nextChild();
 		}
 
 		return true;

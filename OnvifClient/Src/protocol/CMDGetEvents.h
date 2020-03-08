@@ -18,9 +18,9 @@ public:
 		header().replyTo = "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous";
 		header().to = "http://"+URL.getHost()+URL.getPath();
 
-		XMLObject::Child& pullmessage = body().addChild("PullMessages");
+		XML::Child& pullmessage = body().addChild("PullMessages");
 
-		pullmessage.attribute("xmlns","http://www.onvif.org/ver10/events/wsdl");
+		pullmessage.addAttribute("xmlns","http://www.onvif.org/ver10/events/wsdl");
 
 		pullmessage.addChild("Timeout","PT1M");
 		pullmessage.addChild("MessageLimit", Value(1024));
@@ -29,61 +29,55 @@ public:
 	}
 
 	OnvifClientDefs::EventInfos eventinfos;
-	virtual bool parse(const XMLObject::Child& body)
+	virtual bool parse(const XML::Child& body)
 	{
-		XMLObject::Child response = body.getChild("PullMessagesResponse");
+		XML::Child response = body.getChild("PullMessagesResponse");
 		if (response.isEmpty()) return false;
 
-		XMLObject::Child& messageval = response.firstChild("NotificationMessage");
-		while (!messageval.isEmpty())
+		for(XML::ChildIterator iter = response.child("NotificationMessage");iter;iter++)
 		{
+			const XML::Child& messageval = *iter;
 			do 
 			{
 				OnvifClientDefs::EventInfos::EventInfo event;
 
-				const XMLObject::Child& topicval = messageval.getChild("Topic");
+				const XML::Child& topicval = messageval.getChild("Topic");
 				if (topicval.isEmpty()) break;
 
-				event.topic = topicval.data();
+				event.topic = topicval.data().readString();
 
-				XMLObject::Child msgval = messageval.getChild("Message").getChild("Message");
-				event.arrivalTime = onvif_parse_datetime(msgval.attribute("UtcTime"));
-				event.operation = msgval.attribute("PropertyOperation");
+				XML::Child msgval = messageval.getChild("Message").getChild("Message");
+				event.arrivalTime = onvif_parse_datetime(msgval.getAttribute("UtcTime").readString());
+				event.operation = msgval.getAttribute("PropertyOperation").readString();
 
-				XMLObject::Child sourceitem = msgval.getChild("Source");
-				XMLObject::Child &sourceval = sourceitem.firstChild("SimpleItem");
-				while (!sourceval.isEmpty())
+				XML::Child sourceitem = msgval.getChild("Source");
+				for(XML::ChildIterator iter = sourceitem.child("SimpleItem");iter;iter++)
 				{
-					std::string name = sourceval.attribute("Name");
-					std::string value = sourceval.attribute("Value");
+					const XML::Child &sourceval = *iter;
+					std::string name = sourceval.getAttribute("Name").readString();
+					std::string value = sourceval.getAttribute("Value").readString();
 
 					if (name.length() == 0) continue;
 
 					event.sources[name] = value;
-
-					sourceval = sourceitem.nextChild();
 				}
 
-				XMLObject::Child dataitem = msgval.getChild("Data");
-				XMLObject::Child &dataval = dataitem.firstChild("SimpleItem");
-				while (!dataval.isEmpty())
+				XML::Child dataitem = msgval.getChild("Data");
+				for(XML::ChildIterator iter = dataitem.child("SimpleItem");iter;iter++)
 				{
-					std::string name = dataval.attribute("Name");
-					std::string value = dataval.attribute("Value");
+					const XML::Child &dataval = *iter;
+					std::string name = dataval.getAttribute("Name").readString();
+					std::string value = dataval.getAttribute("Value").readString();
 
 					if (name.length() == 0) continue;
 
 					event.datas[name] = value;
-
-					dataval = dataitem.nextChild();
 				}
 
 
 				eventinfos.eventInfos.push_back(event);
 
-			} while (0);			
-
-			messageval = response.nextChild();
+			} while (0);
 		}
 
 		return true;

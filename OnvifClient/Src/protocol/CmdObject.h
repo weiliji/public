@@ -10,13 +10,15 @@ using namespace Public::Onvif;
 #define URL_ONVIF_MEDIA				"/onvif/media"
 #define URL_ONVIF_PTZ				"/onvif/PTZ"
 #define URL_ONVIF_EVENTS			"/onvif/Events"
+#define URL_ONVIF_IMAGING			"/onvif/Imaging"
+
 
 #define MAXOVIFHEADERLEN	2048
 
 class CmdObject:public GSop_Envelop
 {
 public:
-	std::string requesturl;
+	std::string				requesturl;
 public:
 	CmdObject(const std::string& requrl){ requesturl = requrl; }
 	virtual ~CmdObject() {}
@@ -33,49 +35,83 @@ public:
 		return parse(body());
 	}
 private:
-	virtual bool parse(const XMLObject::Child& body) { return false; }
+	virtual bool parse(const XML::Child& body) { return false; }
 protected:
+	std::string parseMacAddr(const std::string& macstr)
+	{
+        std::string macstrtmp;
+        if (macstr.length() == 12)
+        {
+            for (int i = 0; i < 6; i++)
+            {
+                if (i != 0)
+                {
+                    macstrtmp += ":";
+                }
+                macstrtmp += String::toupper(std::string(macstr.c_str() + i * 2, 2));
+            }
+        }
+		else if (macstr.length() == 17)
+		{
+			return String::toupper(macstr);
+		}
+        else
+        {
+            return "";
+        }
+		
+
+		return macstrtmp;
+	}
 public:
 	static Time onvif_parse_datetime(const std::string& datastr)
 	{
 		Time	nowtime;
-		sscanf_s(datastr.c_str(), "%04d-%02d-%02dT%02d:%02d:%02dZ", &nowtime.year, &nowtime.month, &nowtime.day, &nowtime.hour, &nowtime.minute, &nowtime.second);
+		sscanf(datastr.c_str(), "%04d-%02d-%02dT%02d:%02d:%02dZ", &nowtime.year, &nowtime.month, &nowtime.day, &nowtime.hour, &nowtime.minute, &nowtime.second);
 
 		return nowtime;
 	}
 
-	static OnvifClientDefs::VIDEO_ENCODING onvif_parse_encoding(const std::string& pdata)
+	static CodeID onvif_parse_encoding(const std::string& pdata)
 	{
-		if (strcasecmp(pdata.c_str(), "H264") == 0)
+		if (String::strcasecmp(pdata.c_str(), "H264") == 0)
 		{
-			return OnvifClientDefs::VIDEO_ENCODING_H264;
+			return CodeID_Video_H264;
 		}
-		else if (strcasecmp(pdata.c_str(), "JPEG") == 0)
+		else if (String::strcasecmp(pdata.c_str(), "H265") == 0)
 		{
-			return OnvifClientDefs::VIDEO_ENCODING_JPEG;
+			return CodeID_Video_H265;
 		}
-		else if (strcasecmp(pdata.c_str(), "MPEG4") == 0)
+		else if (String::strcasecmp(pdata.c_str(), "JPEG") == 0)
 		{
-			return OnvifClientDefs::VIDEO_ENCODING_MPEG4;
+			return CodeID_Video_JPEG;
 		}
-		return OnvifClientDefs::VIDEO_ENCODING_UNKNOWN;
+		else if (String::strcasecmp(pdata.c_str(), "G711") == 0)
+		{
+			return CodeID_Audio_G711Mu;
+		}
+		else if (String::strcasecmp(pdata.c_str(), "AAC") == 0)
+		{
+			return CodeID_Audio_AAC;
+		}
+		return CodeID_Unknown;
 	}
 
 	OnvifClientDefs::H264_PROFILE onvif_parse_h264_profile(const std::string& pdata)
 	{
-		if (strcasecmp(pdata.c_str(), "Baseline") == 0)
+		if (String::strcasecmp(pdata.c_str(), "Baseline") == 0)
 		{
 			return OnvifClientDefs::H264_PROFILE_Baseline;
 		}
-		else if (strcasecmp(pdata.c_str(), "High") == 0)
+		else if (String::strcasecmp(pdata.c_str(), "High") == 0)
 		{
 			return OnvifClientDefs::H264_PROFILE_High;
 		}
-		else if (strcasecmp(pdata.c_str(), "Main") == 0)
+		else if (String::strcasecmp(pdata.c_str(), "Main") == 0)
 		{
 			return OnvifClientDefs::H264_PROFILE_Main;
 		}
-		else if (strcasecmp(pdata.c_str(), "Extended") == 0)
+		else if (String::strcasecmp(pdata.c_str(), "Extended") == 0)
 		{
 			return OnvifClientDefs::H264_PROFILE_Extended;
 		}

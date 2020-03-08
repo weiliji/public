@@ -6,29 +6,29 @@
 class CmdRemovePreset :public CmdObject
 {
 public:
-	CmdRemovePreset(const OnvifClientDefs::PresetInfo& _presetinfo,const std::string& _token):CmdObject(URL_ONVIF_PTZ),presetinfo(_presetinfo),token(_token)
+	CmdRemovePreset(uint32_t _index , const std::string& _token):CmdObject(URL_ONVIF_PTZ),token(_token), index(_index)
 	{
 	}
 	virtual ~CmdRemovePreset() {}
 
 	std::string token;
-	OnvifClientDefs::PresetInfo presetinfo;
+    uint32_t index;
 
 	virtual std::string build(const URL& URL)
 	{
-		XMLObject::Child& removepreset = body().addChild("RemovePreset");
+		XML::Child& removepreset = body().addChild("RemovePreset");
 
-		removepreset.attribute("xmlns", "http://www.onvif.org/ver20/ptz/wsdl");
+		removepreset.addAttribute("xmlns", "http://www.onvif.org/ver20/ptz/wsdl");
 
 		removepreset.addChild("ProfileToken", token);
-		removepreset.addChild("PresetToken", presetinfo.token);
+		removepreset.addChild("PresetToken", index);
 
 		return CmdObject::build(URL);
 	}
 	
-	virtual bool parse(const XMLObject::Child& body)
+	virtual bool parse(const XML::Child& body)
 	{
-		const XMLObject::Child& respchild = body.getChild("RemovePresetResponse");
+		const XML::Child& respchild = body.getChild("RemovePresetResponse");
 		if (respchild.isEmpty()) return false;
 
 		return true;

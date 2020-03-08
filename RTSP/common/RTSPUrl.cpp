@@ -21,7 +21,7 @@ bool RTSPUrl::parse(const std::string& url)
 	char const* prefix = "rtsp://";
 	uint32_t prefixLength = (uint32_t)strlen(prefix);
 
-	if (url.length() < prefixLength || 0 != strncasecmp(url.c_str(), prefix, prefixLength))
+	if (url.length() < prefixLength || 0 != String::strncasecmp(url.c_str(), prefix, prefixLength))
 	{
 		return false;
 	}

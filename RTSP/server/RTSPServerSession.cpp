@@ -4,268 +4,221 @@
 using namespace Public::RTSP;
 
 
-struct RTSPServerSession::RTSPServerSessionInternal:public RTSPSession
+struct _RTSPServerSession:public RTSPSession
 {
-	bool									socketdisconnected;
-	RTSPServer::ListenCallback				queryhandlercallback;
-	
+	RTSPServer::ListenCallback				queryhandlercallback;	
 	shared_ptr<RTSPServerHandler>			handler;
+	weak_ptr<RTSPServerSession>				session;
+
 	
-	bool									sessionHaveAuthen;
-
-	weak_ptr<RTSPServerSession>				sessionptr;
-
-	RTSPServerSessionInternal(const shared_ptr<IOWorker>& _worker, const shared_ptr<Socket>& sock, const RTSPServer::ListenCallback& queryhandle, const AllockUdpPortCallback& allocport, const std::string&  _useragent)
-		:RTSPSession(true),socketdisconnected(false), queryhandlercallback(queryhandle),sessionHaveAuthen(false)
+	_RTSPServerSession(const shared_ptr<IOWorker>& _worker, const RTSPServer::ListenCallback& queryhandle, const shared_ptr<UDPPortAlloc>& portalloc, const std::string&  _useragent)
+		:RTSPSession(_worker,RTSPUrl(),portalloc,_useragent,true),queryhandlercallback(queryhandle)
 	{
-		ssrc = (uint32_t)Time::getCurrentTime().makeTime();
-		ioworker = _worker;
-		socket = sock;
-		allockportcallback = allocport;
-
-		protocol = make_shared<RTSPProtocol>(sock, RTSPProtocol::CommandCallback(&RTSPServerSessionInternal::rtspCommandCallback, this),
-			RTSPProtocol::DisconnectCallback(&RTSPServerSessionInternal::socketDisconnectCallback, this), true);
+		
 	}
-	virtual ~RTSPServerSessionInternal() 
+	virtual ~_RTSPServerSession()
 	{
 		handler = NULL;
 		RTSPSession::stop();
 	}
-
-	void rtspCommandCallback(const shared_ptr<RTSPCommandInfo>& cmdinfo)
+	virtual shared_ptr<RTSPHandler> queryRtspHandler() 
 	{
-		if (cmdinfo->method == "" || cmdinfo->header("CSeq").empty()) return sendErrorResponse(cmdinfo, 400, "Bad Request");
-		if(strcasecmp(cmdinfo->verinfo.protocol.c_str(),"rtsp") != 0 || cmdinfo->verinfo.version != "1.0")
-		{
-			return sendErrorResponse(cmdinfo, 505, "RTSP Version Not Supported");
-		}	
-
-		shared_ptr<RTSPServerSession> session = sessionptr.lock();
-		if (session == NULL)
-		{
-			socketdisconnected = true;
-			return;
-		}
-
 		if (handler == NULL)
 		{
-			rtspurl = cmdinfo->url;
-
-			handler = queryhandlercallback(session);
+			handler = queryhandlercallback(session.lock());
 		}
 
-		if (handler == NULL)
-		{
-			sendErrorResponse(cmdinfo, 500, "NOT SUPPORT");
-			socketdisconnected = true;
-			return;
-		}
-
-		std::string nowsession = cmdinfo->header("Session").readString();
-		if (sessionstr.length() > 0 && sessionstr != nowsession)
-		{
-			sendErrorResponse(cmdinfo, 451, "Session Error");
-			return;
-		}
-
-		//check authen info
-		if (rtspurl.username != "" || rtspurl.password != "")
-		{
-			std::string authenstr = cmdinfo->header("Authorization").readString();
-			if (authenstr.length() <= 0 && !sessionHaveAuthen)
-			{
-				return sendErrorResponse(cmdinfo, 401, "No Authorization");
-			}
-			else if (authenstr.length() > 0)
-			{
-				if (!WWW_Authenticate::checkAuthenticate(cmdinfo->method, rtspurl.username, rtspurl.password, authenstr))
-				{
-					return sendErrorResponse(cmdinfo, 403, "Forbidden");
-				}
-				sessionHaveAuthen = true;
-			}			
-		}
-		
-		if (strcasecmp(cmdinfo->method.c_str(), "OPTIONS") == 0)
-		{
-			handler->onOptionRequest(session, cmdinfo);
-		}
-		else if (strcasecmp(cmdinfo->method.c_str(), "DESCRIBE") == 0)
-		{
-			handler->onDescribeRequest(session, cmdinfo);
-		}
-		else if (strcasecmp(cmdinfo->method.c_str(), "SETUP") == 0)
-		{
-
-			if (sessionstr.length() <= 0)
-			{
-				sessionstr = Value(Time::getCurrentMilliSecond()).readString() + Value(Time::getCurrentTime().makeTime()).readString();
-			}
-
-			std::string tranportstr = cmdinfo->header("Transport").readString();
-
-			TRANSPORT_INFO transport;
-			rtsp_header_parse_transport(tranportstr.c_str(), &transport);
-
-			shared_ptr<STREAM_TRANS_INFO> transportinfo;
-			if (rtspmedia)
-			{
-				for (std::list<shared_ptr<STREAM_TRANS_INFO> >::const_iterator iter = rtspmedia->infos.begin(); iter != rtspmedia->infos.end(); iter++)
-				{
-					if (String::indexOfByCase(cmdinfo->url, (*iter)->streaminfo.szTrackID) != (size_t)-1)
-					{
-						transportinfo = *iter;
-						break;
-					}
-				}
-			}			
-
-			if (transportinfo == NULL)
-			{
-				sendErrorResponse(cmdinfo, 501, "NO THIS TRACK");
-			}
-			else
-			{
-				transportinfo->transportinfo = transport;
-
-				handler->onSetupRequest(session, cmdinfo, transportinfo);
-			}
-		}
-		else if (strcasecmp(cmdinfo->method.c_str(), "PLAY") == 0)
-		{
-			buildRtpSession(true);
-
-			std::string rangestr = cmdinfo->header("Range").readString();
-			
-			RANGE_INFO range;
-			rtsp_header_parse_range(rangestr.c_str(), &range);
-			handler->onPlayRequest(session, cmdinfo, rtspmedia ,range);
-
-			buildRtpSession(true);
-		}
-		else if (strcasecmp(cmdinfo->method.c_str(), "PAUSE") == 0)
-		{
-			handler->onPauseRequest(session, cmdinfo);
-		}
-		else if (strcasecmp(cmdinfo->method.c_str(), "GET_PARAMETER") == 0)
-		{
-			handler->onGetparameterRequest(session, cmdinfo, cmdinfo->body);
-		}
-		else if (strcasecmp(cmdinfo->method.c_str(), "TEARDOWN") == 0)
-		{
-			handler->onTeardownRequest(session, cmdinfo);
-		}
-		else 
-		{
-			sendErrorResponse(cmdinfo, 500, "NOT SUPPORT");
-		}
+		return handler;
 	}
-	void onContorlDataCallback(const shared_ptr<STREAM_TRANS_INFO>& transinfo, const char* buffer, uint32_t len)
+	virtual shared_ptr<RTSPCommandSender> queryCommandSender() { return session.lock(); }
+
+	void closedByTimeout()
 	{
-		handler->onContorlPackageCallback(transinfo, buffer, len);
-	}
-	void onMediaDataCallback(const shared_ptr<STREAM_TRANS_INFO>& transinfo, const RTPPackage& rtppackage)
-	{
-		handler->onMediaPackageCallback(transinfo, rtppackage);
-	}
-	void socketDisconnectCallback()
-	{
-		socketdisconnected = true;
+		shared_ptr<RTSPCommandSender> sender = queryCommandSender();
+		if (handler && sender) handler->onClose(sender, ErrorInfo(Error_Code_Fail, "session timeout"));
 	}
 };
 
-RTSPServerSession::RTSPServerSession(const shared_ptr<IOWorker>& worker, const shared_ptr<Socket>& sock, const RTSPServer::ListenCallback& querycallback, const AllockUdpPortCallback& allocport, const std::string& useragent)
+struct RTSPServerSession::RTSPServerSessionInternal
 {
-	internal = new RTSPServerSessionInternal(worker,sock, querycallback,allocport,useragent);
-}
-void RTSPServerSession::initRTSPServerSessionPtr(const weak_ptr<RTSPServerSession>& session)
+	shared_ptr<_RTSPServerSession> session;
+};
+
+RTSPServerSession::RTSPServerSession(const shared_ptr<IOWorker>& worker, const RTSPServer::ListenCallback& querycallback, const shared_ptr<UDPPortAlloc>& portalloc, const std::string& useragent)
 {
-	internal->sessionptr = session;
+	internal = new RTSPServerSessionInternal;
+	internal->session = make_shared<_RTSPServerSession>(worker, querycallback, portalloc, useragent);
 }
 
+void RTSPServerSession::initRTSPServerSessionPtr(const weak_ptr<RTSPServerSession>& session, const shared_ptr<Socket>& _sock, const char* buffer, uint32_t len)
+{
+	internal->session->session = session;
+	internal->session->start(_sock, buffer, len);
+}
 RTSPServerSession::~RTSPServerSession()
 {
+	disconnect();
+
 	SAFE_DELETE(internal);
 }
-
+void RTSPServerSession::onPoolTimerProc()
+{
+	shared_ptr<_RTSPServerSession> session = internal->session;
+	if (session) session->onPoolTimerProc();
+}
+void RTSPServerSession::closedByTimeout()
+{
+	shared_ptr<_RTSPServerSession> session = internal->session;
+	if (session) session->closedByTimeout();
+}
 void RTSPServerSession::disconnect()
 {
-	internal->stop();
-	internal->handler = NULL;
-	internal->rtspmedia = NULL;
+    shared_ptr<_RTSPServerSession> tmpSession = internal->session;
+    if(tmpSession)
+	{
+        tmpSession->stop();
+        tmpSession->handler = NULL;
+	}
+	internal->session = NULL;
 }
 
-void RTSPServerSession::setAuthenInfo(const std::string& username, const std::string& password)
-{
-	internal->rtspurl.username = username;
-	internal->rtspurl.password = password;
-}
 const RTSPUrl& RTSPServerSession::url() const
 {
-	return internal->rtspurl;
+	return internal->session->rtspurl;
 }
-uint64_t RTSPServerSession::prevAlivetime() const
+bool RTSPServerSession::sessionIsTimeout() const
 {
-	if (internal->socketdisconnected) return 0;
+	if (internal->session == NULL || internal->session->sessionIsTimeout()) return true;
 
-	if (!internal->protocol) return 0;
-
-	return internal->protocol->prevalivetime();
+	return false;
 }
-shared_ptr<RTSPServerHandler> RTSPServerSession::handler()
+NetStatus RTSPServerSession::connectStatus() const
 {
-	return internal->handler;
+	if (internal->session == NULL) return NetStatus_disconnected;
+
+	return internal->session->connectStatus();
+}
+shared_ptr<RTSPServerHandler> RTSPServerSession::handler() const
+{
+	if (internal->session == NULL) return shared_ptr<RTSPServerHandler>();
+
+	return internal->session->handler;
+}
+shared_ptr<RTSP_Media_Infos> RTSPServerSession::mediainfo() const
+{
+	if (internal->session == NULL) return shared_ptr<RTSP_Media_Infos>();
+
+	return internal->session->rtspmedia;
 }
 void RTSPServerSession::sendOptionResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, const std::string& cmdstr)
 {
-	internal->sendOptionResponse(cmdinfo, cmdstr);
+	if (internal->session)
+		internal->session->sendOptionResponse(cmdinfo, cmdstr);
 }
-void RTSPServerSession::sendDescribeResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, const MEDIA_INFO& mediainfo)
+void RTSPServerSession::sendDescribeResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, const RTSP_Media_Infos& mediainfo)
 {
-	internal-> sendDescribeResponse(cmdinfo, mediainfo);
+	if (internal->session)
+		internal->session->sendDescribeResponse(cmdinfo, mediainfo);
 }
 void RTSPServerSession::sendSetupResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, const shared_ptr<STREAM_TRANS_INFO>& transport)
 {
-	internal->sendSetupResponse(cmdinfo, transport);
+	if (internal->session)
+		internal->session->sendSetupResponse(cmdinfo, transport);
 }
 void RTSPServerSession::sendPlayResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo)
 {
-	internal->sendPlayResponse(cmdinfo);
+	if (internal->session)
+		internal->session->sendPlayResponse(cmdinfo);
 }
 void RTSPServerSession::sendPauseResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo)
 {
-	internal->sendPauseResponse(cmdinfo);
+	if (internal->session)
+		internal->session->sendPauseResponse(cmdinfo);
 }
 void RTSPServerSession::sendTeardownResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo)
 {
-	internal->sendTeardownResponse(cmdinfo);
+	if (internal->session)
+		internal->session->sendTeardownResponse(cmdinfo);
 }
 void RTSPServerSession::sendGetparameterResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, const std::string& content)
 {
-	internal->sendGetparameterResponse(cmdinfo, content);
+	if (internal->session)
+		internal->session->sendGetparameterResponse(cmdinfo, content);
 }
 
 void RTSPServerSession::sendErrorResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, int errcode, const std::string& errmsg)
 {
-	internal->sendErrorResponse(cmdinfo, errcode, errmsg);
+	if(internal->session)
+		internal->session->sendErrorResponse(cmdinfo, errcode, errmsg);
 }
-bool RTSPServerSession::sendMediaPackage(const shared_ptr<STREAM_TRANS_INFO> mediainfo, const RTPPackage& rtppackage)
+
+ErrorInfo RTSPServerSession::sendRTPFrame(const shared_ptr<STREAM_TRANS_INFO>& transport, const shared_ptr<RTPFrame>& frame)
 {
-	shared_ptr<RTPSession> rtpsession = mediainfo->rtpsession;
+    if (internal->session == NULL)
+    {
+        return ErrorInfo(Error_Code_Param);
+    }
 
-	if (mediainfo == NULL || rtpsession == NULL || rtppackage.bufferlen() <= 0) return false;
+	shared_ptr<RTSPMediaSessionInfo> mediasession = internal->session->rtspmedia;
+    if (mediasession == NULL)
+    {
+        return ErrorInfo(Error_Code_Param);
+    }
 
-	rtpsession->sendMediaData(mediainfo, rtppackage);
+	shared_ptr<MediaSession> rtpsession = mediasession->session(transport);
 
-	return true;
+    if (transport == NULL || rtpsession == NULL)
+    {
+        return ErrorInfo(Error_Code_Param);
+    }
+
+	rtpsession->sendMediaFrameData(transport, frame);
+
+	return ErrorInfo();
 }
-bool RTSPServerSession::sendContorlPackage(const shared_ptr<STREAM_TRANS_INFO> mediainfo, const char*  buffer, uint32_t bufferlen)
+ErrorInfo RTSPServerSession::sendRTCPPackage(const shared_ptr<STREAM_TRANS_INFO>& transport, const shared_ptr<RTCPPackage>& rtcppackage)
 {
-	shared_ptr<RTPSession> rtpsession = mediainfo->rtpsession;
+	if (internal->session == NULL) return ErrorInfo(Error_Code_Param);
 
-	if (mediainfo == NULL || rtpsession == NULL || buffer == NULL || bufferlen <= 0) return false;
+	shared_ptr<RTSPMediaSessionInfo> mediasession = internal->session->rtspmedia;
+	if (mediasession == NULL) return ErrorInfo(Error_Code_Param);
 
-	rtpsession->sendContorlData(mediainfo, buffer, bufferlen);
+	shared_ptr<MediaSession> rtpsession = mediasession->session(transport);
 
-	return true;
+	if (transport == NULL || rtpsession == NULL) return ErrorInfo(Error_Code_Param);
+
+	rtpsession->sendContorlData(transport,rtcppackage);
+
+	return ErrorInfo();
 }
+
+uint32_t RTSPServerSession::getSendListSize()
+{
+	if (internal->session == NULL) return 0;
+
+	return internal->session->getSendListSize();
+}
+
+uint32_t RTSPServerSession::getSendCacheSize()
+{
+	if (internal->session == NULL) return 0;
+
+	return internal->session->getSendCacheSize();
+}
+
+ErrorInfo RTSPServerSession::cleanMediaCacheData()
+{
+	if (internal->session == NULL) return ErrorInfo(Error_Code_Param);
+
+	return internal->session->cleanMediaCacheData();
+}
+
+void RTSPServerSession::setAutoTimeStampEnable(const shared_ptr<STREAM_TRANS_INFO>& transport, bool enable)
+{
+	if (internal->session == NULL) return;
+
+	internal->session->setAutoTimeStampEnable(transport, enable);
+}
+
+
+

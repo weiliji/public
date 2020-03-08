@@ -3,68 +3,57 @@
 namespace Public {
 namespace RTSP {
 
-struct RTPPackage::RTPPackageInternal
-{
-	String	data;
-	uint32_t offset;
-	uint32_t len;
-
-	RTPPackageInternal():offset(0),len(0){}
-};
-
 
 RTPPackage::RTPPackage()
 {
-	internal = new RTPPackageInternal();
 }
-RTPPackage::RTPPackage(const String& data, uint32_t pos, uint32_t len)
+RTPPackage::RTPPackage(const String& _data, uint32_t _pos, uint32_t _len)
 {
-	internal = new RTPPackageInternal();
-	internal->data = data;
-	internal->offset = pos;
-	internal->len = len;
+	data = _data;
+	offset = _pos;
+	len = _len;
 }
 RTPPackage::RTPPackage(const RTPPackage& package)
 {
-	internal = new RTPPackageInternal();
-	internal->data = package.internal->data;
-	internal->offset = package.internal->offset;
-	internal->len = package.internal->len;
+	data = package.data;
+	offset = package.offset;
+	len = package.len;
 }
 RTPPackage::~RTPPackage()
 {
-	SAFE_DELETE(internal);
 }
 
 
-const RTPHEADER* RTPPackage::header() const
+const RTPHEADER& RTPPackage::rtpHeader() const
 {
-	const char* buffer = internal->data.c_str();
-	uint32_t bufferlen = (uint32_t)internal->data.length();
+	static RTPHEADER defaultheader;
+
+	const char* buffer = data.c_str();
+	uint32_t bufferlen = len;
+
+	if (buffer == NULL || bufferlen < sizeof(RTPHEADER))
+	{
+		return defaultheader;
+	}
+
+	return *(RTPHEADER*)(buffer + offset);
+}
+const char* RTPPackage::rtpDataAddr() const
+{
+	const char* buffer = data.c_str();
+	uint32_t bufferlen = len;
 
 	if (buffer == NULL || bufferlen < sizeof(RTPHEADER))
 	{
 		return NULL;
 	}
 
-	return (RTPHEADER*)(buffer + internal->offset);
+	return buffer + offset + sizeof(RTPHEADER);
 }
-const char* RTPPackage::data() const
+uint32_t RTPPackage::rtpDataLen() const
 {
-	const char* buffer = internal->data.c_str();
-	uint32_t bufferlen = (uint32_t)internal->data.length();
-
-	if (buffer == NULL || bufferlen < sizeof(RTPHEADER))
-	{
-		return NULL;
-	}
-
-	return buffer + sizeof(RTPHEADER);
-}
-uint32_t RTPPackage::datalen() const
-{
-	const char* buffer = internal->data.c_str();
-	uint32_t bufferlen = (uint32_t)internal->data.length();
+	const char* buffer = data.c_str();
+	uint32_t bufferlen = len;
 
 	if (buffer == NULL || bufferlen < sizeof(RTPHEADER))
 	{
@@ -73,22 +62,32 @@ uint32_t RTPPackage::datalen() const
 
 	return bufferlen - sizeof(RTPHEADER);
 }
+uint32_t RTPPackage::rtpExternLen() const
+{
+	const RTPHEADER& header = rtpHeader();
+	if (header.x == 0 || sizeof(RTPEXTERNHEADER) > rtpDataLen()) return 0;
+
+	RTPEXTERNHEADER* extheader = (RTPEXTERNHEADER*)rtpDataAddr();
+
+	//扩展头为4的倍数
+	return ntohs(extheader->len) * 4;
+}
 const char* RTPPackage::buffer() const
 {
-	const char* buffer = internal->data.c_str();
-	uint32_t bufferlen = (uint32_t)internal->data.length();
+	const char* buffer = data.c_str();
+	uint32_t bufferlen = len;
 
 	if (buffer == NULL || bufferlen < sizeof(RTPHEADER))
 	{
 		return NULL;
 	}
 
-	return (buffer + internal->offset);
+	return (buffer + offset);
 }
 uint32_t RTPPackage::bufferlen() const
 {
-	const char* buffer = internal->data.c_str();
-	uint32_t bufferlen = (uint32_t)internal->data.length();
+	const char* buffer = data.c_str();
+	uint32_t bufferlen = len;
 
 	if (buffer == NULL || bufferlen < sizeof(RTPHEADER))
 	{
@@ -96,6 +95,14 @@ uint32_t RTPPackage::bufferlen() const
 	}
 
 	return bufferlen;
+}
+RTPPackage& RTPPackage::operator = (const RTPPackage& package)
+{
+	data = package.data;
+	offset = package.offset;
+	len = package.len;
+
+	return *this;
 }
 
 }

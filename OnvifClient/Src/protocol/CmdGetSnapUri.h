@@ -13,21 +13,21 @@ public:
 
 	virtual std::string build(const URL& URL)
 	{
-		XMLObject::Child& getsnapuri = body().addChild("GetSnapshotUri");
+		XML::Child& getsnapuri = body().addChild("GetSnapshotUri");
 
-		getsnapuri.attribute("xmlns", "http://www.onvif.org/ver10/media/wsdl");
+		getsnapuri.addAttribute("xmlns", "http://www.onvif.org/ver10/media/wsdl");
 
 		getsnapuri.addChild("ProfileToken", token);
 
 		return CmdObject::build(URL);
 	}
 	OnvifClientDefs::SnapUrl snapurl;
-	virtual bool parse(const XMLObject::Child& body)
+	virtual bool parse(const XML::Child& body)
 	{
-		const XMLObject::Child& resp = body.getChild("GetSnapshotUriResponse");
+		const XML::Child& resp = body.getChild("GetSnapshotUriResponse");
 		if (!resp) return false;
 
-		snapurl.url = resp.getChild("MediaUri").getChild("Uri").data();
+		snapurl.url = resp.getChild("MediaUri").getChild("Uri").data().readString();
 
 		if (snapurl.url == "") return false;
 

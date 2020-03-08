@@ -9,9 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="头文件\Base">
-      <UniqueIdentifier>{0b4d97cc-d908-4dbb-9567-d820206a7f14}</UniqueIdentifier>
-    </Filter>
     <Filter Include="资源文件">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
@@ -22,272 +19,599 @@
     <Filter Include="源文件\regex">
       <UniqueIdentifier>{996eb774-73c6-400e-97cb-0760acac2085}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\Excel">
+      <UniqueIdentifier>{395fa8dd-3d05-4dd9-9210-fd3baf025692}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Excel\libxls">
+      <UniqueIdentifier>{cf3ffaa0-2aee-4666-b8b3-93ecaee9e3be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Excel\xlslib">
+      <UniqueIdentifier>{c6b51475-3acb-43ba-a636-b1942917734d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Base">
+      <UniqueIdentifier>{b975eece-a5a7-42d7-8814-8ad6558802ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\sqlite3">
+      <UniqueIdentifier>{1f7d64fa-bdc8-4e14-8ce6-5cebccb55628}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\zip">
+      <UniqueIdentifier>{d713b5a6-9f3b-48d2-98de-b338d37a5adc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\zip\minizip">
+      <UniqueIdentifier>{7a5e7715-3536-4824-832c-1941632395e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\XML">
+      <UniqueIdentifier>{b104e17b-ad88-47ba-838c-14df26bf9ff1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\XML\tinyxml">
+      <UniqueIdentifier>{4b271599-4492-4e2e-bd6e-0e94211d9d57}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\Thread.h">
-      <Filter>源文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\AtomicCount.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Base.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Base64.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\BaseTemplate.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\ByteOrder.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\CoreDump.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Crc.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Defs.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\DynamicLib.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\DynamicMemPool.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Expression.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\File.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Guard.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Guid.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Host.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\IntTypes.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\IPC.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Math.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Md5.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Mutex.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\PrintLog.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Process.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\ReadWriteMutex.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\RecursiveMutex.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\RecycleBin.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Semaphore.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Sha1.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Shared_ptr.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\ShareMem.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\SimPipe.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\StaticMemPool.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\String.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\System.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Thread.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\ThreadEx.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\ThreadPool.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Time.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Timer.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Unicode.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\URLEncoding.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Version.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\ConsoleCommand.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\FileFind.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\OperationResult.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\URL.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Value.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\Directory.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\SqlDataBase.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\StringBuffer.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\Base\CircleBuffer.h">
-      <Filter>头文件\Base</Filter>
-    </ClInclude>
     <ClInclude Include="Src\regex\regex.h">
       <Filter>源文件\regex</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\Base\RegEx.h">
-      <Filter>头文件\Base</Filter>
+    <ClInclude Include="Src\Expression\muParser.h">
+      <Filter>源文件\Expression</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\Base\Variant.h">
-      <Filter>头文件\Base</Filter>
+    <ClInclude Include="Src\Expression\muParserBase.h">
+      <Filter>源文件\Expression</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Expression\muParserBytecode.h">
+      <Filter>源文件\Expression</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Expression\muParserCallback.h">
+      <Filter>源文件\Expression</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Expression\muParserDef.h">
+      <Filter>源文件\Expression</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Expression\muParserError.h">
+      <Filter>源文件\Expression</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Expression\muParserFixes.h">
+      <Filter>源文件\Expression</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Expression\muParserInt.h">
+      <Filter>源文件\Expression</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Expression\muParserStack.h">
+      <Filter>源文件\Expression</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Expression\muParserTemplateMagic.h">
+      <Filter>源文件\Expression</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Expression\muParserTest.h">
+      <Filter>源文件\Expression</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Expression\muParserToken.h">
+      <Filter>源文件\Expression</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Expression\muParserTokenReader.h">
+      <Filter>源文件\Expression</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\Read_Cell.h">
+      <Filter>源文件\Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\Read_Col.h">
+      <Filter>源文件\Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\Read_Row.h">
+      <Filter>源文件\Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\Read_Sheet.h">
+      <Filter>源文件\Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\Read_Workbook.h">
+      <Filter>源文件\Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\Write_Cell.h">
+      <Filter>源文件\Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\Write_Col.h">
+      <Filter>源文件\Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\Write_Color.h">
+      <Filter>源文件\Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\Write_Font.h">
+      <Filter>源文件\Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\Write_Format.h">
+      <Filter>源文件\Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\Write_Range.h">
+      <Filter>源文件\Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\Write_Row.h">
+      <Filter>源文件\Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\Write_Sheet.h">
+      <Filter>源文件\Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\Write_Side.h">
+      <Filter>源文件\Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\Write_WorkBook.h">
+      <Filter>源文件\Excel</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\libxls\brdb.c.h">
+      <Filter>源文件\Excel\libxls</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\libxls\brdb.h">
+      <Filter>源文件\Excel\libxls</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\libxls\config.h">
+      <Filter>源文件\Excel\libxls</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\libxls\endian.h">
+      <Filter>源文件\Excel\libxls</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\libxls\ole.h">
+      <Filter>源文件\Excel\libxls</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\libxls\xls.h">
+      <Filter>源文件\Excel\libxls</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\libxls\xlsformula.h">
+      <Filter>源文件\Excel\libxls</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\libxls\xlsstruct.h">
+      <Filter>源文件\Excel\libxls</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\libxls\xlstool.h">
+      <Filter>源文件\Excel\libxls</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\libxls\xlstypes.h">
+      <Filter>源文件\Excel\libxls</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\ac-config.win32.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\biffsection.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\binfile.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\blank.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\boolean.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\cbridge.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\cell.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\colinfo.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\colors.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\common.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\continue.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\datast.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\docsumminfo.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\err.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\extformat.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\font.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\format.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\formtags.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\formula.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\formula_cell.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\formula_const.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\formula_estimate.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\formula_expr.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\globalrec.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\HPSF.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\index.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\label.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\merged.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\note.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\number.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\oledoc.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\olefs.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\oleprop.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\range.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\recdef.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\record.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\rectypes.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\row.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\sheetrec.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\stringtok.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\summinfo.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\systype.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\timespan.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\tostr.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\unit.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\workbook.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\xlconfig.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\xls_poppack.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\xls_pshpack1.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\xls_pshpack2.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\xls_pshpack4.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\xlslib.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\xlstypes.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Excel\xlslib\xlsys.h">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Base\snprintf_x.h">
+      <Filter>源文件\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Base\TimerManager.h">
+      <Filter>源文件\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\sqlite3\sqlite3.h">
+      <Filter>源文件\sqlite3</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\sqlite3\sqlite3ext.h">
+      <Filter>源文件\sqlite3</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Base\SaveLog.h">
+      <Filter>源文件\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Base\Log.h">
+      <Filter>源文件\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Base\ThreadManager.h">
+      <Filter>源文件\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\zip\miniZip\crc32.h">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\zip\miniZip\crypt.h">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\zip\miniZip\deflate.h">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\zip\miniZip\gzguts.h">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\zip\miniZip\inffast.h">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\zip\miniZip\inffixed.h">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\zip\miniZip\inflate.h">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\zip\miniZip\inftrees.h">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\zip\miniZip\ioapi.h">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\zip\miniZip\iowin32.h">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\zip\miniZip\mztools.h">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\zip\miniZip\trees.h">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\zip\miniZip\unzip.h">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\zip\miniZip\zconf.h">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\zip\miniZip\zip.h">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\zip\miniZip\zlib.h">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\zip\miniZip\zutil.h">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\AtomicCount.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Base.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Base64.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\BaseTemplate.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\BPlusTreeIO.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\ByteOrder.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\CircleBuffer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\ConsoleCommand.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\CoreDump.h">
+      <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\Base\CPU.h">
-      <Filter>头文件\Base</Filter>
+      <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Src\TimerManager.h">
-      <Filter>源文件</Filter>
+    <ClInclude Include="..\Include\Base\Crc.h">
+      <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\Base\LockFreeList.h">
-      <Filter>头文件\Base</Filter>
+    <ClInclude Include="..\Include\Base\Defs.h">
+      <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\Base\MsgCenter.h">
-      <Filter>头文件\Base</Filter>
+    <ClInclude Include="..\Include\Base\Directory.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\DynamicLib.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\DynamicMemPool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\ErrorInfo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Excel.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Expression.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\File.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\FileFind.h">
+      <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\Base\Function.h">
-      <Filter>头文件\Base</Filter>
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Guard.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Guid.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Hash.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Host.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\IntTypes.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\IPC.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\LockFreeList.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Math.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Md5.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\MediaCode.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Mutex.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\PrintLog.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Process.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\ReadWriteMutex.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\RecursiveMutex.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\RecycleBin.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\RegEx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Semaphore.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Sha1.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Shared_ptr.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\ShareMem.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\SimPipe.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\SqlDataBase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\StaticMemPool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\String.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\StringBuffer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\System.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Thread.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\ThreadEx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\ThreadPool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Time.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Timer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Unicode.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\URL.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\URLEncoding.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Value.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Variant.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\Version.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\wwwAuthenticate.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\XML.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\zip.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\sqlite3\SQLiteRecordset.h">
+      <Filter>源文件\sqlite3</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\XML\XMLTinyxml.h">
+      <Filter>源文件\XML</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\XML\tinyxml\tinystr.h">
+      <Filter>源文件\XML\tinyxml</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\XML\tinyxml\tinyxml.h">
+      <Filter>源文件\XML\tinyxml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\Base\JSON.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Base\JSONWriter.h">
+      <Filter>源文件\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Base\JSONReader.h">
+      <Filter>源文件\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Base\unicode.h">
+      <Filter>源文件\Base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Base.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Base64.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Crc.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\File.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Mutex.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\PrintLog.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Process.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\ReadWriteMutex.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\RecursiveMutex.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Semaphore.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\ShareMem.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\SimPipe.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\String.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\SystemCall.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Thread.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\ThreadPool.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Time.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Timer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Version.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\URLEncoding.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Sha1.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\DynamicLib.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\DynamicMemPool.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\StaticMemPool.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\RecycleBin.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\IPC.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Expression.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\CoreDump.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Md5.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Src\Expression\muParser.cpp">
@@ -311,50 +635,422 @@
     <ClCompile Include="Src\Expression\muParserTokenReader.cpp">
       <Filter>源文件\Expression</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Guid.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Host.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\FileFind.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\ConsoleCommand.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\OperationResult.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\URL.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Value.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Directory.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\SqlDataBase.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\StringEx.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\CircleBuffer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\RegEx1.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Src\regex\regex.cpp">
       <Filter>源文件\regex</Filter>
     </ClCompile>
-    <ClCompile Include="Src\StringBuffer.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="Src\Excel\Excel.cpp">
+      <Filter>源文件\Excel</Filter>
     </ClCompile>
-    <ClCompile Include="Src\CPU.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="Src\Excel\Read_Cell.cpp">
+      <Filter>源文件\Excel</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\Read_Col.cpp">
+      <Filter>源文件\Excel</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\Read_Row.cpp">
+      <Filter>源文件\Excel</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\Read_Sheet.cpp">
+      <Filter>源文件\Excel</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\Read_Workbook.cpp">
+      <Filter>源文件\Excel</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\Write_Cell.cpp">
+      <Filter>源文件\Excel</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\Write_Col.cpp">
+      <Filter>源文件\Excel</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\Write_Color.cpp">
+      <Filter>源文件\Excel</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\Write_Font.cpp">
+      <Filter>源文件\Excel</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\Write_Format.cpp">
+      <Filter>源文件\Excel</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\Write_Range.cpp">
+      <Filter>源文件\Excel</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\Write_Row.cpp">
+      <Filter>源文件\Excel</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\Write_Sheet.cpp">
+      <Filter>源文件\Excel</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\Write_Side.cpp">
+      <Filter>源文件\Excel</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\Write_WorkBook.cpp">
+      <Filter>源文件\Excel</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\libxls\endian.cpp">
+      <Filter>源文件\Excel\libxls</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\libxls\getopt.cpp">
+      <Filter>源文件\Excel\libxls</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\libxls\ole.cpp">
+      <Filter>源文件\Excel\libxls</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\libxls\xls.cpp">
+      <Filter>源文件\Excel\libxls</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\libxls\xlsformula.cpp">
+      <Filter>源文件\Excel\libxls</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\libxls\xlstool.cpp">
+      <Filter>源文件\Excel\libxls</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\assert_assist.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\binfile.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\blank.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\boolean.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\cbridge.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\cell.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\colinfo.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\colors.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\continue.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\datast.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\docsumminfo.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\err.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\extformat.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\font.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\format.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\formula.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\formula_cell.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\formula_estimate.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\formula_expr.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\globalrec.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\HPSF.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\index.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\label.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\merged.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\note.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\number.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\oledoc.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\olefs.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\oleprop.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\range.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\recdef.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\record.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\row.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\sheetrec.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\summinfo.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\unit.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Excel\xlslib\workbook.cpp">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\Base64.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\CircleBuffer.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\ConsoleCommand.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\CoreDump.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\CPU.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\Crc.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\Directory.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\DynamicLib.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\DynamicMemPool.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\ErrorInfo.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\Expression.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\File.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\FileFind.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\Guid.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\Hash.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\Host.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\IPC.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\Md5.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\Mutex.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\PrintLog.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\Process.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\ReadWriteMutex.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\RecursiveMutex.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\RecycleBin.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\RegEx1.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\Semaphore.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\Sha1.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\ShareMem.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\SimPipe.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\SqlDataBase.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\StaticMemPool.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\String.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\StringBuffer.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\StringEx.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\SystemCall.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\Thread.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\ThreadPool.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\Time.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\Timer.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\URL.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\URLEncoding.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\Value.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\Version.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\wwwAuthenticate.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\sqlite3\sqlite3.c">
+      <Filter>源文件\sqlite3</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\miniZip\adler32.c">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\miniZip\compress.c">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\miniZip\crc32.c">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\miniZip\deflate.c">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\miniZip\gzclose.c">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\miniZip\gzlib.c">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\miniZip\gzread.c">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\miniZip\gzwrite.c">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\miniZip\infback.c">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\miniZip\inffast.c">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\miniZip\inflate.c">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\miniZip\inftrees.c">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\miniZip\ioapi.c">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\miniZip\iowin32.c">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\miniZip\mztools.c">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\miniZip\trees.c">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\miniZip\uncompr.c">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\miniZip\unzip.c">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\miniZip\zip.c">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\miniZip\zutil.c">
+      <Filter>源文件\zip\minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\unzipObject.cpp">
+      <Filter>源文件\zip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\zip\zipObject.cpp">
+      <Filter>源文件\zip</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\sqlite3\SQLiteConnection.cpp">
+      <Filter>源文件\sqlite3</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\XML\XML_Attribute.cpp">
+      <Filter>源文件\XML</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\XML\XML_Child.cpp">
+      <Filter>源文件\XML</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\XML\XMLTinyxml.cpp">
+      <Filter>源文件\XML</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\XML\tinyxml\tinystr.cpp">
+      <Filter>源文件\XML\tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\XML\tinyxml\tinyxml.cpp">
+      <Filter>源文件\XML\tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\XML\tinyxml\tinyxmlerror.cpp">
+      <Filter>源文件\XML\tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\XML\tinyxml\tinyxmlparser.cpp">
+      <Filter>源文件\XML\tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\XML\XML.cpp">
+      <Filter>源文件\XML</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\JSON.cpp">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\unicode.c">
+      <Filter>源文件\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Base\unicode_cp936.c">
+      <Filter>源文件\Base</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -363,8 +1059,13 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
+    <Text Include="Src\Excel\xlslib\formula.txt">
+      <Filter>源文件\Excel\xlslib</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
     <None Include="..\Include\Base\Version.tpl">
-      <Filter>头文件\Base</Filter>
+      <Filter>头文件</Filter>
     </None>
   </ItemGroup>
 </Project>

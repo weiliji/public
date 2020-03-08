@@ -1,20 +1,38 @@
 #include "rtpH264Analyzer.h"
 
 
+#define H264_STATRTCODE_LEN 4
+static const char H264_STATRTCODE_ADDR[4] = { 0x00,0x00,0x00,0x01 };
+
+#define SAFE_COPY_VIDEO(videobuffer,src,len,maxlen) {\
+	if(videobuffer.length() + (len) > (size_t)maxlen) return -1;\
+	char* pBuftmp = (char*)videobuffer.c_str();\
+	if(pBuftmp == NULL) assert(0);\
+	memcpy(pBuftmp + videobuffer.length(), src, len);\
+	videobuffer.resize(videobuffer.length() + (len));\
+}
+
+#define SAFE_SET_H264_STARTCODE(videobuffer,maxlen) {\
+	if (videobuffer.length() + H264_STATRTCODE_LEN > (size_t)maxlen) return -1;\
+	char* pBuftmp = (char*)videobuffer.c_str();\
+	if(pBuftmp == NULL) assert(0);\
+	memcpy(pBuftmp + videobuffer.length(),H264_STATRTCODE_ADDR,H264_STATRTCODE_LEN);\
+	videobuffer.resize(videobuffer.length() + H264_STATRTCODE_LEN);\
+}
+
+
+
+
+
+
 RtpH264Analyzer::RtpH264Analyzer(const CBFreamCallBack& callback, const std::string& pSps, const std::string& pPps)
 {
 	m_pFramCallBack = callback;
 
-	m_pVideoBuf = new char[VIEOD_FRAME_LEN];
-	memset(m_pVideoBuf,		0, VIEOD_FRAME_LEN);
-
 	memset(&m_stFuIndictor, 0, sizeof(FU_INDICATOR));
 	memset(&m_stNalHeader,	0, sizeof(FU_HEADER));
 
-	m_nSpsLen				= 0;
-	m_nPpsLen				= 0;
-	m_nVideoBufLen			= 0;
-	m_nFreamType			= FrameType_NONE;
+	m_nFreamType			= FrameType_Video;
 
 	m_bFirstSeq				= -2;
 	m_nLastSeq				= -2;
@@ -22,40 +40,23 @@ RtpH264Analyzer::RtpH264Analyzer(const CBFreamCallBack& callback, const std::str
 	m_bThrowPack			= false;
 	m_bIsRecvingIDRFream	= false;
 	m_bIsWaitingIDRFream	= false;
-
-	m_pSpsBuffer			= new char[pSps.length()];
-	m_pPpsBuffer			= new char[pPps.length()];
-
-
-	m_nSpsLen				= (int)pSps.length();
-	m_nPpsLen				= (int)pPps.length();
-	memcpy(m_pSpsBuffer, pSps.c_str(), m_nSpsLen);
-	memcpy(m_pPpsBuffer, pPps.c_str(), m_nPpsLen);
+	
+		
+	m_pSpsBuffer			= pSps;
+	m_pPpsBuffer			= pPps;
 }
 
 RtpH264Analyzer::~RtpH264Analyzer()
 {
-	if (m_pSpsBuffer != NULL)
-	{
-		delete[] m_pSpsBuffer;
-		m_pSpsBuffer = NULL;
-	}
 
-	if (m_pPpsBuffer != NULL)
-	{
-		delete[] m_pPpsBuffer;
-		m_pPpsBuffer = NULL;
-	}
-
-	if (m_pVideoBuf != NULL)
-	{
-		delete[] m_pVideoBuf;
-		m_pVideoBuf = NULL;
-	}
 }
 
-int RtpH264Analyzer::InputData(const RTPHEADER& m_stRtpHeader, const char* pBuf, unsigned short nBufLen)
+int RtpH264Analyzer::InputData(const shared_ptr<STREAM_TRANS_INFO>& transinfo, const shared_ptr<RTPPackage>& rtp)
 {
+	const RTPHEADER& m_stRtpHeader = rtp->rtpHeader();
+	
+
+
 	//检查是否有丢包
 	int nCurrentSeq = ntohs(m_stRtpHeader.seq);
 
@@ -74,7 +75,32 @@ int RtpH264Analyzer::InputData(const RTPHEADER& m_stRtpHeader, const char* pBuf,
 		//待处理
 	}
 
+	const char* pBuf = rtp->rtpDataAddr();
+	uint32_t nBufLen = rtp->rtpDataLen();
+	uint32_t extBufLen = rtp->rtpExternLen();
+
+	if (m_frame == NULL) m_frame = make_shared<RTPFrame>();
+	m_frame->pushRTPPackage(rtp);
+
+	if (extBufLen > 0)
+	{
+		m_frame->extendData(String(pBuf, extBufLen));
+	
+		pBuf += extBufLen;
+		nBufLen -= extBufLen;
+	}
 	m_nLastSeq = nCurrentSeq;
+	if (nBufLen <= 0)
+	{
+		if (m_stRtpHeader.m && m_frame)
+		{
+			m_pFramCallBack(m_frame);
+
+			m_frame = NULL;
+		}
+
+		return 0;
+	}
 
 	//get nalu header
 	memcpy(&m_stFuIndictor, pBuf, 1);
@@ -85,36 +111,36 @@ int RtpH264Analyzer::InputData(const RTPHEADER& m_stRtpHeader, const char* pBuf,
 	*/
 	if ( m_stFuIndictor.TYPE >0 &&  m_stFuIndictor.TYPE < 24)
 	{
-		char *pVideoBuffer = NULL;
-		int nVideoBufferSize = 0;
+		String videobuffer;
 		if (m_stFuIndictor.TYPE != 5)
 		{
-			nVideoBufferSize = H264_STATRTCODE_LEN + nBufLen;
-			pVideoBuffer = new char[nVideoBufferSize];
+			int nVideoBufferSize = H264_STATRTCODE_LEN + nBufLen;
+			videobuffer.alloc(nVideoBufferSize + 100);
+
 			//单个个NAL包数据,首先设置帧数据起始码
-			SetH264StartCode(pVideoBuffer, 0);
-			memcpy(pVideoBuffer + H264_STATRTCODE_LEN, pBuf, nBufLen);
+			SAFE_SET_H264_STARTCODE(videobuffer, nVideoBufferSize);
+
+			SAFE_COPY_VIDEO(videobuffer, pBuf, nBufLen, nVideoBufferSize);
 		}
 		else
 		{
-			nVideoBufferSize = H264_STATRTCODE_LEN + m_nSpsLen + m_nPpsLen + nBufLen;
-			pVideoBuffer = new char[nVideoBufferSize];
-			int offset = 0;
-			memcpy(pVideoBuffer + offset, m_pSpsBuffer, m_nSpsLen);
-			offset += m_nSpsLen;
-			memcpy(pVideoBuffer + offset, m_pPpsBuffer, m_nPpsLen);
-			offset += m_nPpsLen;
-			SetH264StartCode(pVideoBuffer + offset, 0);
-			offset += H264_STATRTCODE_LEN;
-			memcpy(pVideoBuffer + offset, pBuf, nBufLen);
+			int nVideoBufferSize = H264_STATRTCODE_LEN + (int)m_pSpsBuffer.length() + (int)m_pPpsBuffer.length() + nBufLen;
+			videobuffer.alloc(nVideoBufferSize + 100);
+
+			SAFE_COPY_VIDEO(videobuffer, m_pSpsBuffer.c_str(), m_pSpsBuffer.length(), nVideoBufferSize);
+			SAFE_COPY_VIDEO(videobuffer, m_pPpsBuffer.c_str(), m_pPpsBuffer.length(), nVideoBufferSize);
+
+			SAFE_SET_H264_STARTCODE(videobuffer, nVideoBufferSize);
+
+			SAFE_COPY_VIDEO(videobuffer, pBuf, nBufLen, nVideoBufferSize);
 		}
-		m_nFreamType = FrameType_VIDEO_P_FRAME;
+		m_nFreamType = FrameType_Video_PFrame;
 		switch (m_stFuIndictor.TYPE)
 		{
 		case 0://未定义
 			break;
 		case 1://非IDR帧图像不采用数据划分片段
-			m_nFreamType = FrameType_VIDEO_P_FRAME;
+			m_nFreamType = FrameType_Video_PFrame;
 //			m_pFramCallBack(m_pVideoBuf, m_nVideoBufLen, m_nFreamType, ntohl(m_stRtpHeader.ts), (uint64_t)m_dwUser, m_lpUser);
 			break;
 		case 2://非IDR帧图像中A类数据划分片段
@@ -124,31 +150,19 @@ int RtpH264Analyzer::InputData(const RTPHEADER& m_stRtpHeader, const char* pBuf,
 		case 4://非IDR帧图像中C类数据划分片段
 			break;
 		case 5://IDR帧的图像片段
-			m_nFreamType = FrameType_VIDEO_I_FRAME;
+			m_nFreamType = FrameType_Video_IFrame;
 //			m_pFramCallBack(m_pVideoBuf, m_nVideoBufLen, m_nFreamType, ntohl(m_stRtpHeader.ts), (uint64_t)m_dwUser, m_lpUser);
 			break;
 		case 6://补充增强信息(SEI)
 			break;
 		case 7://序列参数集(SPS)
-			m_nFreamType = FrameType_H264_SPS_FRAME;
-			if (m_pSpsBuffer != NULL)
-			{
-				delete[] m_pSpsBuffer;
-				m_pSpsBuffer = NULL;
-			}
-			m_pSpsBuffer = pVideoBuffer;
-			m_nSpsLen = nVideoBufferSize;
+			m_nFreamType = FrameType_Video_IFrame;
+			m_pSpsBuffer = videobuffer;
 //			m_pFramCallBack(m_pVideoBuf, m_nVideoBufLen, m_nFreamType, ntohl(m_stRtpHeader.ts), (uint64_t)m_dwUser, m_lpUser);
 			break;
 		case 8://图像参数集(PPS)
-			m_nFreamType = FrameType_H264_PPS_FRAME;
-			if (m_pPpsBuffer != NULL)
-			{
-				delete[] m_pPpsBuffer;
-				m_pPpsBuffer = NULL;
-			}
-			m_pPpsBuffer = pVideoBuffer;
-			m_nPpsLen = nVideoBufferSize;
+			m_nFreamType = FrameType_Video_IFrame;
+			m_pPpsBuffer = videobuffer;
 //			m_pFramCallBack(m_pVideoBuf, m_nVideoBufLen, m_nFreamType, ntohl(m_stRtpHeader.ts), (uint64_t)m_dwUser, m_lpUser);
 			break;
 		case 9://分隔符
@@ -184,16 +198,18 @@ int RtpH264Analyzer::InputData(const RTPHEADER& m_stRtpHeader, const char* pBuf,
 		default://未定义
 			break;
 		}
-		if (pVideoBuffer == NULL)
+		if (videobuffer.length() == 0)
 		{
 			return 0;
 		}
-		m_pFramCallBack(m_nFreamType,pVideoBuffer, nVideoBufferSize, ntohl(m_stRtpHeader.ts));
-		if (pVideoBuffer != m_pSpsBuffer && pVideoBuffer != m_pPpsBuffer)
-		{
-			delete[]pVideoBuffer;
-			pVideoBuffer = NULL;
-		}
+		/*shared_ptr<RTPAnalyzer_FrameInfo> frame = make_shared<RTPAnalyzer_FrameInfo>();
+		frame->codeid = CodeID_Video_H264;
+		frame->frametype = m_nFreamType;
+		frame->frame = videobuffer;
+		frame->timestmap = ntohl(m_stRtpHeader.ts);
+
+		m_pFramCallBack(frame);*/
+
 		return 0;
 	}
 	/*RFC3984 5.2  RTP荷载格式的公共结构
@@ -218,10 +234,11 @@ int RtpH264Analyzer::InputData(const RTPHEADER& m_stRtpHeader, const char* pBuf,
 	*/
 	else if (28 == m_stFuIndictor.TYPE)//FU_A
 	{
+		//if (m_pVideoBuf.length() <= 0) m_pVideoBuf.alloc(VIEOD_FRAME_LEN + 100);
+
 		int NALType = pBuf[1] & 0x1f;
 		memset(&m_stNalHeader, 0 ,sizeof(m_stNalHeader));
 		memcpy(&m_stNalHeader, pBuf + 1, 1);//FU_HEADER赋值
-
 		//收到帧分片包的第一包数据
 		if (1 == m_stNalHeader.S) 
 		{
@@ -230,36 +247,31 @@ int RtpH264Analyzer::InputData(const RTPHEADER& m_stRtpHeader, const char* pBuf,
 			//检测IDR帧
 			//5 == m_stFuHeader.TYPE 标准判断方法
 			//7 == m_stFuHeader.TYPE 为了兼容三星SNP3370
-			m_nFreamType = FrameType_VIDEO_P_FRAME;
+			m_nFreamType = FrameType_Video_PFrame;
 			if (5 == m_stNalHeader.TYPE || 7 == m_stNalHeader.TYPE)
 			{
-				m_nFreamType = FrameType_VIDEO_I_FRAME;
+				m_nFreamType = FrameType_Video_IFrame;
 				m_bIsWaitingIDRFream = false;
 				m_bIsRecvingIDRFream = true; //正在接收IDR帧
 
 				//IDR帧前写入sps和pps
-				memcpy(m_pVideoBuf + m_nVideoBufLen, m_pSpsBuffer, m_nSpsLen);
-				m_nVideoBufLen += m_nSpsLen;
-				memcpy(m_pVideoBuf + m_nVideoBufLen, m_pPpsBuffer, m_nPpsLen);
-				m_nVideoBufLen += m_nPpsLen;
+				m_frame->pushBuffer(m_pSpsBuffer);
+				m_frame->pushBuffer(m_pPpsBuffer);
+				//SAFE_COPY_VIDEO(m_pVideoBuf, m_pSpsBuffer.c_str(), m_pSpsBuffer.length(), VIEOD_FRAME_LEN);
+				//SAFE_COPY_VIDEO(m_pVideoBuf, m_pPpsBuffer.c_str(), m_pPpsBuffer.length(), VIEOD_FRAME_LEN);
 			}
 
 			//设置帧数据的起始码
-			SetH264StartCode(m_pVideoBuf, m_nVideoBufLen);
-			m_nVideoBufLen += H264_STATRTCODE_LEN;
-			
+			m_frame->pushBuffer(H264_STATRTCODE_ADDR, H264_STATRTCODE_LEN);
+			//SAFE_SET_H264_STARTCODE(m_pVideoBuf, VIEOD_FRAME_LEN);
+						
 			char pBufer1 = ( pBuf[0] & 0xE0 ) | NALType ;
+			m_frame->pushBuffer(&pBufer1, 1);
+			//SAFE_COPY_VIDEO(m_pVideoBuf, &pBufer1, 1, VIEOD_FRAME_LEN);
 
-			memcpy(m_pVideoBuf + m_nVideoBufLen, &pBufer1, 1);
-			m_nVideoBufLen += 1;
-
-			if (m_nVideoBufLen + nBufLen - 2 > VIEOD_FRAME_LEN)
-			{
-				return -1;
-			}
 			//拷贝荷载数据,跳过前面的IDR帧检验位和FU_HEADER两个字节
-			memcpy(m_pVideoBuf + m_nVideoBufLen, pBuf + 2, nBufLen - 2);
-			m_nVideoBufLen += nBufLen - 2;
+			m_frame->pushRTPBuffer(pBuf + 2, nBufLen - 2);
+			//SAFE_COPY_VIDEO(m_pVideoBuf, pBuf + 2, nBufLen - 2, VIEOD_FRAME_LEN);
 		}
 		//帧分片包的最后一包数据,为了更强的兼容性放宽限制
 		//我们认为FU_HEADER的E字段和rtsp头得mark位符合其一都是有效的
@@ -267,20 +279,26 @@ int RtpH264Analyzer::InputData(const RTPHEADER& m_stRtpHeader, const char* pBuf,
 		{
 			if (true == m_bThrowPack || true == m_bIsWaitingIDRFream)
 			{
+				m_frame = NULL;
 				return -1;
 			}
+			m_frame->pushRTPBuffer(pBuf + 2, nBufLen - 2);
+			m_frame->codeId(CodeID_Video_H264);
+			m_frame->frameType(m_nFreamType);
+			m_frame->timestmap(ntohl(m_stRtpHeader.ts));
 
-			if (m_nVideoBufLen + nBufLen - 2 > VIEOD_FRAME_LEN)
-			{
-				return -1;
-			}
-			memcpy(m_pVideoBuf + m_nVideoBufLen, pBuf + 2, nBufLen - 2);
-			m_nVideoBufLen += nBufLen - 2;
+//			SAFE_COPY_VIDEO(m_pVideoBuf, pBuf + 2, nBufLen - 2, VIEOD_FRAME_LEN);
 
-			m_pFramCallBack(m_nFreamType, m_pVideoBuf, m_nVideoBufLen, ntohl(m_stRtpHeader.ts));
+			//shared_ptr<RTPAnalyzer_FrameInfo> frame = make_shared<RTPAnalyzer_FrameInfo>();
+			//frame->codeid = CodeID_Video_H264;
+			//frame->frametype = m_nFreamType;
+			//frame->frame= m_pVideoBuf;
+			//frame->timestmap = ntohl(m_stRtpHeader.ts);
 
-			memset(m_pVideoBuf, 0, VIEOD_FRAME_LEN);
-			m_nVideoBufLen = 0;
+			m_pFramCallBack(m_frame);
+
+			m_frame = NULL;
+
 			return 0;
 		}
 		else
@@ -288,16 +306,13 @@ int RtpH264Analyzer::InputData(const RTPHEADER& m_stRtpHeader, const char* pBuf,
 			//如果不是帧的第一包数据,而且处于丢帧状态,那么收到的所有包都丢弃
 			if (true == m_bThrowPack || true == m_bIsWaitingIDRFream) 
 			{
+				m_frame = NULL;
 				return -1;
 			}
 
-			if (m_nVideoBufLen + nBufLen - 2 > VIEOD_FRAME_LEN)
-			{
-				return -1;
-			}
 			//正常情况,拷贝数据
-			memcpy(m_pVideoBuf + m_nVideoBufLen, pBuf + 2, nBufLen - 2);
-			m_nVideoBufLen += nBufLen - 2;
+			m_frame->pushRTPBuffer(pBuf + 2, nBufLen - 2);
+			//SAFE_COPY_VIDEO(m_pVideoBuf, pBuf + 2, nBufLen - 2, VIEOD_FRAME_LEN);
 		}
 	}
 	else if (29 == m_stFuIndictor.TYPE)//FU-B
@@ -310,17 +325,3 @@ int RtpH264Analyzer::InputData(const RTPHEADER& m_stRtpHeader, const char* pBuf,
 	return 0;
 }
 
-int RtpH264Analyzer::SetH264StartCode(char* pBuf, int nOffset)
-{
-	if (NULL == pBuf)
-	{
-		return -1;
-	}
-
-	memset(pBuf + nOffset, 0x00, 1);
-	memset(pBuf + nOffset + 1, 0x00, 1);
-	memset(pBuf + nOffset + 2, 0x00, 1);
-	memset(pBuf + nOffset + 3, 0x01, 1);
-
-	return 0;
-}

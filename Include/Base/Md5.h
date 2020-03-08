@@ -38,7 +38,9 @@ public:
 	///	追加要做MD5摘要的数据，该接口可调用多次，分别追加数据。
 	///	\param [in] data 数据指针
 	/// \param [in] size 数据长度
-	void update(uint8_t const* data, size_t size);
+	void update(const char* data, size_t size);
+
+	void update(const std::string& data);
 
 	///	生成16字节MD5摘要
 	///	\param [out]  摘要输出缓存，不可小于16字节！

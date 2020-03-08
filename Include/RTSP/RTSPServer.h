@@ -14,11 +14,10 @@
 #include "RTSP/RTSPUrl.h"
 #include "Network/Network.h"
 #include "Base/Base.h"
-#include "HTTP/HTTPParse.h"
-#include "RTSP/RTPPackage.h"
+#include "RTSPHandler.h"
+
 using namespace Public::Base;
 using namespace Public::Network;
-using namespace Public::HTTP;
 
 namespace Public {
 namespace RTSP {
@@ -32,75 +31,89 @@ public:
 	struct RTSPServerInternal;
 	typedef Function<shared_ptr<RTSPServerHandler>(const shared_ptr<RTSPServerSession>&)> ListenCallback;
 public:
-	RTSPServer(const shared_ptr<IOWorker>& worker, const std::string& useragent);
+	RTSPServer( const std::string& useragent);
 	virtual ~RTSPServer();
 
 	bool initRTPOverUdpType(uint32_t startport = 40000, uint32_t stopport = 41000);
 
-	bool run(uint32_t port, const ListenCallback& callback);
+	bool run(const shared_ptr<IOWorker>& worker, uint32_t port, const ListenCallback& callback);
 	bool stop();
 	uint32_t listenPort() const;
+
+	void inputSocket(const shared_ptr<Socket>& sock, const char* buffer = NULL, uint32_t bufferlen = 0);
 private:
 	RTSPServerInternal* internal;
 };
 
-class RTSP_API RTSPServerSession
+class RTSP_API RTSPServerSession:public RTSPCommandSender,public enable_shared_from_this<RTSPServerSession>
 {
 	friend struct RTSPServer::RTSPServerInternal;
 private:
-	RTSPServerSession(const shared_ptr<IOWorker>& worker, const shared_ptr<Socket>& sock, const RTSPServer::ListenCallback& querycallback, const AllockUdpPortCallback& allocport,const std::string& useragent);
-	void initRTSPServerSessionPtr(const weak_ptr<RTSPServerSession>& session);
+	RTSPServerSession(const shared_ptr<IOWorker>& worker, const RTSPServer::ListenCallback& querycallback, const shared_ptr<UDPPortAlloc>& portalloc, const std::string& useragent);
+	void initRTSPServerSessionPtr(const weak_ptr<RTSPServerSession>& session, const shared_ptr<Socket>& _sock, const char* buffer, uint32_t len);
+
+	//定时器处理
+	void onPoolTimerProc();
+
+	void closedByTimeout();
 public:
 	virtual ~RTSPServerSession();
 
 	void disconnect();
 
-	void setAuthenInfo(const std::string& username, const std::string& password);
 	const RTSPUrl& url() const;
-	uint64_t prevAlivetime() const;
-	shared_ptr<RTSPServerHandler> handler();
+	bool sessionIsTimeout() const;
+	NetStatus connectStatus() const;
+	shared_ptr<RTSPServerHandler> handler() const;
+	shared_ptr<RTSP_Media_Infos> mediainfo() const;
 
-	void sendOptionResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, const std::string& cmdstr = "");
-	void sendDescribeResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, const MEDIA_INFO& mediainfo);
-	void sendSetupResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, const shared_ptr<STREAM_TRANS_INFO>& transport);
-	void sendPlayResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo);
-	void sendPauseResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo);
-	void sendTeardownResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo);
-	void sendGetparameterResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, const std::string& content);
+	virtual void sendOptionResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, const std::string& cmdstr = "");
+	virtual void sendDescribeResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, const RTSP_Media_Infos& mediainfo);
+	virtual void sendSetupResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, const shared_ptr<STREAM_TRANS_INFO>& transport);
+	virtual void sendPlayResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo);
+	virtual void sendPauseResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo);
+	virtual void sendGetparameterResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, const std::string& content);
+	virtual void sendTeardownResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo);
+	virtual void sendErrorResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, int errcode, const std::string& errmsg);
 
-	void sendErrorResponse(const shared_ptr<RTSPCommandInfo>& cmdinfo, int errcode, const std::string& errmsg);
-	
-	bool sendMediaPackage(const shared_ptr<STREAM_TRANS_INFO> mediainfo, const RTPPackage& rtppackge);
-	bool sendContorlPackage(const shared_ptr<STREAM_TRANS_INFO> mediainfo, const char* buffer, uint32_t bufferlen);
+	virtual ErrorInfo sendRTPFrame(const shared_ptr<STREAM_TRANS_INFO>& transport, const shared_ptr<RTPFrame>& frame);
+	virtual ErrorInfo sendRTCPPackage(const shared_ptr<STREAM_TRANS_INFO>& transport, const shared_ptr<RTCPPackage>& rtcppackge);
+
+	//获取发送队列长度
+	virtual uint32_t getSendListSize();
+	//获取发送缓冲区数据缓存大小
+	virtual uint32_t getSendCacheSize();
+
+	virtual ErrorInfo cleanMediaCacheData();
+
+	virtual void setAutoTimeStampEnable(const shared_ptr<STREAM_TRANS_INFO>& transport, bool enable);
 private:
 	struct RTSPServerSessionInternal;
 	RTSPServerSessionInternal* internal;
 };
 
-class RTSP_API RTSPServerHandler
+class RTSP_API RTSPServerHandler :public RTSPHandler
 {
 public:
 	RTSPServerHandler() {}
 	virtual ~RTSPServerHandler() {}
 
-	virtual void onOptionRequest(const shared_ptr<RTSPServerSession>& session, const shared_ptr<RTSPCommandInfo>& cmdinfo) 
-	{
-		session->sendOptionResponse(cmdinfo); 
-	}
-	virtual void onDescribeRequest(const shared_ptr<RTSPServerSession>& session, const shared_ptr<RTSPCommandInfo>& cmdinfo) = 0;
-	virtual void onSetupRequest(const shared_ptr<RTSPServerSession>& session, const shared_ptr<RTSPCommandInfo>& cmdinfo, const shared_ptr<STREAM_TRANS_INFO>& transport)
-	{
-		session->sendSetupResponse(cmdinfo, transport);
-	}
-	virtual void onPlayRequest(const shared_ptr<RTSPServerSession>& session, const shared_ptr<RTSPCommandInfo>& cmdinfo, const shared_ptr<MEDIA_INFO>& mediainfo,const RANGE_INFO& range) = 0;
-	virtual void onPauseRequest(const shared_ptr<RTSPServerSession>& session, const shared_ptr<RTSPCommandInfo>& cmdinfo) { session->sendErrorResponse(cmdinfo, 500, "NOT SUPPORT"); }
-	virtual void onTeardownRequest(const shared_ptr<RTSPServerSession>& session, const shared_ptr<RTSPCommandInfo>& cmdinfo) = 0;
-	virtual void onGetparameterRequest(const shared_ptr<RTSPServerSession>& session, const shared_ptr<RTSPCommandInfo>& cmdinfo, const std::string& content) { session->sendErrorResponse(cmdinfo, 500, "NOT SUPPORT"); }
+	virtual ErrorInfo queryUserPassword(const shared_ptr<RTSPCommandSender>& sender, const std::string& username, std::string& passwd) { return ErrorInfo(Error_Code_NotSupport); }
 
-	virtual void onClose(const shared_ptr<RTSPServerSession>& session, const std::string& errmsg) = 0;
-	
-	virtual void onMediaPackageCallback(const shared_ptr<STREAM_TRANS_INFO> mediainfo, const RTPPackage& rtppackge) {}
-	virtual void onContorlPackageCallback(const shared_ptr<STREAM_TRANS_INFO> mediainfo, const char* buffer, uint32_t bufferlen) {}
+	virtual void onOptionRequest(shared_ptr<RTSPCommandSender>& sender, const shared_ptr<RTSPCommandInfo>& cmdinfo) { sender->sendOptionResponse(cmdinfo); }
+	virtual void onDescribeRequest(shared_ptr<RTSPCommandSender>& sender, const shared_ptr<RTSPCommandInfo>& cmdinfo) = 0;
+	virtual void onSetupRequest(shared_ptr<RTSPCommandSender>& sender, const shared_ptr<RTSPCommandInfo>& cmdinfo, const shared_ptr<STREAM_TRANS_INFO>& transport) { sender->sendSetupResponse(cmdinfo, transport); }
+	virtual void onPlayRequest(shared_ptr<RTSPCommandSender>& sender, const shared_ptr<RTSPCommandInfo>& cmdinfo, const shared_ptr<RTSP_Media_Infos>& mediainfo, const PlayInfo& range) { sender->sendPauseResponse(cmdinfo); }
+	virtual void onPauseRequest(shared_ptr<RTSPCommandSender>& sender, const shared_ptr<RTSPCommandInfo>& cmdinfo) { sender->sendErrorResponse(cmdinfo, 500, "NOT SUPPORT"); }
+	virtual void onGetparameterRequest(shared_ptr<RTSPCommandSender>& sender, const shared_ptr<RTSPCommandInfo>& cmdinfo, const std::string& content) { sender->sendGetparameterResponse(cmdinfo,content); }
+	virtual void onTeardownRequest(shared_ptr<RTSPCommandSender>& sender, const shared_ptr<RTSPCommandInfo>& cmdinfo) { sender->sendTeardownResponse(cmdinfo); }
+	virtual void onRTPFrameCallback(shared_ptr<RTSPCommandSender>& sender, const shared_ptr<STREAM_TRANS_INFO>& transport, const shared_ptr<RTPFrame>& frame) {};
+
+	//virtual void onRTPPackageCallback(shared_ptr<RTSPCommandSender>& sender, const shared_ptr<STREAM_TRANS_INFO>& transport, const shared_ptr<RTPPackage>& rtppackge) {}
+	virtual void onRTCPPackageCallback(shared_ptr<RTSPCommandSender>& sender, const shared_ptr<STREAM_TRANS_INFO>& transport, const shared_ptr<RTCPPackage>& rtcppackge) {}
+
+	//socket disconnect or session timeout or teradown
+	virtual void onClose(shared_ptr<RTSPCommandSender>& sender, const ErrorInfo& err) {}
 };
 
 }

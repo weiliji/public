@@ -1,4 +1,0 @@
-{
-	"filename":"Excel Dll",
-	"productname":"ExcelÎÄ¼þ²Ù×÷¿â"
-}

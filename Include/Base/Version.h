@@ -23,12 +23,15 @@ struct BASE_API Version
 {
 	int Major; //主要版本.
 	int Minor; //次要版本.
+	int OEM;	//OEM版本
 	int Build; //修订号.
 	std::string Revision; //修订号.
 
 public:
 	Version();
+	Version(const std::string& verstr);
 	std::string toString() const;
+	std::string versionString() const;
 	bool parseString(const std::string& versionstr);
 	bool operator < (const Version& version) const;
 	bool operator > (const Version& version) const;
@@ -54,6 +57,7 @@ public:
 	/// \param svnString 	[in] svn版本号的字符串
 	/// \param dataString	[in]	时间字符串
 	AppVersion(const std::string& name, int major, int minor, int build, const std::string& revision, const std::string& dateString);
+	AppVersion(const std::string& name, const std::string& versionstr, const std::string& dateString);
 
 	/// 版本信息打印
 	void print() const;

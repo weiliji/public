@@ -8,3 +8,8 @@ Lib/*
 boost/Include/boost/*
 boost/Lib/win32/*
 ffmpeg/Lib/win32/*
+/*.opendb
+/*.db
+*.sdf
+version.inl
+version.rc
